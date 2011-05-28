@@ -3,7 +3,7 @@ This is a simple web based editor for Force.com Apex and Visualforce. It aspires
 What currently works (not a lot)
 
 * You can login to a Salesforce Org
-* It will retrieve your Apex code (not VF yet)
+* It will retrieve your Apex code and Visualforce pages
 * You can edit stuff but not save it (see I said not a lot)
 
 Setup
