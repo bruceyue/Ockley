@@ -21,9 +21,11 @@
 
     <p>CodeMirror is a code-editor component that can be embedded in
     Web pages. It provides <em>only</em> the editor component, no
-    accompanying buttons, auto-completion, or other IDE functionality.
-    It does provide a rich API on top of which such functionality can
-    be straightforwardly implemented.</p>
+    accompanying buttons
+    (see <a href="http://www.octolabs.com/javascripts/codemirror-ui/">CodeMirror
+    UI</a> for a drop-in button bar), auto-completion, or other IDE
+    functionality. It does provide a rich API on top of which such
+    functionality can be straightforwardly implemented.</p>
 
     <p>CodeMirror works with language-specific modes. Modes are
     JavaScript programs that help color (and optionally indent) text
@@ -73,7 +75,7 @@
     textarea with a real editor:</p>
 
     <pre>var myCodeMirror = CodeMirror(function(elt) {
-  myTextArea.parentNode.replaceChild(myTextArea, elt);
+  myTextArea.parentNode.replaceChild(elt, myTextArea);
 }, {value: myTextArea.value});</pre>
 
     <p>However, for this use case, which is a common way to use
@@ -97,8 +99,14 @@
     default options. You can update this object to change the defaults
     on your page.</p>
 
-    <p>Options are not checked in any way, so setting bogus options is
-    bound to lead to odd errors.</p>
+    <p>Options are not checked in any way, so setting bogus option
+    values is bound to lead to odd errors.</p>
+
+    <p><em>Note:</em> CodeMirror
+    2 <a href="internals.html#summary">does not support</a>
+    line-wrapping. I would have very much liked to support it, but it
+    combines extremely poorly with the way the editor is
+    implemented.</p>
 
     <p>These are the supported options:</p>
 
@@ -184,7 +192,9 @@
 
       <dt id="option_readOnly"><code>readOnly (boolean)</code></dt>
       <dd>This disables editing of the editor content by the user.
-      (Changes through API functions will still be possible.)</dd>
+      (Changes through API functions will still be possible.) If you
+      also want to disable the cursor, use <code>"nocursor"</code> as
+      a value for this option, instead of <code>true</code>.</dd>
 
       <dt id="option_onChange"><code>onChange (function)</code></dt>
       <dd>When given, this function will be called every time the
@@ -209,6 +219,11 @@
       <dd>When given, will be called whenever the editor is
       scrolled.</dd>
 
+      <dt id="option_onHighlightComplete"><code>onHighlightComplete (function)</code></dt>
+      <dd>Whenever the editor's content has been fully highlighted,
+      this function (if given) will be called. It'll be given a single
+      argument, the editor instance.</dd>
+
       <dt id="option_matchBrackets"><code>matchBrackets (boolean)</code></dt>
       <dd>Determines whether brackets are matched whenever the cursor
       is moved next to a bracket.</dd>
@@ -229,24 +244,29 @@
       index</a> to assign to the editor. If not given, no tab index
       will be assigned.</dd>
 
+      <dt id="option_document"><code>document (DOM document)</code></dt>
+      <dd>Use this if you want to display the editor in another DOM.
+      By default it will use the global <code>document</code>
+      object.</dd>
+
       <dt id="option_onKeyEvent"><code>onKeyEvent (function)</code></dt>
       <dd>This provides a rather low-level hook into CodeMirror's key
       handling. If provided, this function will be called on
-      every <code>keydown</code> and <code>keypress</code> event that
-      CodeMirror captures. It will be passed two arguments, the editor
-      instance and the key event. This key event is pretty much the
-      raw key event, except that a <code>stop()</code> method is
-      always added to it. You could feed it to, for
-      example, <code>jQuery.Event</code> to further normalize
-      it.<br>This function can inspect the key event, and handle it if
-      it wants to. It may return true to tell CodeMirror to ignore the
-      event. Be wary that, on some browsers, stopping
-      a <code>keydown</code> does not stop the <code>keypress</code>
-      from firing, whereas on others it does. If you respond to an
-      event, you should probably inspect its <code>type</code>
-      property and only do something when it is <code>keydown</code>
-      (or <code>keypress</code> for actions that need character
-      data).</dd>
+      every <code>keydown</code>, <code>keyup</code>,
+      and <code>keypress</code> event that CodeMirror captures. It
+      will be passed two arguments, the editor instance and the key
+      event. This key event is pretty much the raw key event, except
+      that a <code>stop()</code> method is always added to it. You
+      could feed it to, for example, <code>jQuery.Event</code> to
+      further normalize it.<br>This function can inspect the key
+      event, and handle it if it wants to. It may return true to tell
+      CodeMirror to ignore the event. Be wary that, on some browsers,
+      stopping a <code>keydown</code> does not stop
+      the <code>keypress</code> from firing, whereas on others it
+      does. If you respond to an event, you should probably inspect
+      its <code>type</code> property and only do something when it
+      is <code>keydown</code> (or <code>keypress</code> for actions
+      that need character data).</dd>
     </dl>
 
     <h2 id="styling">Customized Styling</h2>
@@ -304,7 +324,7 @@
       with this class.</dd>
 
       <dt id="class_CodeMirror_matchingbracket"><code>CodeMirror-matchingbracket</code>,
-        <code>CodeMirror-matchingbracket</code></dt>
+        <code>CodeMirror-nonmatchingbracket</code></dt>
       <dd>These are used to style matched (or unmatched) brackets.</dd>
     </dl>
 
@@ -606,6 +626,12 @@
     given as an argument, optionally update its state, and return a
     CSS class string, or <code>null</code> for tokens that do not have
     to be styled.<p>
+
+    <p id="blankLine">By default, blank lines are simply skipped when
+    tokenizing a document. For languages that have significant blank
+    lines, you can define a <code>blankLine(state)</code> method on
+    your mode that will get called whenever a blank line is passed
+    over, so that it can update the parser state.</p>
 
     <p id="StringStream">The stream object encapsulates a line of code
     (tokens may never span lines) and our current position in that

@@ -1,13 +1,24 @@
+#toolbar{
+    height: 32px;
+    width: 95%;
+    float:left;
+    padding: 2px;
+    margin-left: 1px;
+    margin-bottom: 2px;
+}
 
 #sidebar {
     width: 15%;
-    height: 500px;
+    min-width: 10%;
+    height: 100%;
     float:left;
-    margin-right: 5px;
+    margin-right: 2px;
+    clear:left;
 }
 
 #tabs{
     width: 80%;
+    min-width: 40%;
     height: 100%;
     float:left;
 }
@@ -34,15 +45,37 @@
      margin-bottom: 5px;
 }
 
-.editorContainer{
-    width:100%;
-}
 
 .ui-resizable-helper { border: 1px dotted gray; }
 
 .CodeMirror{
     border: 1px solid #eee;
-    height: 500px;
-    margin: 2px;
+    height: 600px;
+    /*margin: 2px;*/
+}
+
+.silk-icon-undo,
+.silk-icon-redo,
+.silk-icon-save,
+.silk-icon-saveall{
+    display: block;
+    text-indent: -99999px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    height: 16px;
+    width: 16px;
+}
+
+.silk-icon-undo {
+    background-image: url("/images/silk_icons/arrow_undo.png") !important;
+}
+.silk-icon-redo {
+    background-image: url("/images/silk_icons/arrow_redo.png") !important;
+}
+.silk-icon-save {
+    background-image: url("/images/silk_icons/disk.png") !important;
+}
+.silk-icon-saveall {
+    background-image: url("/images/silk_icons/disk_multiple.png") !important;
 }
 

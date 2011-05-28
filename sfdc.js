@@ -136,7 +136,72 @@ function query(serverUrl, sessionId, query, options){
               }
               else{
                   if (options.onError){
-                    options.onError.apply(this, [d.toString('utf8')]);
+                    options.onError.apply(this, [data]);
+                  }
+              }
+          });
+
+    });
+    req.on('error', function(error){
+        if (options.onError){
+            options.onError.apply(this, [error]);
+        }
+    });
+
+    req.write(soap);
+    req.end();
+}
+
+function compile(serverUrl, sessionId, code, options){
+
+    var soap = "";
+    soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:apex="http://soap.sforce.com/2006/08/apex">';
+    soap += "<soapenv:Header>";
+    soap += "  <apex:SessionHeader>";
+    soap += "     <apex:sessionId>" + sessionId + "</apex:sessionId>";
+    soap += "  </apex:SessionHeader>";
+    soap += "</soapenv:Header>";
+    soap += "<soapenv:Body>";
+    soap += "  <apex:compileClasses>";
+    soap += "     <apex:scripts>" + code + "</apex:scripts>";
+    soap += "  </apex:compileClasses>";
+    soap += "</soapenv:Body>";
+    soap += "</soapenv:Envelope>";
+
+    var url = parseUrl(serverUrl);
+
+    var headers = {
+        'Host': url.host,
+        'SOAPAction': 'Query',
+        'Content-Type': 'text/xml',
+        'Content-Length': soap.length
+    };
+
+    var path = "/" + url.path;
+    var reqOpts = {
+        host: url.host,
+        port: 443,
+        path: path,
+        method: 'POST',
+        headers: headers
+    };
+
+    var req = https.request(reqOpts, function(res) {
+          var data = '';
+          res.setEncoding('utf8');
+          res.on('data', function(chunk) {
+              //console.log('got response status code:' + sfdcResponse.statusCode);
+              data += chunk;
+          });
+          res.on('end', function(){
+              if (res.statusCode == '200'){
+                  //data = d.toString('utf8');
+                  console.log(data);
+                  //parseQueryResults(data, options);
+              }
+              else{
+                  if (options.onError){
+                    options.onError.apply(this, [data]);
                   }
               }
           });

@@ -3,6 +3,14 @@ Ockley 1.0
 Copyright 2011,  Matthew Page
 licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 -->
+<div>
+    <span id="toolbar" class="ui-widget-header ui-corner-all" >
+        <button id="save">Save</button>
+        <button id="saveAll">Save All</button>
+        <button id="undo">Undo</button>
+        <button id="redo">Redo</button>
+    </span>
+</div>
 <div id="sidebar" class="ui-widget ui-widget-content ui-corner-all">
     <div id="accordion">
 	    <h3 id="apexHeader"><a href="#">Apex</a></h3>
@@ -175,6 +183,34 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
             });
         });
+
+        $( "#save" ).button({
+			text: false,
+			icons: {
+				primary: "silk-icon-save"
+			}
+		}).click(function(){
+            alert('Save');
+
+        });
+        $( "#saveAll" ).button({
+			text: false,
+			icons: {
+				primary: "silk-icon-saveall"
+			}
+		});
+        $( "#undo" ).button({
+			text: false,
+			icons: {
+				primary: "silk-icon-undo"
+			}
+		});
+		$( "#redo" ).button({
+			text: false,
+			icons: {
+				primary: "silk-icon-redo"
+			}
+		});
 /*
         tabSet.resizable({
             animate: true

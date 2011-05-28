@@ -28,7 +28,7 @@
   actively developed, and recommended
   version. <a href="1/index.html">CodeMirror 1</a> is still available
   from here.</p>
- 
+
   <div class="clear"><div class="left1 blk">
 
     <h2 style="margin-top: 0">Supported modes:</h2>
@@ -38,11 +38,15 @@
       <li><a href="mode/xml/index.html">XML/HTML</a></li>
       <li><a href="mode/css/index.html">CSS</a></li>
       <li><a href="mode/htmlmixed/index.html">HTML mixed-mode</a></li>
+      <li><a href="mode/python/index.html">Python</a></li>
       <li><a href="mode/php/index.html">PHP</a></li>
       <li><a href="mode/diff/index.html">diff</a></li>
       <li><a href="mode/clike/index.html">C, Java, and similar</a></li>
       <li><a href="mode/stex/index.html">sTeX, LaTeX</a></li>
       <li><a href="mode/haskell/index.html">Haskell</a></li>
+      <li><a href="mode/smalltalk/index.html">Smalltalk</a></li>
+      <li><a href="mode/rst/index.html">reStructuredText</a></li>
+      <li><a href="mode/plsql/index.html">PL/SQL</a></li>
     </ul>
 
   </div><div class="left2 blk">
@@ -66,7 +70,7 @@
   href="LICENSE">MIT-style</a> license. To get it, you can download
   the <a href="http://codemirror.net/codemirror.zip">latest
   release</a> or the current <a
-  href="http://codemirror.net/codemirror-latest.zip">development
+  href="http://codemirror.net/codemirror2-latest.zip">development
   snapshot</a> as zip files. To create a custom minified script file,
   you can use the <a href="compress.html">compression API</a>.</p>
 
@@ -118,7 +122,7 @@
   <p>I am not actively testing against every new browser release, and
   vendors have a habit of introducing bugs all the time, so I am
   relying on the community to tell me when something breaks.
-  See <a href="#support">below</a> for information on how to contact
+  See <a href="#support">here</a> for information on how to contact
   me.</p>
 
 </div>
@@ -144,6 +148,24 @@
   </p>
 
   <h2>Releases:</h2>
+
+  <p class="rel">26-05-2011: <a href="http://codemirror.net/codemirror-2.01.zip">Version 2.01</a>:</p>
+  <ul class="rel-note">
+    <li>Add a <a href="mode/smalltalk/index.html">Smalltalk mode</a>.</li>
+    <li>Add a <a href="mode/rst/index.html">reStructuredText mode</a>.</li>
+    <li>Add a <a href="mode/python/index.html">Python mode</a>.</li>
+    <li>Add a <a href="mode/plsql/index.html">PL/SQL mode</a>.</li>
+    <li><code>coordsChar</code> now works</li>
+    <li>Fix a problem where <code>onCursorActivity</code> interfered with <code>onChange</code>.</li>
+    <li>Fix a number of scrolling and mouse-click-position glitches.</li>
+    <li>Pass information about the changed lines to <code>onChange</code>.</li>
+    <li>Support cmd-up/down on OS X.</li>
+    <li>Add triple-click line selection.</li>
+    <li>Don't handle shift when changing the selection through the API.</li>
+    <li>Support <code>"nocursor"</code> mode for <code>readOnly</code> option.</li>
+    <li>Add an <code>onHighlightComplete</code> option.</li>
+    <li>Fix the context menu for Firefox.</li>
+  </ul>
 
   <p class="rel">28-03-2011: <a href="http://codemirror.net/codemirror-2.0.zip">Version 2.0</a>:</p>
   <p class="rel-note">CodeMirror 2 is a complete rewrite that's
@@ -184,30 +206,6 @@
     <li>Fix yet another hang with line-numbering in hidden editors.</li>
   </ul>
 
-  <p class="rel">17-12-2010: <a href="http://codemirror.net/codemirror-0.92.zip">Version 0.92</a>:</p>
-  <ul class="rel-note">
-    <li>Make CodeMirror work in XHTML documents.</li>
-    <li>Fix bug in handling of backslashes in Python strings.</li>
-    <li>The <code>styleNumbers</code> option is now officially
-    supported and documented.</li>
-    <li><code>onLineNumberClick</code> option added.</li>
-    <li>More consistent names <code>onLoad</code> and
-    <code>onCursorActivity</code> callbacks. Old names still work, but
-    are deprecated.</li>
-    <li>Add a <a href="contrib/freemarker/index.html">Freemarker</a> mode.</li>
-  </ul>
-
-  <p class="rel">11-11-2010: <a
-  href="http://codemirror.net/codemirror-0.91.zip">Version 0.91</a>:</p>
-  <ul class="rel-note">
-    <li>Adds support for <a href="contrib/java">Java</a>.</li>
-    <li>Small additions to the <a href="contrib/php">PHP</a> and <a href="contrib/sql">SQL</a> parsers.</li>
-    <li>Work around various <a href="https://bugs.webkit.org/show_bug.cgi?id=47806">Webkit</a> <a href="https://bugs.webkit.org/show_bug.cgi?id=23474">issues</a>.</li>
-    <li>Fix <code>toTextArea</code> to update the code in the textarea.</li>
-    <li>Add a <code>noScriptCaching</code> option (hack to ease development).</li>
-    <li>Make sub-modes of <a href="mixedtest.html">HTML mixed</a> mode configurable.</li>
-  </ul>
-
   <p><a href="oldrelease.html">Older releases...</a></p>
 
 </div></div>
@@ -223,3 +221,4 @@
 
   </body>
 </html>
+
