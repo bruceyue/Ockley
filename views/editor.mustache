@@ -35,7 +35,8 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         var editor = CodeMirror.fromTextArea(txt,{
                 lineNumbers: true,
                 value: txt.value,
-                height: "auto"
+                height: "auto",
+                mode: "apex"
         });
         $('.CodeMirror').addClass('ui-corner-all');
         tab.data('editor', editor);
