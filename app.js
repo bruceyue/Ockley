@@ -116,7 +116,7 @@ app.get('/apex/:id.:format?', function(req, res){
       return;
     }
 
-    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Markup from ApexPage where id ='" + req.params.id + "' limit 1", {
+    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Body from ApexClass where id ='" + req.params.id + "' limit 1", {
             
             onSuccess: function(results){
                 if (res){
@@ -131,6 +131,7 @@ app.get('/apex/:id.:format?', function(req, res){
     });
 });
 
+//get apex classes
 app.get('/apex.:format?', function(req, res) {
 
     if (!isAuthenticated(req)){
@@ -143,7 +144,7 @@ app.get('/apex.:format?', function(req, res) {
       return;
     }
 
-    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select name, Id from ApexPage", {
+    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Body from ApexClass limit 1000", {
             onSuccess: function(results){
                 res.send(results);
             },
@@ -154,6 +155,35 @@ app.get('/apex.:format?', function(req, res) {
     });
 });
 
+//get a specific vf page
+app.get('/vf/:id.:format?', function(req, res){
+
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+      res.send('Format not available', 400);
+      return;
+    }
+
+    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Markup from ApexPage where id ='" + req.params.id + "' limit 1", {
+
+            onSuccess: function(results){
+                if (res){
+                    res.send(results);
+                }
+                res = null;
+            },
+            onError: function(error){
+                //TODO - report error
+                console.log(error);
+            }
+    });
+});
+
+//get vf pages
 app.get('/vf.:format?', function(req, res) {
 
     if (!isAuthenticated(req)){
@@ -161,14 +191,24 @@ app.get('/vf.:format?', function(req, res) {
         return;
     }
 
-    switch (req.params.format) {
-      case 'json':
-            //TODO - return JSON visual force pages
-      break;
-
-      default:
-        res.send('Format not available', 400);
+    if (req.params.format != 'json'){
+      res.send('Format not available', 400);
+      return;
     }
+
+    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Markup from ApexPage limit 1000", {
+
+            onSuccess: function(results){
+                if (res){
+                    res.send(results);
+                }
+                res = null;
+            },
+            onError: function(error){
+                //TODO - report error
+                console.log(error);
+            }
+    });
 });
 
 

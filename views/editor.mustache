@@ -10,7 +10,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             <p>loading...</p>
         </div>
         <h3 id="vfHeader"><a href="#">VisualForce</a></h3>
-        <div>
+        <div id="vfContent">
             <p>loading...</p>
         </div>
     </div>
@@ -75,12 +75,30 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
     }
 
     function onAccordionChangeStart(event, ui){
-        //window.log(ui);
         var header = $(ui.newHeader);
+
+        //TODO - serious oppty for refactor here. Can you say D-R-Y
+
         switch(header.attr('id')){
             case 'apexHeader':
                     //window.log('clicked on apex header');
                     $.getJSON('/apex.json', function(data) {
+                        window.log(JSON.stringify(data));
+                        var content = $(ui.newContent);
+                        content.empty();
+                        var list = $("<ul></ul>");
+                        $.each(data, function(index, elem){
+                           if (elem['sf:type'] == "ApexClass"){
+                               list.append("<li><a href='#' id='" + elem['sf:id'] + "'>" + elem['sf:name'] +"</a></li>");
+                           }
+                        });
+                        content.append(list);
+                    });
+                     $( "#accordion" ).accordion("resize");
+            break;
+            case 'vfHeader':
+                    //window.log('clicked on apex header');
+                    $.getJSON('/vf.json', function(data) {
                         window.log(JSON.stringify(data));
                         var content = $(ui.newContent);
                         content.empty();
@@ -94,10 +112,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                     });
                      $( "#accordion" ).accordion("resize");
             break;
-            case 'vfHeader':
-                    window.log('clicked on vf header');
-            break;
-        }
+        }//end switch
     }
 
     function pageLoaded(){
@@ -124,6 +139,27 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             var id = apex.attr("id");
             console.log("Clicked on apex code: " + id);
             $.getJSON('/apex/'+id+'.json', function(data) {
+                window.log(JSON.stringify(data));
+                if (data.length > 0){
+                    var body = data[0]['sf:body'];
+                    if (body){
+                        var ret = createNewTab(tabSet);
+                        if (ret){
+                            ret.editor.setValue(body);
+                        }
+                    }
+                }
+
+            });
+        });
+
+        var vfFiles = $("#vfContent a");
+        vfFiles.die();
+        vfFiles.live("click", function(){
+            var vf = $(this);
+            var id = vf.attr("id");
+            console.log("Clicked on vf code: " + id);
+            $.getJSON('/vf/'+id+'.json', function(data) {
                 window.log(JSON.stringify(data));
                 if (data.length > 0){
                     var markup = data[0]['sf:markup'];
