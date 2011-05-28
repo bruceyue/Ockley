@@ -1,0 +1,148 @@
+<!--
+Ockley 1.0
+Copyright 2011,  Matthew Page
+licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+-->
+<div id="sidebar" class="ui-widget ui-widget-content ui-corner-all">
+    <div id="accordion">
+	    <h3 id="apexHeader"><a href="#">Apex</a></h3>
+        <div id="apexContent">
+            <p>loading...</p>
+        </div>
+        <h3 id="vfHeader"><a href="#">VisualForce</a></h3>
+        <div>
+            <p>loading...</p>
+        </div>
+    </div>
+</div>
+        
+<div id="tabs">
+    <ul>
+		<li><a href="#tabs-new">+</a></li>
+	</ul>
+	<div id="tabs-new">
+	</div>
+</div>
+
+<script>
+
+    function createNewEditor(tab, tabPanel){
+
+        var content = $("<div class='editorContainer'><textarea class='editor' ></textarea></div>");
+        tabPanel.append(content);
+
+        var txt = tabPanel.find(".editor")[0];
+        var editor = CodeMirror.fromTextArea(txt,{
+                lineNumbers: true,
+                value: txt.value,
+                height: "auto"
+        });
+        $('.CodeMirror').addClass('ui-corner-all');
+        tab.data('editor', editor);
+        return editor;
+    }
+
+    function createNewTab(tabSet){
+        var totalTabs = tabSet.tabs("length");
+        var id = "tabs-" + totalTabs;
+        var url = '#' + id;
+
+        tabSet.tabs("add", url, "Untitled", totalTabs - 1 );
+        var editor = createNewEditor(tabSet.find('a[href='+url+']'), tabSet.find('#' + id));
+        tabSet.tabs("select", id );
+        return {
+            "tabId": id,
+            "editor": editor
+        };
+    }
+
+    function onTabSelected(event, ui){
+        //window.log(ui);
+        var tabSet = $( "#tabs" );
+        var tab = $(ui.tab);
+        switch(tab.attr('href')){
+            case '#tabs-new':
+                    createNewTab(tabSet);
+                    return false;
+            break;
+            default:
+               var editor = tab.data('editor');
+               if (editor != null){
+                    editor.refresh();
+               }
+            break;
+        }
+    }
+
+    function onAccordionChangeStart(event, ui){
+        //window.log(ui);
+        var header = $(ui.newHeader);
+        switch(header.attr('id')){
+            case 'apexHeader':
+                    //window.log('clicked on apex header');
+                    $.getJSON('/apex.json', function(data) {
+                        window.log(JSON.stringify(data));
+                        var content = $(ui.newContent);
+                        content.empty();
+                        var list = $("<ul></ul>");
+                        $.each(data, function(index, elem){
+                           if (elem['sf:type'] == "ApexPage"){
+                               list.append("<li><a href='#' id='" + elem['sf:id'] + "'>" + elem['sf:name'] +"</a></li>");
+                           }
+                        });
+                        content.append(list);
+                    });
+                     $( "#accordion" ).accordion("resize");
+            break;
+            case 'vfHeader':
+                    window.log('clicked on vf header');
+            break;
+        }
+    }
+
+    function pageLoaded(){
+        window.log('index page loaded');
+
+        var tabSet = $( "#tabs" );
+        tabSet.tabs({select: onTabSelected }).find( ".ui-tabs-nav" ).sortable({ axis: "x" });
+        createNewTab(tabSet);
+
+        var sidebar = $("#sidebar");
+        sidebar.height(tabSet.outerHeight());
+
+        $( "#accordion" ).accordion({
+			collapsible: true,
+            active: false,
+            changestart: onAccordionChangeStart,
+            fillSpace: true
+		});
+
+        var apexFiles = $("#apexContent a");
+        apexFiles.die();
+        apexFiles.live("click", function(){
+            var apex = $(this);
+            var id = apex.attr("id");
+            console.log("Clicked on apex code: " + id);
+            $.getJSON('/apex/'+id+'.json', function(data) {
+                window.log(JSON.stringify(data));
+                if (data.length > 0){
+                    var markup = data[0]['sf:markup'];
+                    if (markup){
+                        var ret = createNewTab(tabSet);
+                        if (ret){
+                            ret.editor.setValue(markup);
+                        }
+                    }
+                }
+
+            });
+        });
+/*
+        tabSet.resizable({
+            animate: true
+        }).draggable({
+            handle: '.ui-tabs-nav'
+        });
+*/
+    }
+</script>        

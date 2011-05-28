@@ -1,0 +1,40 @@
+
+#sidebar {
+    width: 10%;
+    height: 500px;
+    float:left;
+    margin-right: 5px;
+}
+
+#tabs{
+    width: 80%;
+    height: 100%;
+    float:left;
+}
+
+#tabs ul {
+    margin: 0px;
+}
+
+#tabs div.ui-tabs-panel{
+    padding: 0 !important;
+}
+
+#apexContent{
+    padding-left: 5px;
+    font-size: 12px;
+    overflow-x: hidden;
+}
+
+.editorContainer{
+    width:100%;
+}
+
+.ui-resizable-helper { border: 1px dotted gray; }
+
+.CodeMirror{
+    border: 1px solid #eee;
+    height: 500px;
+    margin: 2px;
+}
+

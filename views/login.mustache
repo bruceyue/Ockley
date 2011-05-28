@@ -1,0 +1,24 @@
+<!--
+Ockley 1.0
+Copyright 2011,  Matthew Page
+licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+-->
+<h2>{{ title }}</h2>
+
+<form method="post" action="/login">
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" name="user[name]" id="username" />
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" name="user[pass]" id="password" />
+    </div>
+    <input type="submit" value="Submit" />
+</form>
+
+<script>
+    function pageLoaded(){
+        window.log('login page loaded');
+    }
+</script>
