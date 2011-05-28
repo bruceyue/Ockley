@@ -26,6 +26,14 @@
     overflow-x: hidden;
 }
 
+#apexContent ul, #vfContent ul{
+     list-style: none;
+}
+
+#apexContent li, #vfContent li{
+     margin-bottom: 5px;
+}
+
 .editorContainer{
     width:100%;
 }

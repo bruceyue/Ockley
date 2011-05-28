@@ -88,13 +88,13 @@ body{
     margin: 10px;
 }
 
-#container ul{
+header ul{
      list-style: none;
      margin: 1em 0;
      padding: 0;
 }
 
-#container ul li {
+header ul li {
     margin: 0 1em 0 0;
     padding: 0;
     display: inline-block;

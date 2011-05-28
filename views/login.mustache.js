@@ -1,10 +1,8 @@
-/**
- * Created by JetBrains WebStorm.
- * User: matthewpage
- * Date: 5/23/11
- * Time: 11:33 AM
- * To change this template use File | Settings | File Templates.
- */
+/*
+Ockley 1.0
+Copyright 2011,  Matthew Page
+licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+*/
 module.exports = {
   stylesheets: function() {
     return ["css/login.css"];

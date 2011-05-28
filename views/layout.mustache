@@ -46,6 +46,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             </ul>
 		</header>
 
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
 		<div id="main" role="main">
             {{{ body }}}
 		</div>
@@ -55,14 +56,17 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 		</footer>
 	</div>
 
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+
 <!--
 	<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.5.1.min.js"%3E%3C/script%3E'))</script>
 -->
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <script src="js/plugins.js"></script>
+	{{#scripts}}<script src="{{.}}"></script>{{/scripts}}
 
     <script>
         jQuery(function(){
+            log('layout loaded...')
             var login = $('#login');
             var logout = $('#logout');
             logout.click(function(e) {
@@ -76,10 +80,6 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         });
     </script>
 
-    <script src="js/plugins.js"></script>
-	{{#scripts}}<script src="{{.}}"></script>{{/scripts}}
-    <script src="js/script.js"></script>
-    
 	<!--[if lt IE 7 ]>
 	<script src="js/libs/dd_belatedpng.js"></script>
 	<script> DD_belatedPNG.fix('img, .png_bg');</script>
