@@ -1,4 +1,10 @@
-This is a simple web based editor for Salesforce Apex and Visualforce.
+This is a simple web based editor for Force.com Apex and Visualforce. It aspires to be the textpad/notepad of Force.com development tools.
+
+What currently works (not a lot)
+
+* You can login to a Salesforce Org
+* It will retrieve your Apex code (not VF yet)
+* You can edit stuff but not save it (see I said not a lot)
 
 Setup
 
@@ -11,5 +17,8 @@ The instructions here will get you started: http://dailyjs.com/2010/11/08/node-t
     Install via npm:
         cd Ockley
         npm install express connect-mongodb mongoose mustache mustachio sax
+* run mongod
+* run Ockley (node app.js)
+
 
     
