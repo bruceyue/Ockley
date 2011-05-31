@@ -155,6 +155,11 @@ app.get('/apex.:format?', function(req, res) {
     });
 });
 
+//save a specific apex page
+app.post('/apex/:id.:format?', function(req, res){
+});
+
+
 //get a specific vf page
 app.get('/vf/:id.:format?', function(req, res){
 
@@ -211,6 +216,40 @@ app.get('/vf.:format?', function(req, res) {
     });
 });
 
+//save a specific vf page
+app.post('/vf/:id.:format?', function(req, res){
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+      res.send('Format not available', 400);
+      return;
+    }
+
+
+    if (req.markup == null){
+        //TODO - report error
+        console.log('Missing markup param');
+        res.redirect('back');
+        return;
+    }
+
+    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, req.markup, {
+
+            onSuccess: function(results){
+                if (res){
+                    res.send(results);
+                }
+                res = null;
+            },
+            onError: function(error){
+                //TODO - report error
+                console.log(error);
+            }
+    });
+});
 
 app.get('*', function(req, res) {
     res.send("Nope", 404);

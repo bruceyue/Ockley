@@ -1,9 +1,7 @@
-/**
- * Created by JetBrains WebStorm.
- * User: matthewpage
- * Date: 5/27/11
- * Time: 8:37 AM
- * To change this template use File | Settings | File Templates.
+/*
+ Ockley 1.0
+ Copyright 2011,  Matthew Page
+ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
  */
 var https = require('https');
 var sax = require('./node_modules/sax');

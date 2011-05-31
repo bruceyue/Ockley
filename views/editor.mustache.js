@@ -8,7 +8,7 @@ module.exports = {
     return ["js/libs/codemirror/lib/codemirror.css", "css/editor.css", "css/apex.css"];
   },
   scripts: function(){
-    return ["js/libs/codemirror/lib/codemirror.js", "js/apex.js"];
+    return ["js/libs/codemirror/lib/codemirror.js", "js/apex.js", "js/editortabs.js", "js/docaccordion.js"];
   }
 };
 

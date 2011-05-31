@@ -17,7 +17,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         <div id="apexContent">
             <p>loading...</p>
         </div>
-        <h3 id="vfHeader"><a href="#">VisualForce</a></h3>
+        <h3 id="vfHeader"><a href="#">Visualforce</a></h3>
         <div id="vfContent">
             <p>loading...</p>
         </div>
@@ -34,156 +34,92 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
 <script>
 
-    function createNewEditor(tab, tabPanel){
-
-        var content = $("<div class='editorContainer'><textarea class='editor' ></textarea></div>");
-        tabPanel.append(content);
-
-        var txt = tabPanel.find(".editor")[0];
-        var editor = CodeMirror.fromTextArea(txt,{
-                lineNumbers: true,
-                value: txt.value,
-                height: "auto",
-                mode: "apex"
-        });
-        $('.CodeMirror').addClass('ui-corner-all');
-        tab.data('editor', editor);
-        return editor;
-    }
-
-    function createNewTab(tabSet){
-        var totalTabs = tabSet.tabs("length");
-        var id = "tabs-" + totalTabs;
-        var url = '#' + id;
-
-        tabSet.tabs("add", url, "Untitled", totalTabs - 1 );
-        var editor = createNewEditor(tabSet.find('a[href='+url+']'), tabSet.find('#' + id));
-        tabSet.tabs("select", id );
-        return {
-            "tabId": id,
-            "editor": editor
-        };
-    }
-
-    function onTabSelected(event, ui){
-        //log(ui);
-        var tabSet = $( "#tabs" );
-        var tab = $(ui.tab);
-        switch(tab.attr('href')){
-            case '#tabs-new':
-                    createNewTab(tabSet);
-                    return false;
-            break;
-            default:
-               var editor = tab.data('editor');
-               if (editor != null){
-                    editor.refresh();
-               }
-            break;
+    function fetchDocs(url, type, callback){
+        if (url && type){
+            $.getJSON(url, function(data) {
+                var docs = [];
+                $.each(data, function(index, elem){
+                   if (elem['sf:type'] == type){
+                       docs.push({ id: elem['sf:id'], name: elem['sf:name'] });
+                   }
+                });
+                if ($.isFunction(callback)){
+                    callback.call(this, docs);
+                }
+            });
         }
-        return true;
     }
 
-    function onAccordionChangeStart(event, ui){
-        var header = $(ui.newHeader);
-
-        //TODO - serious oppty for refactor here. Can you say D-R-Y
-
-        switch(header.attr('id')){
-            case 'apexHeader':
-                    //log('clicked on apex header');
-                    $.getJSON('/apex.json', function(data) {
-                        log(JSON.stringify(data));
-                        var content = $(ui.newContent);
-                        content.empty();
-                        var list = $("<ul></ul>");
-                        $.each(data, function(index, elem){
-                           if (elem['sf:type'] == "ApexClass"){
-                               list.append("<li><a href='#' id='" + elem['sf:id'] + "'>" + elem['sf:name'] +"</a></li>");
-                           }
-                        });
-                        content.append(list);
-                    });
-                     $( "#accordion" ).accordion("resize");
-            break;
-            case 'vfHeader':
-                    //log('clicked on apex header');
-                    $.getJSON('/vf.json', function(data) {
-                        log(JSON.stringify(data));
-                        var content = $(ui.newContent);
-                        content.empty();
-                        var list = $("<ul></ul>");
-                        $.each(data, function(index, elem){
-                           if (elem['sf:type'] == "ApexPage"){
-                               list.append("<li><a href='#' id='" + elem['sf:id'] + "'>" + elem['sf:name'] +"</a></li>");
-                           }
-                        });
-                        content.append(list);
-                    });
-                     $( "#accordion" ).accordion("resize");
-            break;
-        }//end switch
+    function fetchApexDocs(callback){
+        fetchDocs('/apex.json', 'ApexClass', callback);
+    }
+    function fetchVisualforceDocs(callback){
+        fetchDocs('/vf.json', 'ApexPage', callback);
     }
 
     jQuery(function(){
         log('editor page loaded...');
 
-        var tabSet = $( "#tabs" );
-        tabSet.tabs({select: onTabSelected }).find( ".ui-tabs-nav" ).sortable({ axis: "x" });
-        createNewTab(tabSet);
+        var tabs = new EditorTabs( "#tabs" );
 
-        var sidebar = $("#sidebar");
-        sidebar.height(tabSet.outerHeight());
+        tabs.createNewTab();
 
-        $( "#accordion" ).accordion({
-			collapsible: true,
-            active: false,
-            changestart: onAccordionChangeStart,
-            fillSpace: true
-		});
+        $("#sidebar").height(tabs.outerHeight());
 
-        var apexFiles = $("#apexContent a");
-        apexFiles.die();
-        apexFiles.live("click", function(){
-            var apex = $(this);
-            var id = apex.attr("id");
-            log("Clicked on apex code: " + id);
-            $.getJSON('/apex/'+id+'.json', function(data) {
-                log(JSON.stringify(data));
-                if (data.length > 0){
-                    var body = data[0]['sf:body'];
-                    if (body){
-                        var ret = createNewTab(tabSet);
-                        if (ret){
-                            ret.editor.setValue(body);
-                        }
-                    }
+        var accordion = new DocAccordion("#accordion", {
+            documentClicked: function(headerTitle, link){
+                var docId = link.attr('id');
+                log("Clicked on doc: " +  docId + " under header " + headerTitle);
+
+                //if it's already open, just activate the tab
+                var existingTabs = tabs.findTabData('docId', docId);
+                if (existingTabs.size() > 0){
+                    tabs.setSelectedTab(existingTabs[0]);
+                    return;
                 }
 
-            });
-        });
+                var url = null;
+                var key = null;
 
-        var vfFiles = $("#vfContent a");
-        vfFiles.die();
-        vfFiles.live("click", function(){
-            var vf = $(this);
-            var id = vf.attr("id");
-            log("Clicked on vf code: " + id);
-            $.getJSON('/vf/'+id+'.json', function(data) {
-                log(JSON.stringify(data));
-                if (data.length > 0){
-                    var markup = data[0]['sf:markup'];
-                    if (markup){
-                        var ret = createNewTab(tabSet);
-                        if (ret){
-                            ret.editor.setValue(markup);
-                        }
-                    }
+                if (headerTitle === "Apex"){
+                    url = '/apex/'+ docId+'.json';
+                    key = 'sf:body';
+                }
+                else if (headerTitle === "Visualforce"){
+                    url = '/vf/'+ docId+'.json';
+                    key = 'sf:markup';
                 }
 
-            });
+                if (url && key){
+                    //fetch the document and open it in a new tab
+                    $.getJSON(url, function(data) {
+                        log(JSON.stringify(data));
+                        if (data.length > 0){
+                            var content = data[0][key];
+                            if (content){
+                                var ret = tabs.createNewTab();
+                                if (ret){
+                                    tabs.setTabTitle(ret.tabId, link.text() );
+                                    tabs.setTabData(ret.tabId,  'docId', docId);
+                                    ret.editor.setValue(content);
+                                }
+                            }
+                        }
+
+                    });
+                }
+            }
         });
 
+        fetchApexDocs(function(docs){
+            accordion.appendDocuments("Apex", docs);
+        });
+        fetchVisualforceDocs(function(docs){
+            accordion.appendDocuments("Visualforce", docs);
+        });
+
+        //setup toolbar buttons
+        
         $( "#save" ).button({
 			text: false,
 			icons: {
@@ -191,7 +127,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 			}
 		}).click(function(){
             alert('Save');
-
+            //$.post('/vf')
         });
         $( "#saveAll" ).button({
 			text: false,
