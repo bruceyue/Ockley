@@ -34,7 +34,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
 <script>
 
-    function fetchDocs(url, type, callback){
+    function getDocList(url, type, callback){
         if (url && type){
             $.getJSON(url, function(data) {
                 var docs = [];
@@ -50,59 +50,52 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         }
     }
 
-    function fetchApexDocs(callback){
-        fetchDocs('/apex.json', 'ApexClass', callback);
-    }
-    function fetchVisualforceDocs(callback){
-        fetchDocs('/vf.json', 'ApexPage', callback);
-    }
-
     jQuery(function(){
         log('editor page loaded...');
 
-        var tabs = new EditorTabs( "#tabs" );
+        var $t = $("#tabs");
 
-        tabs.createNewTab();
+        var tabs = new EditorTabs( $t );
+        tabs.createNew();
 
-        $("#sidebar").height(tabs.outerHeight());
+        $("#sidebar").height($t.outerHeight());
 
         var accordion = new DocAccordion("#accordion", {
             documentClicked: function(headerTitle, link){
+
                 var docId = link.attr('id');
-                log("Clicked on doc: " +  docId + " under header " + headerTitle);
 
                 //if it's already open, just activate the tab
-                var existingTabs = tabs.findTabData('docId', docId);
-                if (existingTabs.size() > 0){
-                    tabs.setSelectedTab(existingTabs[0]);
+                var existing = tabs.findByData('docId', docId);
+                if (existing.size() > 0){
+                    tabs.setSelected(existing[0]);
                     return;
                 }
 
                 var url = null;
-                var key = null;
+                var contentKey = null;
 
                 if (headerTitle === "Apex"){
                     url = '/apex/'+ docId+'.json';
-                    key = 'sf:body';
+                    contentKey = 'sf:body';
                 }
                 else if (headerTitle === "Visualforce"){
                     url = '/vf/'+ docId+'.json';
-                    key = 'sf:markup';
+                    contentKey = 'sf:markup';
                 }
 
-                if (url && key){
+                if (url && contentKey){
                     //fetch the document and open it in a new tab
                     $.getJSON(url, function(data) {
-                        log(JSON.stringify(data));
+                        //log(JSON.stringify(data));
                         if (data.length > 0){
-                            var content = data[0][key];
+                            var content = data[0][contentKey];
                             if (content){
-                                var ret = tabs.createNewTab();
-                                if (ret){
-                                    tabs.setTabTitle(ret.tabId, link.text() );
-                                    tabs.setTabData(ret.tabId,  'docId', docId);
-                                    ret.editor.setValue(content);
-                                }
+                                tabs.createNew({
+                                    title: link.text(),
+                                    text: content,
+                                    data: { 'docId': docId, 'headerTitle': headerTitle }
+                                });
                             }
                         }
 
@@ -111,10 +104,10 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             }
         });
 
-        fetchApexDocs(function(docs){
+        getDocList('/apex.json', 'ApexClass', function(docs){
             accordion.appendDocuments("Apex", docs);
         });
-        fetchVisualforceDocs(function(docs){
+        getDocList('/vf.json', 'ApexPage',function(docs){
             accordion.appendDocuments("Visualforce", docs);
         });
 
@@ -126,8 +119,28 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 				primary: "silk-icon-save"
 			}
 		}).click(function(){
-            alert('Save');
-            //$.post('/vf')
+            //alert('Save');
+
+            var tabId = tabs.getSelected();
+            var docId = tabs.getData(tabId, 'docId');
+            var headerTitle = tabs.getData(tabId, 'headerTitle');
+            var editor = tabs.getEditor(tabId);
+            var content = editor.getValue();
+            var url = null;
+
+            if (headerTitle === "Apex"){
+                url = '/apex/'+ docId+'.json';
+            }
+            else if (headerTitle === "Visualforce"){
+                url = '/vf/'+ docId+'.json';
+            }
+
+            if (url != null){
+                $.post(url, { 'content': content }, function(data) {
+                    log('Compile result: ' + data);
+                });
+            }
+
         });
         $( "#saveAll" ).button({
 			text: false,

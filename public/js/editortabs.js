@@ -10,26 +10,84 @@ Creates CodeMirror Editor tabs.
 
 function EditorTabs(elemId) {
     var _tabSet = $(elemId);
+
     _tabSet.tabs().find(".ui-tabs-nav").sortable({ axis: "x" });
 
-    _tabSet.bind("tabsselect", {createNewTab : this.createNewTab}, function(event, ui) {
-                var tab = $(ui.tab);
-                switch (tab.attr('href')) {
-                    case '#tabs-new':
-                        event.data.createNewTab();
-                        return false;
-                        break;
-                    default:
-                        var editor = tab.data('editor');
-                        if (editor != null) {
-                            editor.refresh();
-                        }
-                        break;
-                }
-                return true;
-            });
+    _tabSet.bind("tabsselect", { createNew : this.createNew },
+        function(event, ui) {
+            var tab = $(ui.tab);
+            switch (tab.attr('href')) {
+                case '#tabs-new':
+                    event.data.createNew();
+                    return false;
+                    break;
+                default:
+                    var editor = tab.data('editor');
+                    if (editor != null) {
+                        editor.refresh();
+                    }
+                    break;
+            }
+            return true;
+    });
 
-    function createNewEditor(tab, tabPanel) {
+    function getTab(tabId){
+        return _tabSet.find('a[href=' + tabId + ']');
+    }
+
+    function getTabs(){
+        return _tabSet.find('ul.ui-tabs-nav li a');
+    }
+
+    function getTabCount() {
+        return _tabSet.tabs("length");
+    }
+
+
+    /* public */
+    this.setSelected = function(tabId) {
+        _tabSet.tabs("select", tabId);
+    };
+
+    this.getSelected = function() {
+        return _tabSet.find('ul.ui-tabs-nav li.ui-tabs-selected a').attr('href');
+    };
+
+    this.findByData = function(key, value){
+        return getTabs().map( function(index, elem) {
+            var tab = $(this);
+            if(tab.data(key) === value){
+                return tab.attr('href');
+            }
+        });
+    };
+
+    this.getData = function(tabId, key){
+      return getTab(tabId).data(key);
+    };
+
+    this.getEditor = function(tabId){
+        return getTab(tabId).data('editor');
+    };
+
+    this.createNew = function(options) {
+
+        var settings = $.extend({
+            title: "Untitled",
+            text: null,
+            data: null
+        }, options);
+
+        var totalTabs = getTabCount();
+        var index = totalTabs - 1;
+        var id = "#tabs-" + totalTabs;
+        _tabSet.tabs("add", id, settings.title, index);
+
+        //Note: tabs are links which have hrefs pointing to the tabpanels
+        var tab = getTab(id);
+
+        var tabPanel = _tabSet.find(id);
+
         var content = $("<div class='editorContainer'><textarea class='editor' ></textarea></div>");
         tabPanel.append(content);
 
@@ -40,91 +98,23 @@ function EditorTabs(elemId) {
             height: "auto",
             mode: "apex"
         });
-        $('.CodeMirror').addClass('ui-corner-all');
-        tab.data('editor', editor);
-        return editor;
-    }
+        tabPanel.find('.CodeMirror').addClass('ui-corner-all');
 
-    this.getTabCount = function() {
-        return _tabSet.tabs("length");
-    };
-
-    //tabs are links which have hrefs pointing to the tabpanels
-    function getTab(tabId){
-        var id = $.trim(tabId);
-        if (id.indexOf('#') !== 0){
-            id = '#' + id;
+        if (settings.text != null){
+            editor.setValue(settings.text);
         }
-        return _tabSet.find('a[href=' + id + ']');
-    }
 
-    //tabpanels are divs which have ids equal to the href of the tab
-    function getTabPanel(tabId){
-        var id = $.trim(tabId);
-        if (id.indexOf('#') !== 0){
-            id = '#' + id;
-        }
-        return _tabSet.find(id);
-    }
-
-    function getTabs(){
-        return _tabSet.find('ul.ui-tabs-nav li a');
-    }
-
-    this.outerHeight = function() {
-        return _tabSet.outerHeight();
-    };
-
-    /*
-    this.getSelectedTabIndex = function() {
-        return _tabSet.tabs('option', 'selected');
-    };
-    */
-
-    this.setSelectedTab = function(id) {
-        _tabSet.tabs("select", id);
-    };
-
-    this.setTabTitle = function(tabId, text) {
-        getTab(tabId).find('span:first').text(text);
-    };
-
-    this.getTabTitle = function(tabId) {
-        return getTab(tabId).find('span:first').text();
-    };
-
-    this.setTabData = function(tabId, key, value){
-        getTab(tabId).data(key, value);
-    };
-
-    this.getTabData = function(tabId, key){
-        return getTab(tabId).data(key);
-    };
-
-    this.findTabData = function(key, value){
-        return getTabs().map( function(index, elem) {
-            var tab = $(this);
-            if(tab.data(key) === value){
-                return tab.attr('href');
+        var data = settings.data;
+        if (data != null){
+            for (var key in data){
+                if (data.hasOwnProperty(key)){
+                    tab.data(key, data[key]);
+                }
             }
-        });
-    };
+        }
+        tab.data('editor', editor);
 
-    this.createNewTab = function() {
-
-        var totalTabs = this.getTabCount();
-        var id = "tabs-" + totalTabs;
-
-        _tabSet.tabs("add", '#' + id, "Untitled", totalTabs - 1);
-
-        var editor = createNewEditor(getTab(id), getTabPanel(id));
-
-        this.setSelectedTab(id);
-
-        return {
-            "tabId": id,
-            "editor": editor
-        };
+        this.setSelected(index);
     };
 
 }

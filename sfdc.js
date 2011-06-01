@@ -170,7 +170,7 @@ function compile(serverUrl, sessionId, code, options){
 
     var headers = {
         'Host': url.host,
-        'SOAPAction': 'Query',
+        'SOAPAction': 'CompileClasses',
         'Content-Type': 'text/xml',
         'Content-Length': soap.length
     };
@@ -184,22 +184,44 @@ function compile(serverUrl, sessionId, code, options){
         headers: headers
     };
 
+    console.log('Making request: ' + JSON.stringify(reqOpts));
+    //console.log('Soap: ' + soap);
+    
     var req = https.request(reqOpts, function(res) {
           var data = '';
-          res.setEncoding('utf8');
+          res.setEncoding('utf8');00
           res.on('data', function(chunk) {
               //console.log('got response status code:' + sfdcResponse.statusCode);
               data += chunk;
           });
           res.on('end', function(){
+              var errMsg = "";
               if (res.statusCode == '200'){
                   //data = d.toString('utf8');
                   console.log(data);
                   //parseQueryResults(data, options);
+
+                  var re = new RegExp("<compileClassesResponse>\s*<result>.*<success>(.+)</success>.*</result>\s*</compileClassesResponse>", "gm");
+                  var matches = re.exec(data);
+                  if (matches != null){
+                      var totalMatches = matches.length;
+                      if (totalMatches > 1){
+                          if (options.onSuccess){
+                              options.onSuccess.apply(this, [{ success: matches[1] }]);
+                          }
+                          return;
+                      }
+                      else{
+                          errMsg = 'Unable to find compileClasses response';
+                      }
+                  }
+                  else{
+                      errMsg = 'No matches in response';
+                  }
               }
               else{
                   if (options.onError){
-                    options.onError.apply(this, [data]);
+                    options.onError.apply(this, [errMsg]);
                   }
               }
           });
@@ -256,13 +278,13 @@ function login(name, password, options){
               var errMsg = "";
               if (res.statusCode == '200'){
                   //console.log(data);
-                  var re = new RegExp("<loginResponse>\s*<result>.*<serverUrl>(.+)</serverUrl>.*<sessionId>(.+)</sessionId>.*</result>\s*</loginResponse>", "gm");
+                  var re = new RegExp("<loginResponse>\s*<result>.*<metadataServerUrl>(.+)</metadataServerUrl>.*<serverUrl>(.+)</serverUrl>.*<sessionId>(.+)</sessionId>.*</result>\s*</loginResponse>", "gm");
                   var matches = re.exec(data);
                   if (matches != null){
                       var totalMatches = matches.length;
-                      if (totalMatches > 2){
+                      if (totalMatches > 3){
                           if (options.onSuccess){
-                              options.onSuccess.apply(this, [{ serverUrl: matches[1], sessionId: matches[2] }]);
+                              options.onSuccess.apply(this, [{ apexServerUrl: matches[1].replace('Soap/m', 'Soap/s'), metadataServerUrl: matches[1], serverUrl: matches[2], sessionId: matches[3] }]);
                           }
                           return;
                       }
@@ -288,5 +310,6 @@ function login(name, password, options){
 
 module.exports = {
     "query": query,
-    "login": login
+    "login": login,
+    "compile": compile
 };

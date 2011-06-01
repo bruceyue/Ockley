@@ -69,6 +69,8 @@ app.post('/login', function(req, res) {
         onSuccess : function(info){
             req.session.sfdcServerUrl = info.serverUrl;
             req.session.sfdcSession = info.sessionId;
+            req.session.sfdcMetadataServerUrl = info.metadataServerUrl;
+            req.session.sfdcApexServerUrl = info.apexServerUrl;
             res.redirect('/editor');
         },
         onError : function(error){
@@ -157,6 +159,41 @@ app.get('/apex.:format?', function(req, res) {
 
 //save a specific apex page
 app.post('/apex/:id.:format?', function(req, res){
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+      res.send('Format not available', 400);
+      return;
+    }
+
+    console.log('Saving doc ' + req.params.id );
+
+    console.log(req.body);
+
+
+    if (req.body == null || req.body.content == null){
+        //TODO - report error
+        console.log('Missing content param');
+        res.redirect('back');
+        return;
+    }
+
+    sfdc.compile(req.session.sfdcApexServerUrl, req.session.sfdcSession, req.body.content, {
+
+            onSuccess: function(results){
+                if (res){
+                    res.send(results);
+                }
+                res = null;
+            },
+            onError: function(error){
+                //TODO - report error
+                console.log(error);
+            }
+    });
 });
 
 
@@ -228,15 +265,20 @@ app.post('/vf/:id.:format?', function(req, res){
       return;
     }
 
+    console.log('Saving doc ' + req.params.id );
 
-    if (req.markup == null){
+    console.log(req.body);
+
+
+    if (req.body == null || req.body.content == null){
         //TODO - report error
-        console.log('Missing markup param');
+        console.log('Missing content param');
         res.redirect('back');
         return;
     }
 
-    sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, req.markup, {
+    /*
+    sfdc.update(req.session.sfdcServerUrl, req.session.sfdcSession, req.body.content, {
 
             onSuccess: function(results){
                 if (res){
@@ -249,6 +291,7 @@ app.post('/vf/:id.:format?', function(req, res){
                 console.log(error);
             }
     });
+    */
 });
 
 app.get('*', function(req, res) {
