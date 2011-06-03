@@ -17,7 +17,6 @@ app.configure(function() {
     app.use(express.cookieParser());
 
     var secretKey = process.env.SESSIONKEY || "SuperSecretSecretSquirrel";
-    console.log('Using session key: ' + secretKey);
     app.use(express.session({ secret: secretKey}));
     app.use(express.methodOverride());
     app.use(express.static(__dirname + '/public'));
@@ -39,7 +38,7 @@ function isAuthenticated(req){
 
 app.get('/', function(req, res) {
     res.render("index", {
-        title: "Home",
+        title: "Ockley",
         loggedIn: isAuthenticated(req)
     });
 });

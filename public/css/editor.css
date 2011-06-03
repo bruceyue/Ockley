@@ -1,8 +1,8 @@
 #toolbar{
-    height: 32px;
+    height: 100%;
     width: 95%;
     float:left;
-    padding: 2px;
+    padding: 4px;
     margin-left: 1px;
     margin-bottom: 2px;
 }
