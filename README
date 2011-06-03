@@ -5,7 +5,7 @@ What currently works (not a lot)
 * You can login to a Salesforce Org
 * It will retrieve your Apex code and Visualforce pages
 * basic apex syntax highlighting
-* You can edit stuff but not save it (see I said not a lot)
+* You can edit and save Apex and Visualforce.
 
 Setup
 
