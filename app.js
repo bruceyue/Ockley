@@ -5,8 +5,8 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 */
 var express = require('./node_modules/express');
 var mustachio = require('./node_modules/mustachio');
-var mongoose = require('./node_modules/mongoose');
-var mongoStore = require('connect-mongodb');
+//var mongoose = require('./node_modules/mongoose');
+//var mongoStore = require('connect-mongodb');
 var sfdc = require('./sfdc.js');
 
 var app = module.exports = express.createServer();
@@ -21,7 +21,7 @@ app.configure(function() {
     app.use(express.cookieParser());
 
     //TODO - Important! Change secret on deployment
-    app.use(express.session({ secret: "WlJP7z13Rg2s0hT5_RW-7", store: mongoStore(dbUri) }));
+    app.use(express.session({ secret: "ZRJP7z78Rg2s0hT6_RW-9" /*, store: mongoStore(dbUri) */}));
     app.use(express.methodOverride());
     app.use(express.static(__dirname + '/public'));
 });
@@ -44,8 +44,10 @@ app.configure('production', function() {
 */
 });
 
-console.log('connect to db with uri: ' + dbUri)
+/*
+console.log('connect to db with uri: ' + dbUri);
 var db = mongoose.connect(dbUri);
+*/
 
 function isAuthenticated(req){
     return (req.session && req.session.sfdcSession);
