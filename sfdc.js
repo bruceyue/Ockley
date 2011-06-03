@@ -18,71 +18,91 @@ function parseUrl(url){
     return ret;
 }
 
-function parseQueryResults(xmlString, options){
+function parseResults(xmlString, tagNames, options){
 
-    var strict = false;
-    var parser = new sax.parser(strict, { lowercasetags: true });
-    parser.ockley = {
-        record : null,
-        tagName : null,
-        records : [],
-        onSuccess: options.onSuccess,
-        onError: options.onError
-    };
+    var _parser = new sax.parser(false, { lowercasetags: true, trim:true });
+    var _options = options;
+    var _tags = [];
+    var _results = [];
+    var _tagNames = tagNames;
 
-    parser.onopentag = function(tag) {
-        console.log("Sax - Open Element: " + tag.name +" (Attributes: " + JSON.stringify(tag.attributes) + " )");
-        var state = this.ockley;
-        if (tag.name === "records"){
-            state.record = {};
+    function inArray( elem, array ) {
+        if ( array.indexOf ) {
+            return array.indexOf( elem );
         }
-        else if (state.record != null){
-            state.tagName = tag.name;
-            state.record[tag.name] = "";
-        }
-    };
-    parser.onclosetag = function(tagName) {
-        console.log("Sax - Close Element: " + tagName);
-        var state = this.ockley;
-        if (tagName === "records"){
-            if (state.record){
-                state.records.push(state.record);
-                state.record = null;
+        for ( var i = 0, length = array.length; i < length; i++ ) {
+            if ( array[ i ] === elem ) {
+                return i;
             }
         }
-        state.tagName = null;
+        return -1;
+    }
+
+    var isMatch = function(tag){
+        return (inArray(tag, _tagNames) > -1);
     };
-    parser.ontext = function(text) {
-        console.log('Sax - Text: ' + text);
-        var state = this.ockley;
-        var tagName = state.tagName;
-        var record = state.record;
-        if (record && tagName){
-            record[tagName] = text;
+
+    var pushTag = function(tag){
+        //console.log('push tag: ' + tag.name);
+        _tags.push({ name: tag.name });
+    };
+    
+    var popTag = function(){
+        if (_tags.length){
+            var t = _tags.pop();
+            //console.log('popped tag: ' + t.name);
+            var len = _tags.length;
+            if (len){
+                _tags[len - 1][t.name] = t;
+            }
+            else{
+                //console.log('pushing result: ');
+                //console.log(t);
+                _results.push(t);
+            }
         }
-
     };
-    parser.onerror = function(err) {
-        console.log('Sax - Error: ' + JSON.stringify(err));
 
-        var onError = this.ockley.onError;
+    _parser.onopentag = function(tag) {
+        //console.log("Sax - Open Element: " + tag.name +" (Attributes: " + JSON.stringify(tag.attributes) + " )");
+        if (_tags.length || isMatch(tag.name)){
+            pushTag(tag);
+        }
+    };
+    _parser.onclosetag = function(tagName) {
+        //console.log("Sax - Close Element: " + tagName);
+        popTag();
+    };
+    _parser.ontext = function(text) {
+        //console.log('Sax - Text: ' + text);
+        var len = _tags.length;
+        if (len){
+            _tags[len - 1].text = text;
+        }
+    };
+    _parser.onerror = function(err) {
+        //console.log('Sax - Error: ' + JSON.stringify(err));
+        var onError = _options.onError;
         if (onError){
-            onError.apply(this, [err]);
+            while(_tags.length){
+                popTag();
+            }
+            onError.call(this, err, _results);
         }
 
     };
-    parser.onend = function() {
-        console.log('Sax - End');
-        var state = this.ockley;
-        var onSuccess = state.onSuccess;
+    _parser.onend = function() {
+        //console.log('Sax - End');
+        var onSuccess = _options.onSuccess;
         if (onSuccess){
-            console.log('Parsed ' + state.records.length + ' records');
-            onSuccess.apply(this, [state.records]);
+            //console.log('Parsed ' + _results.length + ' elements');
+            //console.log(_results);
+            onSuccess.call(this, _results);
         }
     };
 
-    parser.write(xmlString);
-    parser.close();
+    _parser.write(xmlString);
+    _parser.close();
 }
 
 function query(serverUrl, sessionId, query, options){
@@ -123,14 +143,95 @@ function query(serverUrl, sessionId, query, options){
           var data = '';
           res.setEncoding('utf8');
           res.on('data', function(chunk) {
-              //console.log('got response status code:' + sfdcResponse.statusCode);
               data += chunk;
           });
           res.on('end', function(){
+              //console.log('got response status code:' + res.statusCode);
+              //console.log('data: ' + data);
               if (res.statusCode == '200'){
-                  //data = d.toString('utf8');
-                  console.log(data);
-                  parseQueryResults(data, options);
+                  parseResults(data, ['records'], options);
+              }
+              else{
+                  if (options.onError){
+                    options.onError.apply(this, [data]);
+                  }
+              }
+          });
+
+    });
+    req.on('error', function(error){
+        if (options.onError){
+            options.onError.apply(this, [error]);
+        }
+    });
+
+    req.write(soap);
+    req.end();
+}
+
+function update(serverUrl, sessionId, sObjectTypeName, sObjectId, fieldsToNull, fieldsValues, options){
+
+    var soap = "";
+    soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com" xmlns:urn1="urn:sobject.partner.soap.sforce.com">';
+    soap += "<soapenv:Header>";
+    soap += "  <urn:SessionHeader>";
+    soap += "     <urn:sessionId>" + sessionId + "</urn:sessionId>";
+    soap += "  </urn:SessionHeader>";
+    soap += "</soapenv:Header>";
+    soap += "<soapenv:Body>";
+    soap += "  <urn:update>";
+    soap += "     <urn:sObjects>";
+    soap += "     <urn1:type>" + sObjectTypeName + "</urn1:type>";
+
+    var len = fieldsToNull.length;
+    for(var i = 0; i < len; ++i){
+        soap += "<urn1:fieldsToNull>" + fieldsToNull[i] + "</urn1:fieldsToNull>";
+    }
+
+    soap += "    <urn1:Id>" + sObjectId + "</urn1:Id>";
+
+    for (var field in fieldsValues){
+        if (fieldsValues.hasOwnProperty(field)){
+           soap += "<urn1:" + field + ">" + fieldsValues[field] + "</urn1:" + field + ">";
+        }
+    }
+
+    soap += "    </urn:sObjects>";
+    soap += " </urn:update>";
+    soap += "</soapenv:Body>";
+    soap += "</soapenv:Envelope>";
+
+    //console.log('soap: ' + soap);
+
+    var url = parseUrl(serverUrl);
+
+    var headers = {
+        'Host': url.host,
+        'SOAPAction': 'Update',
+        'Content-Type': 'text/xml',
+        'Content-Length': soap.length
+    };
+
+    var path = "/" + url.path;
+    var reqOpts = {
+        host: url.host,
+        port: 443,
+        path: path,
+        method: 'POST',
+        headers: headers
+    };
+
+    var req = https.request(reqOpts, function(res) {
+          var data = '';
+          res.setEncoding('utf8');
+          res.on('data', function(chunk) {
+              data += chunk;
+          });
+          res.on('end', function(){
+              console.log('got response status code:' + res.statusCode);
+              console.log('data: ' + data);
+              if (res.statusCode == '200'){
+                  parseResults(data, ['result'], options);
               }
               else{
                   if (options.onError){
@@ -184,44 +285,26 @@ function compile(serverUrl, sessionId, code, options){
         headers: headers
     };
 
-    console.log('Making request: ' + JSON.stringify(reqOpts));
-    //console.log('Soap: ' + soap);
-    
+    //console.log('Making request: ' + JSON.stringify(reqOpts));
+
     var req = https.request(reqOpts, function(res) {
           var data = '';
-          res.setEncoding('utf8');00
+          res.setEncoding('utf8');
           res.on('data', function(chunk) {
               //console.log('got response status code:' + sfdcResponse.statusCode);
-              data += chunk;
+              if (chunk){
+                data += chunk;
+              }
           });
           res.on('end', function(){
-              var errMsg = "";
+              //console.log('got response status code:' + res.statusCode);
+              //console.log('data: ' + data);
               if (res.statusCode == '200'){
-                  //data = d.toString('utf8');
-                  console.log(data);
-                  //parseQueryResults(data, options);
-
-                  var re = new RegExp("<compileClassesResponse>\s*<result>.*<success>(.+)</success>.*</result>\s*</compileClassesResponse>", "gm");
-                  var matches = re.exec(data);
-                  if (matches != null){
-                      var totalMatches = matches.length;
-                      if (totalMatches > 1){
-                          if (options.onSuccess){
-                              options.onSuccess.apply(this, [{ success: matches[1] }]);
-                          }
-                          return;
-                      }
-                      else{
-                          errMsg = 'Unable to find compileClasses response';
-                      }
-                  }
-                  else{
-                      errMsg = 'No matches in response';
-                  }
+                  parseResults(data, ['result'], options);
               }
               else{
                   if (options.onError){
-                    options.onError.apply(this, [errMsg]);
+                      options.onError.apply(this, [data]);
                   }
               }
           });
@@ -273,36 +356,23 @@ function login(name, password, options){
           });
 
           res.on('end', function(){
-
-              //console.log('got response status code:' + sfdcResponse.statusCode);
-              var errMsg = "";
+              //console.log('got response status code:' + res.statusCode);
+              //console.log('data: ' + data);
               if (res.statusCode == '200'){
-                  //console.log(data);
-                  var re = new RegExp("<loginResponse>\s*<result>.*<metadataServerUrl>(.+)</metadataServerUrl>.*<serverUrl>(.+)</serverUrl>.*<sessionId>(.+)</sessionId>.*</result>\s*</loginResponse>", "gm");
-                  var matches = re.exec(data);
-                  if (matches != null){
-                      var totalMatches = matches.length;
-                      if (totalMatches > 3){
-                          if (options.onSuccess){
-                              options.onSuccess.apply(this, [{ apexServerUrl: matches[1].replace('Soap/m', 'Soap/s'), metadataServerUrl: matches[1], serverUrl: matches[2], sessionId: matches[3] }]);
-                          }
-                          return;
-                      }
-                      else{
-                          errMsg = 'Unable to find session and server url';
-                      }
-                  }
-                  else{
-                      errMsg = 'No matches in response';
-                  }
+                  parseResults(data, ['result'], options);
               }
               else{
-                  errMsg = 'Received statusCode ' + res.statusCode;
+                  if (options.onError){
+                      options.onError.apply(this, [data]);
+                  }
               }
-              if (options.onError){
-                options.onError.apply(this, [errMsg]);
-              }
+
           });
+    });
+    req.on('error', function(error){
+        if (options.onError){
+            options.onError.apply(this, [error]);
+        }
     });
     req.write(soap);
     req.end();
@@ -311,5 +381,6 @@ function login(name, password, options){
 module.exports = {
     "query": query,
     "login": login,
-    "compile": compile
+    "compile": compile,
+    "update": update
 };

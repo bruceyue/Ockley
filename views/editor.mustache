@@ -32,15 +32,19 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 	</div>
 </div>
 
+<div id='messageDialog' style='display:none'>
+    <p></p>
+</div>
+
 <script>
 
     function getDocList(url, type, callback){
         if (url && type){
             $.getJSON(url, function(data) {
                 var docs = [];
-                $.each(data, function(index, elem){
-                   if (elem['sf:type'] == type){
-                       docs.push({ id: elem['sf:id'], name: elem['sf:name'] });
+                $.each(data, function(index, doc){
+                   if (doc['sf:type'].text == type){
+                       docs.push({ id: doc['sf:id'].text, name: doc['sf:name'].text });
                    }
                 });
                 if ($.isFunction(callback)){
@@ -59,6 +63,15 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         tabs.createNew();
 
         $("#sidebar").height($t.outerHeight());
+
+        var messageDialog = $('#messageDialog').dialog({
+                                    autoOpen: false,
+                                    resizable: false,
+                                    closeText: '',
+                                  });
+
+        //remove title bar from showDialog
+        messageDialog.prev(".ui-dialog-titlebar").hide();
 
         var accordion = new DocAccordion("#accordion", {
             documentClicked: function(headerTitle, link){
@@ -89,7 +102,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                     $.getJSON(url, function(data) {
                         //log(JSON.stringify(data));
                         if (data.length > 0){
-                            var content = data[0][contentKey];
+                            var content = data[0][contentKey].text;
                             if (content){
                                 tabs.createNew({
                                     title: link.text(),
@@ -119,7 +132,6 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 				primary: "silk-icon-save"
 			}
 		}).click(function(){
-            //alert('Save');
 
             var tabId = tabs.getSelected();
             var docId = tabs.getData(tabId, 'docId');
@@ -127,17 +139,52 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             var editor = tabs.getEditor(tabId);
             var content = editor.getValue();
             var url = null;
+            var action = "Compiling...";
 
             if (headerTitle === "Apex"){
                 url = '/apex/'+ docId+'.json';
             }
             else if (headerTitle === "Visualforce"){
                 url = '/vf/'+ docId+'.json';
+                action = "Saving...";
             }
 
             if (url != null){
+                messageDialog.find('p').text(action);
+                messageDialog.dialog('open');
+                messageDialog.dialog( "option", "buttons", {} );
+                
                 $.post(url, { 'content': content }, function(data) {
-                    log('Compile result: ' + data);
+                    log('Compile/Save result: ');
+                    log(data);
+                    var msg = 'Failed to receive result from request';
+                    if (data && data.length > 0){
+                        data = data[0];
+                        if (data.success){
+                            if (data.success.text === 'true'){
+                                //success
+                                messageDialog.dialog('close');
+                                return;
+                            }
+                            else if (data.success.text === 'false'){
+                                //fail
+                                if (data.problem){
+                                    msg = data.problem.text;
+                                }
+                                if (data.errors && data.errors.message){
+                                    msg = data.errors.message.text;
+                                }
+                                if (data.line){
+                                    msg += ' line: ' + data.line.text;
+                                }
+                                if (data.column){
+                                    msg += ' column: ' + data.column.text;
+                                }
+                            }
+                        }
+                    }
+                    messageDialog.find('p').text(msg);
+                    messageDialog.dialog( "option", "buttons", { "Ok": function() { $(this).dialog("close"); } } );
                 });
             }
 

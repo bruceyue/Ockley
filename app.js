@@ -66,16 +66,29 @@ app.post('/login', function(req, res) {
 
     var user = req.body.user;
     sfdc.login(user.name, user.pass, {
-        onSuccess : function(info){
-            req.session.sfdcServerUrl = info.serverUrl;
-            req.session.sfdcSession = info.sessionId;
-            req.session.sfdcMetadataServerUrl = info.metadataServerUrl;
-            req.session.sfdcApexServerUrl = info.apexServerUrl;
+        onSuccess : function(result){
+            console.log('login success');
+            //console.log(result);
+            if (result && result.length)
+            {
+                result = result[0];
+                if (result.metadataserverurl){
+                    var metaUrl = result.metadataserverurl.text;
+                    req.session.sfdcMetadataServerUrl = metaUrl;
+                    req.session.sfdcApexServerUrl = metaUrl.replace('Soap/m', 'Soap/s')
+                }
+                if (result.serverurl){
+                    req.session.sfdcServerUrl = result.serverurl.text;
+                }
+                if (result.sessionid){
+                    req.session.sfdcSession = result.sessionid.text;
+                }
+            }
             res.redirect('/editor');
         },
         onError : function(error){
+            console.log('login error' + error);
             //TODO - report error
-            console.log(error);
             res.redirect('back');
         }
     });
@@ -121,12 +134,13 @@ app.get('/apex/:id.:format?', function(req, res){
     sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Body from ApexClass where id ='" + req.params.id + "' limit 1", {
             
             onSuccess: function(results){
-                if (res){
-                    res.send(results);
-                }
-                res = null;
+                console.log('query success');
+                //console.log('Query Results: ');
+                //console.log(results);
+                res.send(results);
             },
             onError: function(error){
+                console.log('query error');
                 //TODO - report error
                 console.log(error);
             }
@@ -148,9 +162,11 @@ app.get('/apex.:format?', function(req, res) {
 
     sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Body from ApexClass limit 1000", {
             onSuccess: function(results){
+                console.log('query success');
                 res.send(results);
             },
             onError: function(error){
+                console.log('query error');
                 //TODO - report error
                 console.log(error);
             }
@@ -184,14 +200,15 @@ app.post('/apex/:id.:format?', function(req, res){
     sfdc.compile(req.session.sfdcApexServerUrl, req.session.sfdcSession, req.body.content, {
 
             onSuccess: function(results){
-                if (res){
-                    res.send(results);
-                }
-                res = null;
+                console.log('parse success - results: ');
+                console.log(results);
+                res.send(results);
             },
-            onError: function(error){
+            onError: function(error, results){
+                console.log('parse error - ' + error + ' got this much: ');
+                console.log(results);
                 //TODO - report error
-                console.log(error);
+                res.redirect('back');
             }
     });
 });
@@ -213,10 +230,7 @@ app.get('/vf/:id.:format?', function(req, res){
     sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Markup from ApexPage where id ='" + req.params.id + "' limit 1", {
 
             onSuccess: function(results){
-                if (res){
-                    res.send(results);
-                }
-                res = null;
+                res.send(results);
             },
             onError: function(error){
                 //TODO - report error
@@ -239,12 +253,8 @@ app.get('/vf.:format?', function(req, res) {
     }
 
     sfdc.query(req.session.sfdcServerUrl, req.session.sfdcSession, "select Id, Name, Markup from ApexPage limit 1000", {
-
             onSuccess: function(results){
-                if (res){
-                    res.send(results);
-                }
-                res = null;
+                res.send(results);
             },
             onError: function(error){
                 //TODO - report error
@@ -269,7 +279,6 @@ app.post('/vf/:id.:format?', function(req, res){
 
     console.log(req.body);
 
-
     if (req.body == null || req.body.content == null){
         //TODO - report error
         console.log('Missing content param');
@@ -277,21 +286,24 @@ app.post('/vf/:id.:format?', function(req, res){
         return;
     }
 
-    /*
-    sfdc.update(req.session.sfdcServerUrl, req.session.sfdcSession, req.body.content, {
+    var markup = req.body.content;
 
-            onSuccess: function(results){
-                if (res){
-                    res.send(results);
-                }
-                res = null;
-            },
-            onError: function(error){
-                //TODO - report error
-                console.log(error);
-            }
+    markup = markup.replace(/&/g, '\&amp;');
+    markup = markup.replace(/</g, '&lt;');
+    markup = markup.replace(/>/g, '&gt;');
+
+    sfdc.update(req.session.sfdcServerUrl, req.session.sfdcSession, 'ApexPage',  req.params.id, [], { Markup:  markup }, {
+        onSuccess: function(results){
+            console.log('update success - results: ');
+            console.log(results);
+            res.send(results);
+        },
+        onError: function(error, results){
+            console.log('update error - ' + error + ' got this much: ');
+            console.log(results);
+            console.log(error);
+        }
     });
-    */
 });
 
 app.get('*', function(req, res) {
