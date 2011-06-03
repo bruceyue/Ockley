@@ -16,8 +16,9 @@ app.configure(function() {
     app.use(express.bodyParser());
     app.use(express.cookieParser());
 
-    //TODO - Important! Change secret on deployment
-    app.use(express.session({ secret: "SuperSecretSecretSquirrel"}));
+    var secretKey = process.env.SESSIONKEY || "SuperSecretSecretSquirrel";
+    console.log('Using session key: ' + secretKey);
+    app.use(express.session({ secret: secretKey}));
     app.use(express.methodOverride());
     app.use(express.static(__dirname + '/public'));
 });
