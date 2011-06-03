@@ -26,12 +26,14 @@ app.configure(function() {
 
 app.configure('development', function() {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-    app.set('db-uri', 'mongodb://localhost/ockley-development');
+    var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-development';
+    app.set('db-uri', uri);
 });
 
 app.configure('production', function() {
     app.use(express.errorHandler());
-    app.set('db-uri', 'mongodb://localhost/ockley-production');
+    var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-production';
+    app.set('db-uri', uri);
 });
 
 var db = mongoose.connect(app.set('db-uri'));
