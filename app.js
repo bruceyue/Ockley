@@ -27,12 +27,14 @@ app.configure(function() {
 app.configure('development', function() {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
     var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-development';
+    console.log(uri);
     app.set('db-uri', uri);
 });
 
 app.configure('production', function() {
     app.use(express.errorHandler());
     var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-production';
+    console.log(uri);
     app.set('db-uri', uri);
 });
 
