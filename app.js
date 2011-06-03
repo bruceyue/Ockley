@@ -11,6 +11,8 @@ var sfdc = require('./sfdc.js');
 
 var app = module.exports = express.createServer();
 
+var dbUri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-development';
+
 app.configure(function() {
     app.register('.mustache', mustachio);
     app.set('views', __dirname + '/views');
@@ -19,26 +21,31 @@ app.configure(function() {
     app.use(express.cookieParser());
 
     //TODO - Important! Change secret on deployment
-    app.use(express.session({ secret: "WlJP7z13Rg2s0hT5_RW-7", store: mongoStore(app.set('db-uri')) }));
+    app.use(express.session({ secret: "WlJP7z13Rg2s0hT5_RW-7", store: mongoStore(dbUri) }));
     app.use(express.methodOverride());
     app.use(express.static(__dirname + '/public'));
 });
 
 app.configure('development', function() {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+/*
     var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-development';
     console.log(uri);
-    app.set('db-uri', uri);
+    app.set('db-Uri', uri);
+*/
 });
 
 app.configure('production', function() {
     app.use(express.errorHandler());
+/*
     var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-production';
     console.log(uri);
-    app.set('db-uri', uri);
+    app.set('dbUri', uri);
+*/
 });
 
-var db = mongoose.connect(app.set('db-uri'));
+console.log('connect to db with uri: ' + dbUri)
+var db = mongoose.connect(dbUri);
 
 function isAuthenticated(req){
     return (req.session && req.session.sfdcSession);
