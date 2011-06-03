@@ -5,13 +5,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 */
 var express = require('./node_modules/express');
 var mustachio = require('./node_modules/mustachio');
-//var mongoose = require('./node_modules/mongoose');
-//var mongoStore = require('connect-mongodb');
 var sfdc = require('./sfdc.js');
 
 var app = module.exports = express.createServer();
-
-var dbUri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-development';
 
 app.configure(function() {
     app.register('.mustache', mustachio);
@@ -21,33 +17,18 @@ app.configure(function() {
     app.use(express.cookieParser());
 
     //TODO - Important! Change secret on deployment
-    app.use(express.session({ secret: "ZRJP7z78Rg2s0hT6_RW-9" /*, store: mongoStore(dbUri) */}));
+    app.use(express.session({ secret: "SuperSecretSecretSquirrel"}));
     app.use(express.methodOverride());
     app.use(express.static(__dirname + '/public'));
 });
 
 app.configure('development', function() {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-/*
-    var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-development';
-    console.log(uri);
-    app.set('db-Uri', uri);
-*/
 });
 
 app.configure('production', function() {
     app.use(express.errorHandler());
-/*
-    var uri = process.env.MONGOHQ_URL || 'mongodb://localhost/ockley-production';
-    console.log(uri);
-    app.set('dbUri', uri);
-*/
 });
-
-/*
-console.log('connect to db with uri: ' + dbUri);
-var db = mongoose.connect(dbUri);
-*/
 
 function isAuthenticated(req){
     return (req.session && req.session.sfdcSession);
@@ -79,30 +60,29 @@ app.post('/login', function(req, res) {
 
     var user = req.body.user;
     sfdc.login(user.name, user.pass, {
-        onSuccess : function(result){
+        onSuccess : function(results){
             console.log('login success');
-            //console.log(result);
-            if (result && result.length)
+            console.log(results);
+            if (results && results.length)
             {
-                result = result[0];
-                if (result.metadataserverurl){
-                    var metaUrl = result.metadataserverurl.text;
+                results = results[0];
+                if (results.metadataserverurl){
+                    var metaUrl = results.metadataserverurl.text;
                     req.session.sfdcMetadataServerUrl = metaUrl;
                     req.session.sfdcApexServerUrl = metaUrl.replace('Soap/m', 'Soap/s')
                 }
-                if (result.serverurl){
-                    req.session.sfdcServerUrl = result.serverurl.text;
+                if (results.serverurl){
+                    req.session.sfdcServerUrl = results.serverurl.text;
                 }
-                if (result.sessionid){
-                    req.session.sfdcSession = result.sessionid.text;
+                if (results.sessionid){
+                    req.session.sfdcSession = results.sessionid.text;
                 }
             }
             res.redirect('/editor');
         },
         onError : function(error){
-            console.log('login error' + error);
-            //TODO - report error
-            res.redirect('back');
+            console.log('login error - ' + error);
+            res.send(error);
         }
     });
 

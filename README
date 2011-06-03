@@ -12,13 +12,11 @@ Setup
 The instructions here will get you started: http://dailyjs.com/2010/11/08/node-tutorial-2/
 
 * Node.js - http://nodejs.org/
-* mongodb - http://www.mongodb.org/
 * npm - https://github.com/isaacs/npm
 * A bunch of modules.
     Install via npm:
         cd Ockley
-        npm install express connect-mongodb mongoose mustache mustachio sax
-* run mongod
+        npm install express mustache mustachio sax
 * run Ockley (node app.js)
 
 

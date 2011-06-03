@@ -356,14 +356,36 @@ function login(name, password, options){
           });
 
           res.on('end', function(){
-              //console.log('got response status code:' + res.statusCode);
+              console.log('got response status code:' + res.statusCode);
               //console.log('data: ' + data);
               if (res.statusCode == '200'){
                   parseResults(data, ['result'], options);
               }
               else{
                   if (options.onError){
-                      options.onError.apply(this, [data]);
+                      if (res.statusCode == '500'){
+                        console.log('parsing error');
+                        parseResults(data, ['soapenv:fault'], {
+                           onSuccess: function(errResult){
+                               console.log('parse success');
+                               console.log(errResult);
+                               if (errResult && errResult.length){
+                                   errResult = errResult[0];
+                                   if (errResult.faultstring){
+                                       options.onError.apply(this, [errResult.faultstring.text]);
+                                   }
+                               }
+                           },
+                           onError: function(errResult){
+                               console.log('parse error');
+                               console.log(errResult);
+                               options.onError.apply(this, [data]);
+                           }
+                        });
+                      }
+                      else{
+                        options.onError.apply(this, [data]);
+                      }
                   }
               }
 
