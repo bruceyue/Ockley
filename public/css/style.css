@@ -88,13 +88,12 @@ a:hover { color: #036; }
 /*-------------------------------------- */
 
 body{
-    margin: 10px;
 }
 
 #container{
     font-family: Verdana,Arial,sans-serif;
     font-size: 1.1em;
-
+    margin: 20px;
 }
 
 header ul{
