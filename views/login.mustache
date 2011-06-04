@@ -3,22 +3,22 @@ Ockley 1.0
 Copyright 2011,  Matthew Page
 licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 -->
-<h2>{{ title }}</h2>
-
-<form method="post" action="/login">
+<form id="loginForm" method="post" action="/login">
     <div>
-        <label for="username">Username:</label>
-        <input type="text" name="user[name]" id="username" />
+        <label for="username">Salesforce User:</label>
+        <input type="text" name="user[name]" id="username" require="true" />
     </div>
     <div>
         <label for="password">Password:</label>
-        <input type="password" name="user[pass]" id="password" />
+        <input type="password" name="user[pass]" id="password" require="true" />
     </div>
+    <p class='note'>You may need to add your security token to the end of your password.</p>
     <input type="submit" value="Submit" />
+    <input type="reset" value="Clear" />
 </form>
 
 <script>
     jQuery(function(){
-        log('login page loaded');
+        $("#loginForm").formly();
     });
 </script>

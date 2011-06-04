@@ -1,6 +1,11 @@
 form {
-    margin: 10px;
+    width: 400px;
 }
 form div {
     margin-bottom: 10px;
+}
+
+.note{
+    font-size: x-small;
+    font-style: italic;
 }
