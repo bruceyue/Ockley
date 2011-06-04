@@ -2,7 +2,7 @@ This is a simple web based editor for Force.com Apex and Visualforce. It aspires
 
 What currently works (not a lot)
 
-* You can login to a Salesforce Partner Org.
+* You can login to a Salesforce Org (tested with Developer and Enterprise Editions).
 * It will retrieve your Apex code and Visualforce pages
 * basic apex syntax highlighting
 * You can edit and save Apex and Visualforce.
