@@ -87,6 +87,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
                 var url = null;
                 var contentKey = null;
+                var editMode = 'apex';
 
                 if (headerTitle === "Apex"){
                     url = '/apex/'+ docId+'.json';
@@ -95,6 +96,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 else if (headerTitle === "Visualforce"){
                     url = '/vf/'+ docId+'.json';
                     contentKey = 'sf:markup';
+                    editMode = 'text/html';
                 }
 
                 if (url && contentKey){
@@ -107,7 +109,8 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                                 tabs.createNew({
                                     title: link.text(),
                                     text: content,
-                                    data: { 'docId': docId, 'headerTitle': headerTitle }
+                                    data: { 'docId': docId, 'headerTitle': headerTitle },
+                                    'mode': editMode
                                 });
                             }
                         }

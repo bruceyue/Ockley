@@ -75,7 +75,8 @@ function EditorTabs(elemId) {
         var settings = $.extend({
             title: "Untitled",
             text: null,
-            data: null
+            data: null,
+            mode: 'apex'
         }, options);
 
         var totalTabs = getTabCount();
@@ -96,7 +97,7 @@ function EditorTabs(elemId) {
             lineNumbers: true,
             value: txt.value,
             height: "auto",
-            mode: "apex"
+            mode: settings.mode
         });
         tabPanel.find('.CodeMirror').addClass('ui-corner-all');
 
