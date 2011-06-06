@@ -93,7 +93,9 @@ body{
 #container{
     font-family: Verdana,Arial,sans-serif;
     font-size: 1.1em;
-    margin: 20px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 header ul{
@@ -109,7 +111,7 @@ header ul li {
 }
 
 #main{
-    /*border: solid 1px red;*/
+    margin-top: 3em;
 }
 
 /*-------------------------------------- */
