@@ -58,16 +58,25 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         log('editor page loaded...');
 
         var $t = $("#tabs");
-
         var tabs = new EditorTabs( $t );
         tabs.createNew();
 
-        $("#sidebar").height($t.outerHeight());
+        var $s =  $("#sidebar");
+        //var $tbar = $("#toolbar");
+
+        $t.resizable({
+            helper: "ui-resizable-helper",
+            stop: function(event, ui) {
+                tabs.refresh(true);
+            }
+        });
+
+        $s.height($t.outerHeight());
 
         var messageDialog = $('#messageDialog').dialog({
                                     autoOpen: false,
                                     resizable: false,
-                                    closeText: '',
+                                    closeText: ''
                                   });
 
         //remove title bar from showDialog
@@ -210,12 +219,5 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 				primary: "silk-icon-redo"
 			}
 		});
-/*
-        tabSet.resizable({
-            animate: true
-        }).draggable({
-            handle: '.ui-tabs-nav'
-        });
-*/
     });
 </script>        
