@@ -212,12 +212,25 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 			icons: {
 				primary: "silk-icon-undo"
 			}
-		});
+		}).click(function(){
+            var tabId = tabs.getSelected();
+            var editor = tabs.getEditor(tabId);
+            if (editor != null){
+                editor.undo();
+            }
+        });
+
 		$( "#redo" ).button({
 			text: false,
 			icons: {
 				primary: "silk-icon-redo"
 			}
-		});
+		}).click(function(){
+            var tabId = tabs.getSelected();
+            var editor = tabs.getEditor(tabId);
+            if (editor != null){
+                editor.redo();
+            }
+        });
     });
 </script>        
