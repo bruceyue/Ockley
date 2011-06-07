@@ -10,6 +10,7 @@ Creates CodeMirror Editor tabs.
 
 function EditorTabs(elemId) {
     var _tabSet = $(elemId);
+    var _resized = false;
 
     _tabSet.tabs().find(".ui-tabs-nav").sortable({ axis: "x" });
 
@@ -22,10 +23,7 @@ function EditorTabs(elemId) {
                     return false;
                     break;
                 default:
-                    var editor = tab.data('editor');
-                    if (editor != null) {
-                        editor.refresh();
-                    }
+                    refreshEditor(tab);
                     break;
             }
             return true;
@@ -43,6 +41,29 @@ function EditorTabs(elemId) {
         return _tabSet.tabs("length");
     }
 
+    function getSelectedTab(){
+        return _tabSet.find('ul.ui-tabs-nav li.ui-tabs-selected a');
+    }
+
+    function refreshEditor(tab, resize){
+        if (resize || _resized){
+            resizeAll();
+        }
+        var editor = tab.data('editor');
+        if (editor != null) {
+            editor.refresh();
+        }
+    }
+
+    function resizeAll(){
+        _resized = true;
+        var w = _tabSet.innerWidth() - 6;
+        var h = _tabSet.innerHeight() - 6;
+        var tabsNav = _tabSet.find('.ui-tabs-nav');
+        h -= tabsNav.outerHeight();
+
+        _tabSet.find('.ui-tabs-panel, .editorContainer, .CodeMirror, .CodeMirror-scroll').width(w).height(h);
+    }
 
     /* public */
     this.setSelected = function(tabId) {
@@ -50,7 +71,7 @@ function EditorTabs(elemId) {
     };
 
     this.getSelected = function() {
-        return _tabSet.find('ul.ui-tabs-nav li.ui-tabs-selected a').attr('href');
+        return getSelectedTab().attr('href');
     };
 
     this.findByData = function(key, value){
@@ -68,6 +89,11 @@ function EditorTabs(elemId) {
 
     this.getEditor = function(tabId){
         return getTab(tabId).data('editor');
+    };
+
+    this.refresh = function(resize){
+      var tab = getSelectedTab();
+      refreshEditor(tab, resize);
     };
 
     this.createNew = function(options) {

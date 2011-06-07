@@ -51,13 +51,10 @@
      margin-bottom: 5px;
 }
 
-
 .ui-resizable-helper { border: 1px dotted gray; }
 
 .CodeMirror{
     border: 1px solid #eee;
-    height: 100%;
-    /*margin: 2px;*/
 }
 
 .silk-icon-undo,
