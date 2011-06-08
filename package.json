@@ -18,8 +18,5 @@
     "mustache": "0.3.1-dev",
     "mustachio": "0.2.0",
     "sax": "0.1.2"
-  },
-  "bin": {
-    "Ockley": "./app.js"
   }
 }

@@ -1,3 +1,4 @@
+
 #toolbar{
     height: 100%;
     width: 95%;
@@ -24,22 +25,35 @@
 }
 
 #tabs ul {
-    margin: 0px;
+    margin: 0;
 }
 
 #tabs div.ui-tabs-panel{
     padding: 0 !important;
 }
 
-#messageDialog {
+#messageDialog,
+#findDialog {
     background-color:white;
-    width: 400px;
-    padding: 10px;
+    padding: 1em;
+}
+
+#findDialog ul{
+    list-style: none;
+}
+#findDialog li{
+    margin: 0.5em;
+}
+#findText {
+    width: 250px;
+}
+.foundText{
+    background-color: yellow;
 }
 
 #apexContent, #vfContent{
-    padding-left: 5px;
-    font-size: 12px;
+    padding-left: 0.5em;
+    font-size: 0.75em;
     overflow-x: hidden;
 }
 
@@ -48,7 +62,7 @@
 }
 
 #apexContent li, #vfContent li{
-     margin-bottom: 5px;
+     margin-bottom: 0.5em;
 }
 
 .ui-resizable-helper { border: 1px dotted gray; }
@@ -60,7 +74,7 @@
 .silk-icon-undo,
 .silk-icon-redo,
 .silk-icon-save,
-.silk-icon-saveall{
+.silk-icon-find{
     display: block;
     text-indent: -99999px;
     overflow: hidden;
@@ -78,7 +92,7 @@
 .silk-icon-save {
     background-image: url("/images/silk_icons/disk.png") !important;
 }
-.silk-icon-saveall {
-    background-image: url("/images/silk_icons/disk_multiple.png") !important;
+.silk-icon-find {
+    background-image: url("/images/silk_icons/find.png") !important;
 }
 
