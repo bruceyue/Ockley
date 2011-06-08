@@ -34,6 +34,13 @@ function isAuthenticated(req){
     return (req.session && req.session.sfdcSession);
 }
 
+function encode(text){
+    text = text.replace(/&/g, '\&amp;');
+    text = text.replace(/</g, '&lt;');
+    text = text.replace(/>/g, '&gt;');
+    return text;
+}
+
 //ROUTES
 
 app.get('/', function(req, res) {
@@ -190,7 +197,10 @@ app.post('/apex/:id.:format?', function(req, res){
         return;
     }
 
-    sfdc.compile(req.session.sfdcApexServerUrl, req.session.sfdcSession, req.body.content, {
+    var content = encode(req.body.content);
+
+
+    sfdc.compile(req.session.sfdcApexServerUrl, req.session.sfdcSession, content, {
 
             onSuccess: function(results){
                 console.log('parse success - results: ');
@@ -279,11 +289,7 @@ app.post('/vf/:id.:format?', function(req, res){
         return;
     }
 
-    var markup = req.body.content;
-
-    markup = markup.replace(/&/g, '\&amp;');
-    markup = markup.replace(/</g, '&lt;');
-    markup = markup.replace(/>/g, '&gt;');
+    var markup = encode(req.body.content);
 
     sfdc.update(req.session.sfdcServerUrl, req.session.sfdcSession, 'ApexPage',  req.params.id, [], { Markup:  markup }, {
         onSuccess: function(results){
