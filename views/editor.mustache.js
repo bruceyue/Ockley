@@ -20,7 +20,9 @@ module.exports = {
             "js/libs/codemirror/mode/javascript/javascript.js",
             "js/apex.js",
             "js/editortabs.js",
-            "js/docaccordion.js"];
+            "js/docaccordion.js",
+            "js/messagedialog.js",
+            "js/finddialog.js"];
   }
 };
 

@@ -3,7 +3,6 @@
  Copyright 2011,  Matthew Page
  licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 
-EditorTabs class
 Manages a jQuery UI tabs set.
 Creates CodeMirror Editor tabs.
  */
@@ -88,6 +87,9 @@ function EditorTabs(elemId) {
     };
 
     this.getEditor = function(tabId){
+        if (tabId == null){
+            tabId = this.getSelected();
+        }
         return getTab(tabId).data('editor');
     };
 

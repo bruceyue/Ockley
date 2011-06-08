@@ -6,9 +6,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 <div>
     <span id="toolbar" class="ui-widget-header ui-corner-all" >
         <button id="save">Save</button>
-        <button id="saveAll">Save All</button>
         <button id="undo">Undo</button>
         <button id="redo">Redo</button>
+        <button id="find">Find</button>
     </span>
 </div>
 <div id="sidebar" class="ui-widget ui-widget-content ui-corner-all">
@@ -32,37 +32,32 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 	</div>
 </div>
 
-<div id='messageDialog' style='display:none'>
+<div id='messageDialog' class='display:none'>
     <p></p>
+</div>
+
+<div id="findDialog" class='display:none'>
+    <ul>
+        <li><span>Find:&nbsp;</span><input id='findText' type='text' /></li>
+        <li><input id='caseSensitive' type='checkbox'>Case Sensitive</input></li>
+        <li><input id='regex' type='checkbox'>Regex</input></li>
+    </ul>
 </div>
 
 <script>
 
-    function getDocList(url, type, callback){
-        if (url && type){
-            $.getJSON(url, function(data) {
-                var docs = [];
-                $.each(data, function(index, doc){
-                   if (doc['sf:type'].text == type){
-                       docs.push({ id: doc['sf:id'].text, name: doc['sf:name'].text });
-                   }
-                });
-                if ($.isFunction(callback)){
-                    callback.call(this, docs);
-                }
-            });
-        }
-    }
-
     jQuery(function(){
-        log('editor page loaded...');
 
         var $t = $("#tabs");
+
+        //maximize the tab height
+        var wh = $(window).height();
+        var fudge = wh * 0.1;
+        $t.height(wh - $t.offset().top - fudge);
+
         var tabs = new EditorTabs( $t );
         tabs.createNew();
-
-        var $s =  $("#sidebar");
-        //var $tbar = $("#toolbar");
+        tabs.refresh(true);
 
         $t.resizable({
             helper: "ui-resizable-helper",
@@ -71,62 +66,20 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             }
         });
 
-        $s.height($t.outerHeight());
+        $("#sidebar").height($t.outerHeight());
 
-        var messageDialog = $('#messageDialog').dialog({
-                                    autoOpen: false,
-                                    resizable: false,
-                                    closeText: ''
-                                  });
+        var messageDialog = new MessageDialog('#messageDialog');
 
-        //remove title bar from showDialog
-        messageDialog.prev(".ui-dialog-titlebar").hide();
+        var findDialog = new FindDialog({
+            dialogElemSelector: '#findDialog',
+            findTextSelector: '#findText',
+            foundTextClassName: 'foundText',
+            caseSensitiveSelector: '#caseSensitive',
+            getEditor: function(){ return tabs.getEditor(); }
+        });
 
         var accordion = new DocAccordion("#accordion", {
-            documentClicked: function(headerTitle, link){
-
-                var docId = link.attr('id');
-
-                //if it's already open, just activate the tab
-                var existing = tabs.findByData('docId', docId);
-                if (existing.size() > 0){
-                    tabs.setSelected(existing[0]);
-                    return;
-                }
-
-                var url = null;
-                var contentKey = null;
-                var editMode = 'apex';
-
-                if (headerTitle === "Apex"){
-                    url = '/apex/'+ docId+'.json';
-                    contentKey = 'sf:body';
-                }
-                else if (headerTitle === "Visualforce"){
-                    url = '/vf/'+ docId+'.json';
-                    contentKey = 'sf:markup';
-                    editMode = 'text/html';
-                }
-
-                if (url && contentKey){
-                    //fetch the document and open it in a new tab
-                    $.getJSON(url, function(data) {
-                        //log(JSON.stringify(data));
-                        if (data.length > 0){
-                            var content = data[0][contentKey].text;
-                            if (content){
-                                tabs.createNew({
-                                    title: link.text(),
-                                    text: content,
-                                    data: { 'docId': docId, 'headerTitle': headerTitle },
-                                    'mode': editMode
-                                });
-                            }
-                        }
-
-                    });
-                }
-            }
+            documentClicked: onDocumentClicked
         });
 
         getDocList('/apex.json', 'ApexClass', function(docs){
@@ -143,8 +96,62 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 			icons: {
 				primary: "silk-icon-save"
 			}
-		}).click(function(){
+		}).click(onDocumentSave);
 
+        $( "#undo" ).button({
+			text: false,
+			icons: {
+				primary: "silk-icon-undo"
+			}
+		}).click(function(){
+            var editor = tabs.getEditor();
+            if (editor != null){
+                editor.undo();
+            }
+        });
+
+		$( "#redo" ).button({
+			text: false,
+			icons: {
+				primary: "silk-icon-redo"
+			}
+		}).click(function(){
+            var editor = tabs.getEditor();
+            if (editor != null){
+                editor.redo();
+            }
+        });
+
+        $( "#find" ).button({
+			text: false,
+			icons: {
+				primary: "silk-icon-find"
+			}
+		}).click(function(){
+            var editor = tabs.getEditor();
+            if (editor != null){
+                var selection = $.trim(editor.getSelection());
+                findDialog.show(selection);
+            }
+        });
+
+        function getDocList(url, type, callback){
+            if (url && type){
+                $.getJSON(url, function(data) {
+                    var docs = [];
+                    $.each(data, function(index, doc){
+                       if (doc['sf:type'].text == type){
+                           docs.push({ id: doc['sf:id'].text, name: doc['sf:name'].text });
+                       }
+                    });
+                    if ($.isFunction(callback)){
+                        callback.call(this, docs);
+                    }
+                });
+            }
+        }
+
+        function onDocumentSave(){
             var tabId = tabs.getSelected();
             var docId = tabs.getData(tabId, 'docId');
             var headerTitle = tabs.getData(tabId, 'headerTitle');
@@ -162,10 +169,8 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             }
 
             if (url != null){
-                messageDialog.find('p').text(action);
-                messageDialog.dialog('open');
-                messageDialog.dialog( "option", "buttons", {} );
-                
+                messageDialog.show(action);
+
                 $.post(url, { 'content': content }, function(data) {
                     log('Compile/Save result: ');
                     log(data);
@@ -175,7 +180,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                         if (data.success){
                             if (data.success.text === 'true'){
                                 //success
-                                messageDialog.dialog('close');
+                                messageDialog.hide();
                                 return;
                             }
                             else if (data.success.text === 'false'){
@@ -195,42 +200,55 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                             }
                         }
                     }
-                    messageDialog.find('p').text(msg);
-                    messageDialog.dialog( "option", "buttons", { "Ok": function() { $(this).dialog("close"); } } );
+                    messageDialog.setMessage(msg).showOk(true);
                 });
             }
+        }
 
-        });
-        $( "#saveAll" ).button({
-			text: false,
-			icons: {
-				primary: "silk-icon-saveall"
-			}
-		});
-        $( "#undo" ).button({
-			text: false,
-			icons: {
-				primary: "silk-icon-undo"
-			}
-		}).click(function(){
-            var tabId = tabs.getSelected();
-            var editor = tabs.getEditor(tabId);
-            if (editor != null){
-                editor.undo();
-            }
-        });
+        function onDocumentClicked(headerTitle, link){
+            var docId = link.attr('id');
 
-		$( "#redo" ).button({
-			text: false,
-			icons: {
-				primary: "silk-icon-redo"
-			}
-		}).click(function(){
-            var tabId = tabs.getSelected();
-            var editor = tabs.getEditor(tabId);
-            if (editor != null){
-                editor.redo();
+            //if it's already open, just activate the tab
+            var existing = tabs.findByData('docId', docId);
+            if (existing.size() > 0){
+                tabs.setSelected(existing[0]);
+                return;
             }
-        });
+
+            var url = null;
+            var contentKey = null;
+            var editMode = 'apex';
+
+            if (headerTitle === "Apex"){
+                url = '/apex/'+ docId+'.json';
+                contentKey = 'sf:body';
+            }
+            else if (headerTitle === "Visualforce"){
+                url = '/vf/'+ docId+'.json';
+                contentKey = 'sf:markup';
+                editMode = 'text/html';
+            }
+
+            if (url && contentKey){
+                //fetch the document and open it in a new tab
+                $.getJSON(url, function(data) {
+                    //log(JSON.stringify(data));
+                    if (data.length > 0){
+                        var content = data[0][contentKey].text;
+                        if (content){
+                            tabs.createNew({
+                                title: link.text(),
+                                text: content,
+                                data: { 'docId': docId, 'headerTitle': headerTitle },
+                                'mode': editMode
+                            });
+                        }
+                    }
+
+                });
+            }
+        }
+
+
     });
 </script>        
