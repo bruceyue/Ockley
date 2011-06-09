@@ -50,6 +50,9 @@
 .foundText{
     background-color: yellow;
 }
+.currentLine{
+    background-color: #dcdcdc !important;
+}
 
 #apexContent, #vfContent{
     padding-left: 0.5em;

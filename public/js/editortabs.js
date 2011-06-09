@@ -130,9 +130,17 @@ function EditorTabs(elemId) {
             indentWithTabs: false,
             tabMode: "shift",
             enterMode: "keep",
-            electricChars: false
+            electricChars: false,
+            onCursorActivity: function() {
+                if (editor.currentLine != null){
+                    editor.setLineClass(editor.currentLine, null);
+                }
 
+                editor.currentLine = editor.setLineClass(editor.getCursor().line, "currentLine");
+            }
         });
+        editor.currentLine = editor.setLineClass(0, "currentLine");
+
         tabPanel.find('.CodeMirror').addClass('ui-corner-all');
 
         if (settings.text != null){
