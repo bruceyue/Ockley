@@ -125,7 +125,13 @@ function EditorTabs(elemId) {
             lineNumbers: true,
             value: txt.value,
             height: "auto",
-            mode: settings.mode
+            mode: settings.mode,
+            indentUnit: 2,
+            indentWithTabs: false,
+            tabMode: "shift",
+            enterMode: "keep",
+            electricChars: false
+
         });
         tabPanel.find('.CodeMirror').addClass('ui-corner-all');
 
