@@ -28,33 +28,61 @@ function FindDialog( options){
     };
 
     var _dlg = $(settings.dialogElemSelector).dialog(dialogOptions);
-    var _findText = _dlg.find(settings.findTextSelector);
-    var _findCursor = null;
+
+    function getQueryText(){
+        return _dlg.find(settings.findTextSelector).val();
+    }
+    function setQueryText(text){
+        _dlg.find(settings.findTextSelector).val(text);
+    }
+
+    function isCaseSensitive(){
+        return _dlg.find(settings.caseSensitiveSelector).is(':checked');
+    }
 
     function getEditor(){
+        var editor = null;
         if (settings.getEditor != null && $.isFunction(settings.getEditor)){
-            return settings.getEditor.apply(this, []);
+            editor = settings.getEditor.apply(this, []);
+
+            if (!editor.hasOwnProperty('ockley')){
+                editor.ockley = {}
+            }
+
+            if (!editor.ockley.hasOwnProperty('findState')){
+                editor.ockley.findState = {
+                        cursor: null,
+                        query: '',
+                        isCaseSensitive: false
+                    };
+            }
         }
-        return null;
+        return editor;
     }
 
     function find(findPrevious){
         var editor = getEditor();
         if (editor != null){
-            var query = _findText.val();
-            if (_findCursor == null){
-                _findCursor = editor.getSearchCursor(query)
+            var query = getQueryText();
+            var caseSensitive = isCaseSensitive();
+            var findState = editor.ockley.findState;
+            if (findState.cursor == null ||
+                findState.query != query ||
+                findState.isCaseSensitive != caseSensitive){
+                findState.query = query;
+                findState.isCaseSensitive = caseSensitive;
+                findState.cursor = editor.getSearchCursor(query, null, !caseSensitive);
             }
             var ret = false;
             if (findPrevious){
-                ret = _findCursor.findPrevious();
+                ret = findState.cursor.findPrevious();
             }
             else{
-                ret = _findCursor.findNext();
+                ret = findState.cursor.findNext();
             }
             if (ret){
-                editor.markText(_findCursor.from(), _findCursor.to(), settings.foundTextClassName);
-                editor.setCursor(_findCursor.from());
+                editor.markText(findState.cursor.from(), findState.cursor.to(), settings.foundTextClassName);
+                editor.setCursor(findState.cursor.from());
             }
         }
     }
@@ -78,7 +106,7 @@ function FindDialog( options){
     }
 
     this.show = function(text){
-        _findText.val(text);
+        setQueryText(text);
         _dlg.dialog('open');
         return this;
     };
