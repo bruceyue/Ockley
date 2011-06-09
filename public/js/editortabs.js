@@ -132,15 +132,28 @@ function EditorTabs(elemId) {
             enterMode: "keep",
             electricChars: false,
             onCursorActivity: function() {
-                if (editor.currentLine != null){
-                    editor.setLineClass(editor.currentLine, null);
+                //highlight the line that the cursor is on
+                var currentLine = editor.ockley.currentLineNumber;
+                var cursorLine = editor.getCursor().line;
+                if (currentLine != cursorLine){
+                    editor.setLineClass(currentLine, null);
+                    editor.ockley.currentLineNumber = cursorLine;
+                    editor.setLineClass(cursorLine, "currentLine");
                 }
 
-                editor.currentLine = editor.setLineClass(editor.getCursor().line, "currentLine");
             }
         });
-        editor.currentLine = editor.setLineClass(0, "currentLine");
 
+        //initialize line highlighting
+        if (!editor.hasOwnProperty('ockley')){
+            editor.ockley = {}
+        }
+        if (!editor.ockley.hasOwnProperty('currentLineNumber')){
+            editor.ockley.currentLineNumber = 0;
+        }
+        editor.setLineClass(0, "currentLine");
+
+        //fancy corners
         tabPanel.find('.CodeMirror').addClass('ui-corner-all');
 
         if (settings.text != null){
