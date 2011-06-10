@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<project name="Ockley Build" default="build" basedir="../"> <!-- one back since we're in build/ -->
+    <!-- Load in Ant-Contrib to give us access to some very useful tasks! -->
+    <!-- the .jar file is located in the tools directory -->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="${basedir}/build/tools/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
+
+    <!-- load shell environment -->
+    <property environment="ENV" />
+
+    <!-- tools dir -->
+    <property name="buildtools" location="build/tools"/>
+
+    <!-- js dir -->
+    <property name="jsfiles" location="public/js" />
+
+    <property name="buildnumber" value="1"/>
+
+    <target name="build">
+       <echo message="Minifying JS files..."/>
+
+       <apply executable="java" parallel="false">
+           <fileset dir="${jsfiles}" includes="*.js" excludes="*.min.js"/>
+           <arg line="-jar"/>
+           <arg path="${buildtools}/yuicompressor-2.4.2.jar"/>
+           <srcfile/>
+           <arg line="-o"/>
+           <!-- disabled build numbers for now.
+           <mapper type="glob" from="*.js" to="${jsfiles}/*-${buildnumber}.min.js"/>
+           -->
+           <!-- just min files w/o build number -->
+           <mapper type="glob" from="*.js" to="${jsfiles}/*.min.js"/>
+           <targetfile/>
+       </apply>
+    </target>
+    
+</project>

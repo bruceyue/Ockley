@@ -5,10 +5,10 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 */
 module.exports = {
   stylesheets: function() {
-    return ["css/login.css", "css/formly.min.css"];
+    return ["css/login.css", "libs/formly/formly.min.css"];
   },
   scripts: function(){
-    return ["js/libs/formly.min.js"];
+    return ["libs/formly/formly.min.js"];
   }
 };
 
