@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+<!--
+    This build file is a stripped down version of the one that HTML5Boilerplate provides.
+    Anything brilliant herein should be attributed to those fine folks.
+    Anything boneheaded is likely mine.
+ -->
 <project name="Ockley Build" default="build" basedir="../"> <!-- one back since we're in build/ -->
     <!-- Load in Ant-Contrib to give us access to some very useful tasks! -->
     <!-- the .jar file is located in the tools directory -->
@@ -17,6 +22,8 @@
     <!-- js dir -->
     <property name="jsfiles" location="public/js" />
 
+    <property name="viewfiles" location="views" />
+
     <property name="buildnumber" value="1"/>
 
     <target name="build">
@@ -28,13 +35,16 @@
            <arg path="${buildtools}/yuicompressor-2.4.2.jar"/>
            <srcfile/>
            <arg line="-o"/>
-           <!-- disabled build numbers for now.
            <mapper type="glob" from="*.js" to="${jsfiles}/*-${buildnumber}.min.js"/>
-           -->
-           <!-- just min files w/o build number -->
-           <mapper type="glob" from="*.js" to="${jsfiles}/*.min.js"/>
            <targetfile/>
        </apply>
+
+        <echo message="Updating views to use minified js files..."/>
+
+        <replaceregexp match='js/(\w+)\.js' replace='js/\1-${buildnumber}.min.js' flags="g">
+            <fileset dir="${viewfiles}" includes="*.mustache.js"/>
+        </replaceregexp>
+
     </target>
     
 </project>

@@ -12,14 +12,17 @@ Setup
 
 The instructions here will get you started: http://dailyjs.com/2010/11/08/node-tutorial-2/
 
-* Node.js - http://nodejs.org/
-* npm - https://github.com/isaacs/npm
-* A bunch of modules.
-    Install via npm:
-        cd Ockley
-        npm install express mustache mustachio sax
-* run Ockley (node app.js)
-
+* Install Node.js - http://nodejs.org/
+* Install npm - https://github.com/isaacs/npm
+* Install a bunch of modules.
+    cd Ockley
+    npm install express mustache mustachio sax
+* Run the build script
+    cd Ockley/build
+    ant build
+* Run Ockley
+    cd Ockley
+    node app.js
 
 Special thanks to Mark James for the awesome icons:
 http://www.famfamfam.com/lab/icons/silk/

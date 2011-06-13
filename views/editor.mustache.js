@@ -20,11 +20,11 @@ module.exports = {
             "libs/codemirror/mode/xml/xml.js",
             "libs/codemirror/mode/css/css.js",
             "libs/codemirror/mode/javascript/javascript.js",
-            "js/apex.min.js",
-            "js/editortabs.min.js",
-            "js/docaccordion.min.js",
-            "js/messagedialog.min.js",
-            "js/finddialog.min.js"];
+            "js/apex.js",
+            "js/editortabs.js",
+            "js/docaccordion.js",
+            "js/messagedialog.js",
+            "js/finddialog.js"];
   }
 };
 
