@@ -109,7 +109,7 @@ app.post('/oauth', function(req, res) {
     res.redirect( url );
 });
 
-app.post('/token', function(req, res){
+app.get('*/token', function(req, res){
     OAuth.getRequestToken( req.url, {
         onSuccess: function(response){
             console.log('oauth response: ' + response);
