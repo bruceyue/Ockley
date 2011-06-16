@@ -336,6 +336,8 @@ app.post('/vf/:id.:format?', function(req, res){
 });
 
 app.get('*', function(req, res) {
+    console.log('Got unknown request');
+    console.log(req);
     res.send("Nope", 404);
 });
 
