@@ -9,21 +9,6 @@ module.exports = function(settings){
     var http = require('http');
     var https = require('https');
 
-    /*
-    var settings = {
-        publicKey : '',
-        privateKey : '',
-        callbackURI : ''
-    };
-
-    //merge options onto settings
-    if (options != null) {
-        for (var key in options) {
-          settings[key] = options[key];
-        }
-    }
-    */
-
     this.getOAuthURL = function(){
         return 'https://login.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.publicKey + '&redirect_uri=' + settings.callbackURI;
     };

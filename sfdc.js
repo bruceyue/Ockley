@@ -400,9 +400,64 @@ function login(name, password, options){
     req.end();
 }
 
+/*
+The 'id' URI that accompanies the access token and instance URL is the gateway to Force.com's Identity Service. You can send a GET request to the id URI, accompanied by an OAuth authorization HTTP header containing the access token, and receive a wealth of information regarding the user and org:
+*/
+function getIdentityInfo(identityServerUrl, accessToken){
+    var url = parseUrl(identityServerUrl);
+
+    var headers = {
+        'Host': url.host,
+        'Authorization': 'OAuth ' + accessToken
+    };
+
+    var path = "/" + url.path;
+    var reqOpts = {
+        host: url.host,
+        port: 443,
+        path: path,
+        method: 'GET',
+        headers: headers
+    };
+
+    var req = https.request(reqOpts, function(res) {
+          var data = '';
+          res.setEncoding('utf8');
+          res.on('data', function(chunk) {
+              data += chunk;
+          });
+          res.on('end', function(){
+              console.log('got response status code:' + res.statusCode);
+              console.log('data: ' + data);
+              if (res.statusCode == '200'){
+              }
+              else{
+                  /*
+                  if (options.onError){
+                    options.onError.apply(this, [data]);
+                  }
+                  */
+              }
+          });
+
+    });
+    req.on('error', function(error){
+        console.log(error);
+        /*
+        if (options.onError){
+            options.onError.apply(this, [error]);
+        }
+        */
+    });
+
+    //req.write(soap);
+    req.end();
+}
+
 module.exports = {
     "query": query,
     "login": login,
     "compile": compile,
-    "update": update
+    "update": update,
+    "getIdentityInfo":getIdentityInfo
 };

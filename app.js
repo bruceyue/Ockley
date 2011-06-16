@@ -10,7 +10,7 @@ var sfdc = require('./sfdc.js');
 var OAuth = require('./oauth')({
     publicKey : process.env.OAuthPublicKey || '',
     privateKey : process.env.OAuthPrivateKey || '',
-    callbackURI: process.env.OAuthCallbackUri || 'https://warm-sky-881.herokuapp.com/token'
+    callbackURI: process.env.OAuthCallbackUri || 'https://ockley.herokuapp.com/token'
 });
 
 
@@ -109,7 +109,6 @@ app.post('/oauth', function(req, res) {
     res.redirect( url );
 });
 
-
 app.get('/token', function(req, res){
     console.log('getting request token...');
     OAuth.getRequestToken( req.url, {
@@ -117,11 +116,28 @@ app.get('/token', function(req, res){
             console.log('oauth response: ' + JSON.stringify(response));
             req.session.refresh_token = response.refresh_token;
             req.session.sfdcSession = response.access_token;
-            res.redirect('/editor');
+            console.log('requesting identity info');
+            sfdc.getIdentityInfo(response.id, response.access_token, {
+                onSuccess: function(identityInfo){
+                    console.log('got identity info');
+                    console.log(JSON.stringify(identityInfo))
+                    if (identityInfo.hasOwnProperty('urls')){
+                        var metaUrl = identityInfo.urls.metadata;
+                        req.session.sfdcMetadataServerUrl = metaUrl;
+                        req.session.sfdcApexServerUrl = metaUrl.replace('Soap/m', 'Soap/s');
+                        req.session.sfdcServerUrl = identityInfo.urls.enterprise;
+                    }
+                    res.redirect('/editor');
+                },
+                onError: function(identityErr){
+                    console.log('error requesting identity - ' + identityErr);
+                    res.send(identityErr);
+                }
+            });
         },
         onError: function(e){
-            console.log('login error - ' + error);
-            res.send(error);
+            console.log('login error - ' + e);
+            res.send(e);
         }
     });
 });
