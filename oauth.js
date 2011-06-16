@@ -79,4 +79,6 @@ module.exports = function(options){
         req.write(post_data);
         req.end();
     }
+
+    return this;
 };
