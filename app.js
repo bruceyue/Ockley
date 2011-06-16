@@ -10,7 +10,7 @@ var sfdc = require('./sfdc.js');
 var OAuth = require('./oauth')({
     publicKey : process.env.OAuthPublicKey || '',
     privateKey : process.env.OAuthPrivateKey || '',
-    callbackURI: process.env.OAuthCallbackUri || 'https://ockley.herokuapp.com/token'
+    callbackURI: process.env.OAuthCallbackUri || 'https://warm-sky-881.herokuapp.com/token'
 });
 
 
@@ -101,14 +101,14 @@ app.post('/login', function(req, res) {
     });
 
 });
-/*
+
 app.post('/oauth', function(req, res) {
 
     var url = OAuth.getOAuthURL();
     console.log('redirecting to oauth url:' + url);
     res.redirect( url );
 });
-*/
+
 
 app.get('/token', function(req, res){
     console.log('getting request token...');
