@@ -101,13 +101,14 @@ app.post('/login', function(req, res) {
     });
 
 });
-
+/*
 app.post('/oauth', function(req, res) {
 
     var url = OAuth.getOAuthURL();
     console.log('redirecting to oauth url:' + url);
     res.redirect( url );
 });
+*/
 
 app.get('/token', function(req, res){
     console.log('getting request token...');
