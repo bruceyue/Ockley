@@ -336,6 +336,7 @@ app.post('/vf/:id.:format?', function(req, res){
 });
 
 app.get('*', function(req, res) {
+    console.log('404:' + req.url);
     res.send("Nope", 404);
 });
 
