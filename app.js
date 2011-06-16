@@ -109,7 +109,7 @@ app.post('/oauth', function(req, res) {
     res.redirect( url );
 });
 
-app.get('/token', function(req, res){
+app.post('/token', function(req, res){
     OAuth.getRequestToken( req.url, {
         onSuccess: function(response){
             console.log('oauth response: ' + response);
@@ -336,8 +336,6 @@ app.post('/vf/:id.:format?', function(req, res){
 });
 
 app.get('*', function(req, res) {
-    console.log('Got unknown request');
-    console.log(req);
     res.send("Nope", 404);
 });
 
