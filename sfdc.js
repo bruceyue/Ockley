@@ -430,7 +430,11 @@ function getIdentityInfo(identityServerUrl, accessToken, options){
           res.on('end', function(){
               console.log('got response status code:' + res.statusCode);
               console.log('data: ' + data);
-              if (res.statusCode == '200'){
+              if (res.statusCode == '302'){
+                  console.log('got redirect ' +  res.headers.location);
+                  getIdentityInfo(res.headers.location, accessToken, options);
+              }
+              else if (res.statusCode == '200'){
                   if (options.onSuccess){
                       options.onSuccess.apply(this, [data]);
                   }
