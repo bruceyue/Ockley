@@ -3,7 +3,17 @@ Ockley 1.0
 Copyright 2011,  Matthew Page
 licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 -->
-<form id="loginForm" method="post" action="/login">
+
+
+<h2>OAuth</h2>
+<form class="login" method="post" action="/oauth">
+    <input type="submit" value="login" />
+</form>
+
+<p>or</p>
+
+<h2>Basic Auth</h2>
+<form id="loginForm" class="login" method="post" action="/login">
     <div>
         <label for="username">Salesforce User:</label>
         <input type="text" name="user[name]" id="username" require="true" />
@@ -17,8 +27,10 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
     <input type="reset" value="Clear" />
 </form>
 
+
+
 <script>
     jQuery(function(){
-        $("#loginForm").formly();
+        $(".login").formly();
     });
 </script>

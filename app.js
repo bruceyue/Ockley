@@ -7,6 +7,13 @@ var express = require('./node_modules/express');
 var mustachio = require('./node_modules/mustachio');
 var sfdc = require('./sfdc.js');
 
+var OAuth = require('./oauth')({
+    publicKey : process.env.OAuthPublicKey || '',
+    privateKey : process.env.OAuthPrivateKey || '',
+    callbackURI: process.env.OAuthCallbackUri || 'https://ockley.herokuapp.com/token'
+});
+
+
 var app = module.exports = express.createServer();
 
 app.configure(function() {
@@ -94,6 +101,29 @@ app.post('/login', function(req, res) {
     });
 
 });
+
+app.post('/oauth', function(req, res) {
+
+    var url = OAuth.getOAuthURL();
+    console.log('redirecting to oauth url:' + url);
+    res.redirect( url );
+});
+
+app.get('/token', function(req, res){
+    OAuth.getRequestToken( req.url, {
+        onSuccess: function(response){
+            console.log('oauth response: ' + response);
+            req.session.refresh_token = response.refresh_token;
+            req.session.sfdcSession = response.access_token;
+            res.redirect('/editor');
+        },
+        onError: function(e){
+            console.log('login error - ' + error);
+            res.send(error);
+        }
+    });
+});
+
 
 app.del('/logout', function(req, res) {
     console.log('logging out ');
