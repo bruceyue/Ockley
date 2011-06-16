@@ -403,7 +403,7 @@ function login(name, password, options){
 /*
 The 'id' URI that accompanies the access token and instance URL is the gateway to Force.com's Identity Service. You can send a GET request to the id URI, accompanied by an OAuth authorization HTTP header containing the access token, and receive a wealth of information regarding the user and org:
 */
-function getIdentityInfo(identityServerUrl, accessToken){
+function getIdentityInfo(identityServerUrl, accessToken, options){
     var url = parseUrl(identityServerUrl);
 
     var headers = {
@@ -420,6 +420,7 @@ function getIdentityInfo(identityServerUrl, accessToken){
         headers: headers
     };
 
+    console.log('Requesting identity info: ' + JSON.stringify(reqOpts));
     var req = https.request(reqOpts, function(res) {
           var data = '';
           res.setEncoding('utf8');
@@ -430,24 +431,23 @@ function getIdentityInfo(identityServerUrl, accessToken){
               console.log('got response status code:' + res.statusCode);
               console.log('data: ' + data);
               if (res.statusCode == '200'){
+                  if (options.onSuccess){
+                      options.onSuccess.apply(this, [data]);
+                  }
               }
               else{
-                  /*
                   if (options.onError){
                     options.onError.apply(this, [data]);
                   }
-                  */
               }
           });
 
     });
     req.on('error', function(error){
         console.log(error);
-        /*
         if (options.onError){
             options.onError.apply(this, [error]);
         }
-        */
     });
 
     //req.write(soap);

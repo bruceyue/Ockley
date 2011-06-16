@@ -116,7 +116,7 @@ app.get('/token', function(req, res){
             console.log('oauth response: ' + JSON.stringify(response));
             req.session.refresh_token = response.refresh_token;
             req.session.sfdcSession = response.access_token;
-            console.log('requesting identity info');
+
             sfdc.getIdentityInfo(response.id, response.access_token, {
                 onSuccess: function(identityInfo){
                     console.log('got identity info');
@@ -134,6 +134,7 @@ app.get('/token', function(req, res){
                     res.send(identityErr);
                 }
             });
+            
         },
         onError: function(e){
             console.log('login error - ' + e);
