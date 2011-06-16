@@ -109,8 +109,8 @@ app.post('/oauth', function(req, res) {
     res.redirect( url );
 });
 
-function versionedUrl(url, apiVersion){
-    return url.replace('{version}', 21.0);
+function versionedUrl(url){
+    return url.replace('{version}', '21.0');
 }
 
 app.get('/token', function(req, res){
