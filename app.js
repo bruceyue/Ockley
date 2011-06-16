@@ -114,7 +114,7 @@ app.get('/token', function(req, res){
     console.log('getting request token...');
     OAuth.getRequestToken( req.url, {
         onSuccess: function(response){
-            console.log('oauth response: ' + response);
+            console.log('oauth response: ' + JSON.stringify(response));
             req.session.refresh_token = response.refresh_token;
             req.session.sfdcSession = response.access_token;
             res.redirect('/editor');
