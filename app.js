@@ -109,6 +109,10 @@ app.post('/oauth', function(req, res) {
     res.redirect( url );
 });
 
+function versionedUrl(url, apiVersion){
+    return url.replace('{version}', 21.0);
+}
+
 app.get('/token', function(req, res){
     console.log('getting request token...');
     OAuth.getRequestToken( req.url, {
@@ -123,9 +127,9 @@ app.get('/token', function(req, res){
                     console.log(JSON.stringify(identityInfo))
                     if (identityInfo.hasOwnProperty('urls')){
                         var metaUrl = identityInfo.urls.metadata;
-                        req.session.sfdcMetadataServerUrl = metaUrl;
+                        req.session.sfdcMetadataServerUrl = versionedUrl(metaUrl);
                         req.session.sfdcApexServerUrl = metaUrl.replace('Soap/m', 'Soap/s');
-                        req.session.sfdcServerUrl = identityInfo.urls.enterprise;
+                        req.session.sfdcServerUrl = versionedUrl(identityInfo.urls.enterprise);
                     }
                     res.redirect('/editor');
                 },
