@@ -126,10 +126,15 @@ app.get('/token', function(req, res){
                     console.log('got identity info');
                     console.log(JSON.stringify(identityInfo))
                     if (identityInfo.hasOwnProperty('urls')){
-                        var metaUrl = identityInfo.urls.metadata;
-                        req.session.sfdcMetadataServerUrl = versionedUrl(metaUrl);
-                        req.session.sfdcApexServerUrl = metaUrl.replace('Soap/m', 'Soap/s');
-                        req.session.sfdcServerUrl = versionedUrl(identityInfo.urls.enterprise);
+                        var metaUrl = versionedUrl(identityInfo.urls.metadata);
+                        console.log('metaUrl:' + metaUrl);
+                        req.session.sfdcMetadataServerUrl = metaUrl;
+                        var apexUrl = metaUrl.replace('Soap/m', 'Soap/s');
+                        console.log('apexUrl:' + apexUrl);
+                        req.session.sfdcApexServerUrl = apexUrl;
+                        var serverUrl = versionedUrl(identityInfo.urls.enterprise);
+                        console.log('serverUrl:' + serverUrl);
+                        req.session.sfdcServerUrl = serverUrl;
                     }
                     res.redirect('/editor');
                 },

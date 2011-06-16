@@ -139,6 +139,8 @@ function query(serverUrl, sessionId, query, options){
         headers: headers
     };
 
+    console.log('Querying: ' + JSON.stringify(reqOpts));
+
     var req = https.request(reqOpts, function(res) {
           var data = '';
           res.setEncoding('utf8');
@@ -400,9 +402,6 @@ function login(name, password, options){
     req.end();
 }
 
-/*
-The 'id' URI that accompanies the access token and instance URL is the gateway to Force.com's Identity Service. You can send a GET request to the id URI, accompanied by an OAuth authorization HTTP header containing the access token, and receive a wealth of information regarding the user and org:
-*/
 function getIdentityInfo(identityServerUrl, accessToken, options){
     var url = parseUrl(identityServerUrl);
 
