@@ -110,8 +110,13 @@ app.post('/login', function(req, res) {
     });
     */
 
-    //TODO - support sandbox logins
-    var isSandbox = false;
+    if (req.body == null || req.body.server == null){
+        res.send('Missing login server selection');
+        return;
+    }
+
+    var selectedServer = req.body.server.url;
+    var isSandbox = selectedServer === 'test.salesforce.com';
     var url = isSandbox ? sfdc.getOAuthSandboxUrl() : sfdc.getOAuthUrl();
     console.log('Redirecting to login url: ' + url);
     res.redirect(url);

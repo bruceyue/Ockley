@@ -4,9 +4,12 @@ Copyright 2011,  Matthew Page
 licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 -->
 
-
-<form class="loginForm" method="post" action="/login">
-    <p class='note'>This is currently under development!</p>
+<form id="loginForm" method="post" action="/login">
+    <label for="server">Server:</label>
+    <select id="server" name="server[url]">
+        <option value="login.salesforce.com">login.salesforce.com</option>
+        <option value="test.salesforce.com">test.salesforce.com</option>
+    </select>
     <input type="submit" value="login" />
 </form>
 
@@ -29,6 +32,6 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
 <script>
     jQuery(function(){
-        $(".login").formly();
+        $("#loginForm").formly();
     });
 </script>
