@@ -177,6 +177,7 @@ module.exports = function(options){
         soap += "</soapenv:Body>";
         soap += "</soapenv:Envelope>";
 
+        console.log('query: server url: ' +serverUrl);
         var url = utils.parseUrl(serverUrl);
 
         var headers = {
