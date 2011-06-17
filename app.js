@@ -192,8 +192,8 @@ app.get('/apex/:id.:format?', function(req, res){
             
             onSuccess: function(records){
                 console.log('query success');
-                console.log('Query Results: ');
-                console.log(results);
+                //console.log('Query Results: ');
+                //console.log(records);
                 res.send(records);
             },
             onError: function(error){
@@ -218,9 +218,10 @@ app.get('/apex.:format?', function(req, res) {
     }
 
     sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body from ApexClass limit 1000", {
-            onSuccess: function(results){
+
+            onSuccess: function(records){
                 console.log('query success');
-                res.send(results);
+                res.send(records);
             },
             onError: function(error){
                 console.log('query error');
@@ -287,10 +288,10 @@ app.get('/vf/:id.:format?', function(req, res){
       return;
     }
 
-    sfdc.query(getSfdcServerUrl(req.session), req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage where id ='" + req.params.id + "' limit 1", {
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage where id ='" + req.params.id + "' limit 1", {
 
-            onSuccess: function(results){
-                res.send(results);
+            onSuccess: function(records){
+                res.send(records);
             },
             onError: function(error){
                 //TODO - report error
@@ -312,9 +313,9 @@ app.get('/vf.:format?', function(req, res) {
       return;
     }
 
-    sfdc.query(getSfdcServerUrl(req.session), req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage limit 1000", {
-            onSuccess: function(results){
-                res.send(results);
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage limit 1000", {
+            onSuccess: function(records){
+                res.send(records);
             },
             onError: function(error){
                 //TODO - report error
