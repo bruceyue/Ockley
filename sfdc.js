@@ -193,8 +193,7 @@ module.exports = function(options){
                   console.log('data: ' + data);
                   if (res.statusCode == '200'){
                       if (options.onSuccess()){
-                        data = JSON.parse(data);
-                        options.onSuccess.apply(this, [data.records]);
+                        options.onSuccess.apply(this, [data]);
                       }
                   }
                   else{
