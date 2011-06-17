@@ -105,7 +105,7 @@ function parseResults(xmlString, tagNames, options){
     _parser.close();
 }
 
-function query(serverUrl, sessionId, query, options){
+function query(serverUrl, sessionId, isOAuth, query, options){
 
     var soap = "";
     soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">';
@@ -129,6 +129,10 @@ function query(serverUrl, sessionId, query, options){
         'Content-Type': 'text/xml',
         'Content-Length': soap.length
     };
+
+    if (isOAuth){
+        headers['Authorization'] = 'OAuth ' + sessionId;
+    }
 
     var path = "/" + url.path;
     var reqOpts = {
@@ -171,7 +175,7 @@ function query(serverUrl, sessionId, query, options){
     req.end();
 }
 
-function update(serverUrl, sessionId, sObjectTypeName, sObjectId, fieldsToNull, fieldsValues, options){
+function update(serverUrl, sessionId, isOAuth, sObjectTypeName, sObjectId, fieldsToNull, fieldsValues, options){
 
     var soap = "";
     soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com" xmlns:urn1="urn:sobject.partner.soap.sforce.com">';
@@ -214,6 +218,11 @@ function update(serverUrl, sessionId, sObjectTypeName, sObjectId, fieldsToNull, 
         'Content-Length': soap.length
     };
 
+    if (isOAuth){
+        headers['Authorization'] = 'OAuth ' + sessionId;
+    }
+
+
     var path = "/" + url.path;
     var reqOpts = {
         host: url.host,
@@ -253,7 +262,7 @@ function update(serverUrl, sessionId, sObjectTypeName, sObjectId, fieldsToNull, 
     req.end();
 }
 
-function compile(serverUrl, sessionId, code, options){
+function compile(serverUrl, sessionId, isOAuth, code, options){
 
     var soap = "";
     soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:apex="http://soap.sforce.com/2006/08/apex">';
@@ -277,6 +286,10 @@ function compile(serverUrl, sessionId, code, options){
         'Content-Type': 'text/xml',
         'Content-Length': soap.length
     };
+
+    if (isOAuth){
+        headers['Authorization'] = 'OAuth ' + sessionId;
+    }
 
     var path = "/" + url.path;
     var reqOpts = {
@@ -420,7 +433,6 @@ function getIdentityInfo(identityServerUrl, accessToken, options){
         headers: headers
     };
 
-    //console.log('Requesting identity info: ' + JSON.stringify(reqOpts));
     var req = https.request(reqOpts, function(res) {
           var data = '';
           res.setEncoding('utf8');
@@ -428,8 +440,6 @@ function getIdentityInfo(identityServerUrl, accessToken, options){
               data += chunk;
           });
           res.on('end', function(){
-              //console.log('got response status code:' + res.statusCode);
-              //console.log('data: ' + data);
               if (res.statusCode == '302'){
                   console.log('got redirect ' +  res.headers.location);
                   getIdentityInfo(res.headers.location, accessToken, options);
@@ -453,8 +463,6 @@ function getIdentityInfo(identityServerUrl, accessToken, options){
             options.onError.apply(this, [error]);
         }
     });
-
-    //req.write(soap);
     req.end();
 }
 
