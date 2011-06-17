@@ -467,7 +467,8 @@ module.exports = function(options){
         req.end();
     };
 */
-    this.getIdentityInfo = function(identityServerUrl, accessToken, options){
+
+    function fetchIdentityInfo(identityServerUrl, accessToken, options){
 
         var url = utils.parseUrl(identityServerUrl);
 
@@ -494,7 +495,7 @@ module.exports = function(options){
               res.on('end', function(){
                   if (res.statusCode == '302'){
                       console.log('got redirect ' +  res.headers.location);
-                      this.getIdentityInfo(res.headers.location, accessToken, options);
+                      fetchIdentityInfo(res.headers.location, accessToken, options);
                   }
                   else if (res.statusCode == '200'){
                       if (options.onSuccess){
@@ -516,6 +517,10 @@ module.exports = function(options){
             }
         });
         req.end();
+    }
+
+    this.getIdentityInfo = function(identityServerUrl, accessToken, options){
+      fetchIdentityInfo(identityServerUrl, accessToken, options);
     };
 
 
