@@ -161,8 +161,9 @@ module.exports = function(options){
     };
 
 
-    this.query = function(serverUrl, sessionId, query, options){
+    this.query = function(serverUrl, accessToken, query, options){
 
+        /*
         var soap = "";
         soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">';
         soap += "<soapenv:Header>";
@@ -176,23 +177,24 @@ module.exports = function(options){
         soap += "  </urn:query>";
         soap += "</soapenv:Body>";
         soap += "</soapenv:Envelope>";
-
+        */
         console.log('query: server url: ' +serverUrl);
         var url = utils.parseUrl(serverUrl);
 
         var headers = {
             'Host': url.host,
-            'SOAPAction': 'Query',
-            'Content-Type': 'text/xml',
-            'Content-Length': soap.length
+            //'SOAPAction': 'Query',
+            'Authorization': 'OAuth ' + accessToken,
+            //'Content-Type': 'text/xml',
+            //'Content-Length': soap.length
         };
 
-        var path = "/" + url.path;
+        var path = "/" + url.path + '?q=' + encodeURIComponent(query);
         var reqOpts = {
             host: url.host,
             port: 443,
             path: path,
-            method: 'POST',
+            method: 'GET',
             headers: headers
         };
 
@@ -205,10 +207,10 @@ module.exports = function(options){
                   data += chunk;
               });
               res.on('end', function(){
-                  //console.log('got response status code:' + res.statusCode);
-                  //console.log('data: ' + data);
+                  console.log('got response status code:' + res.statusCode);
+                  console.log('data: ' + data);
                   if (res.statusCode == '200'){
-                      parseResults(data, ['records'], options);
+                      //parseResults(data, ['records'], options);
                   }
                   else{
                       if (options.onError){
@@ -224,8 +226,9 @@ module.exports = function(options){
             }
         });
 
-        req.write(soap);
+        //req.write(soap);
         req.end();
+
     };
 
     this.update = function(serverUrl, sessionId, sObjectTypeName, sObjectId, fieldsToNull, fieldsValues, options){

@@ -188,7 +188,7 @@ app.get('/apex/:id.:format?', function(req, res){
       return;
     }
 
-    sfdc.query(getSfdcServerUrl(req.session), req.session.sfdc.access_token, "select Id, Name, Body from ApexClass where id ='" + req.params.id + "' limit 1", {
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body from ApexClass where id ='" + req.params.id + "' limit 1", {
             
             onSuccess: function(results){
                 console.log('query success');
