@@ -110,7 +110,7 @@ module.exports = function(options){
     function getAccessToken(token, callbacks) {
         console.log('Getting Access Token for ' + token);
 
-        var post_data = 'code=' + token + '&grant_type=authorization_code&client_id=' + settings.publicKey + '&redirect_uri=' + escape(settings.callbackURI) + '&client_secret=' + settings.privateKey;
+        var post_data = 'code=' + token + '&grant_type=authorization_code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + escape(settings.oAuthCallbackURI) + '&client_secret=' + settings.oAuthPrivateKey;
         console.log(post_data);
 
         var options = {
