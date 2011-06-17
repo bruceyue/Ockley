@@ -18,8 +18,7 @@ module.exports = function(options){
     utils.extend(settings, options);
 
     settings.oAuthUrl = 'https://login.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + settings.oAuthCallbackURI;
-    settings.oAuthSandboxUrl = settings.oAuthUrl.replace('https://login.', 'https://test.');
-
+    settings.oAuthSandboxUrl = 'https://test.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + settings.oAuthCallbackURI;
 
     function parseResults(xmlString, tagNames, options){
 
