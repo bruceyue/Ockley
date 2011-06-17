@@ -192,7 +192,7 @@ module.exports = function(options){
                   console.log('got response status code:' + res.statusCode);
                   //console.log('data: ' + data);
                   if (res.statusCode == '200'){
-                      if (options.onSuccess()){
+                      if (options.onSuccess){
                         options.onSuccess.apply(this, [data]);
                       }
                   }
@@ -202,13 +202,6 @@ module.exports = function(options){
                       }
                   }
               });
-              res.on('error', function(e){
-                console.log(e);
-                  if (options.onError){
-                    options.onError.apply(this, [e]);
-                }
-              });
-
         });
         req.on('error', function(error){
             if (options.onError){
