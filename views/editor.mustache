@@ -138,14 +138,16 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         function getDocList(url, type, callback){
             if (url && type){
                 $.getJSON(url, function(data) {
-                    var docs = [];
-                    $.each(data, function(index, doc){
-                       if (doc['sf:type'].text == type){
-                           docs.push({ id: doc['sf:id'].text, name: doc['sf:name'].text });
-                       }
-                    });
-                    if ($.isFunction(callback)){
-                        callback.call(this, docs);
+                    if (data && data.records){
+                        var docs = [];
+                        $.each(data.records, function(index, doc){
+                           if (doc.attributes && doc.attributes.type == type){
+                               docs.push({ id: doc.Id, name: doc.Name });
+                           }
+                        });
+                        if ($.isFunction(callback)){
+                            callback.call(this, docs);
+                        }
                     }
                 });
             }
