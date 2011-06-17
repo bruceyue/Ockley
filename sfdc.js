@@ -218,6 +218,12 @@ module.exports = function(options){
                       }
                   }
               });
+              res.on('error', function(e){
+                console.log(e);
+                  if (options.onError){
+                    options.onError.apply(this, [e]);
+                }
+              });
 
         });
         req.on('error', function(error){
