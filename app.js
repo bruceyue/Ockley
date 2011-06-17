@@ -60,12 +60,12 @@ function updateSession(session, state){
 }
 
 function getSfdcServerUrl(session){
-    var serverUrl = req.session.sfdc.enterprise;
+    var serverUrl = session.sfdc.enterprise;
 
     //TODO - support partners
     var isPartner = false;
     if (isPartner){
-        serverUrl = req.session.sfdc.partner;
+        serverUrl = session.sfdc.partner;
     }
     return serverUrl;
 }
