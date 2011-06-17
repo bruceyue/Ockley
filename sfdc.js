@@ -402,6 +402,7 @@ function login(name, password, options){
     req.end();
 }
 
+
 function getIdentityInfo(identityServerUrl, accessToken, options){
     var url = parseUrl(identityServerUrl);
 
@@ -419,7 +420,7 @@ function getIdentityInfo(identityServerUrl, accessToken, options){
         headers: headers
     };
 
-    console.log('Requesting identity info: ' + JSON.stringify(reqOpts));
+    //console.log('Requesting identity info: ' + JSON.stringify(reqOpts));
     var req = https.request(reqOpts, function(res) {
           var data = '';
           res.setEncoding('utf8');
@@ -427,15 +428,15 @@ function getIdentityInfo(identityServerUrl, accessToken, options){
               data += chunk;
           });
           res.on('end', function(){
-              console.log('got response status code:' + res.statusCode);
-              console.log('data: ' + data);
+              //console.log('got response status code:' + res.statusCode);
+              //console.log('data: ' + data);
               if (res.statusCode == '302'){
                   console.log('got redirect ' +  res.headers.location);
                   getIdentityInfo(res.headers.location, accessToken, options);
               }
               else if (res.statusCode == '200'){
                   if (options.onSuccess){
-                      options.onSuccess.apply(this, [data]);
+                      options.onSuccess.apply(this, [JSON.parse(data)]);
                   }
               }
               else{

@@ -109,7 +109,7 @@ app.post('/oauth', function(req, res) {
     res.redirect( url );
 });
 
-function versionedUrl(url){
+function versionUrl(url){
     return url.replace('{version}', '21.0');
 }
 
@@ -124,15 +124,15 @@ app.get('/token', function(req, res){
             sfdc.getIdentityInfo(response.id, response.access_token, {
                 onSuccess: function(identityInfo){
                     console.log('got identity info');
-                    console.log(JSON.stringify(identityInfo))
+                    console.log(JSON.stringify(identityInfo));
                     if (identityInfo.hasOwnProperty('urls')){
-                        var metaUrl = versionedUrl(identityInfo.urls.metadata);
+                        var metaUrl = versionUrl(identityInfo.urls.metadata);
                         console.log('metaUrl:' + metaUrl);
                         req.session.sfdcMetadataServerUrl = metaUrl;
                         var apexUrl = metaUrl.replace('Soap/m', 'Soap/s');
                         console.log('apexUrl:' + apexUrl);
                         req.session.sfdcApexServerUrl = apexUrl;
-                        var serverUrl = versionedUrl(identityInfo.urls.enterprise);
+                        var serverUrl = versionUrl(identityInfo.urls.enterprise);
                         console.log('serverUrl:' + serverUrl);
                         req.session.sfdcServerUrl = serverUrl;
                     }
