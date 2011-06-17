@@ -190,11 +190,11 @@ app.get('/apex/:id.:format?', function(req, res){
 
     sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body from ApexClass where id ='" + req.params.id + "' limit 1", {
             
-            onSuccess: function(records){
+            onSuccess: function(results){
                 console.log('query success');
                 //console.log('Query Results: ');
                 //console.log(records);
-                res.send(records);
+                res.send(results);
             },
             onError: function(error){
                 console.log('query error');
@@ -221,6 +221,9 @@ app.get('/apex.:format?', function(req, res) {
 
             onSuccess: function(results){
                 console.log('query success');
+                console.log('query Results: ');
+                console.log(results);
+
                 res.send(results);
             },
             onError: function(error){
@@ -315,6 +318,10 @@ app.get('/vf.:format?', function(req, res) {
 
     sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage limit 1000", {
             onSuccess: function(results){
+                console.log('query success');
+                console.log('query Results: ');
+                console.log(results);
+
                 res.send(results);
             },
             onError: function(error){

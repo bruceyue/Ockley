@@ -190,7 +190,7 @@ module.exports = function(options){
               });
               res.on('end', function(){
                   console.log('got response status code:' + res.statusCode);
-                  console.log('data: ' + data);
+                  //console.log('data: ' + data);
                   if (res.statusCode == '200'){
                       if (options.onSuccess()){
                         options.onSuccess.apply(this, [data]);
