@@ -184,12 +184,13 @@ module.exports = function(options){
         var headers = {
             'Host': url.host,
             //'SOAPAction': 'Query',
-            'Authorization': 'OAuth ' + accessToken,
+            'Authorization': 'OAuth ' + accessToken
             //'Content-Type': 'text/xml',
             //'Content-Length': soap.length
         };
 
-        var path = "/" + url.path + '/query?q=' + encodeURIComponent(query);
+        //var path = "/" + url.path + '/query?q=' + encodeURIComponent(query);
+        var path = '/services/Soap/c/21.0/query?q='+ escape(query);
         var reqOpts = {
             host: url.host,
             port: 443,
