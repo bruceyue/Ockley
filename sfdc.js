@@ -189,7 +189,7 @@ module.exports = function(options){
             //'Content-Length': soap.length
         };
 
-        var path = "/" + url.path + '?q=' + encodeURIComponent(query);
+        var path = "/" + url.path + '/query?q=' + encodeURIComponent(query);
         var reqOpts = {
             host: url.host,
             port: 443,
