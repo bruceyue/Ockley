@@ -217,7 +217,7 @@ app.get('/apex.:format?', function(req, res) {
       return;
     }
 
-    sfdc.query(getSfdcServerUrl(req.session), req.session.sfdc.access_token, "select Id, Name, Body from ApexClass limit 1000", {
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body from ApexClass limit 1000", {
             onSuccess: function(results){
                 console.log('query success');
                 res.send(results);

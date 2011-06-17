@@ -189,8 +189,8 @@ module.exports = function(options){
             //'Content-Length': soap.length
         };
 
-        //var path = "/" + url.path + '/query?q=' + encodeURIComponent(query);
-        var path = '/services/Soap/c/21.0/query?q='+ escape(query);
+        var path = "/" + url.path + '?q=' + encodeURIComponent(query);
+        //var path = '/services/data/c/21.0/query?q='+ encodeURIComponent(query);
         var reqOpts = {
             host: url.host,
             port: 443,
