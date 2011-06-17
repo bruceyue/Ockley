@@ -8,7 +8,7 @@ module.exports = function(options){
 
     var https = require('https');
     var sax = require('./node_modules/sax');
-    var utils = require('./utils.js');
+    var utils = require('./utils.js')();
 
     var settings = {
         oAuthPublicKey: '',

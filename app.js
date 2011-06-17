@@ -5,7 +5,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 */
 var express = require('./node_modules/express');
 var mustachio = require('./node_modules/mustachio');
-var utils = require('./utils.js');
+var utils = require('./utils.js')();
 var sfdc = require('./sfdc.js')({
     oAuthPublicKey : process.env.OAuthPublicKey || '',
     oAuthPrivateKey : process.env.OAuthPrivateKey || '',
