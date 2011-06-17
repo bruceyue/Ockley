@@ -163,34 +163,15 @@ module.exports = function(options){
 
     this.query = function(serverUrl, accessToken, query, options){
 
-        /*
-        var soap = "";
-        soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">';
-        soap += "<soapenv:Header>";
-        soap += "  <urn:SessionHeader>";
-        soap += "     <urn:sessionId>" + sessionId + "</urn:sessionId>";
-        soap += "  </urn:SessionHeader>";
-        soap += "</soapenv:Header>";
-        soap += "<soapenv:Body>";
-        soap += "  <urn:query>";
-        soap += "     <urn:queryString>" + query + "</urn:queryString>";
-        soap += "  </urn:query>";
-        soap += "</soapenv:Body>";
-        soap += "</soapenv:Envelope>";
-        */
         console.log('query: server url: ' +serverUrl);
         var url = utils.parseUrl(serverUrl);
 
         var headers = {
             'Host': url.host,
-            //'SOAPAction': 'Query',
             'Authorization': 'OAuth ' + accessToken
-            //'Content-Type': 'text/xml',
-            //'Content-Length': soap.length
         };
 
         var path = "/" + url.path + '?q=' + encodeURIComponent(query);
-        //var path = '/services/data/c/21.0/query?q='+ encodeURIComponent(query);
         var reqOpts = {
             host: url.host,
             port: 443,
@@ -211,7 +192,10 @@ module.exports = function(options){
                   console.log('got response status code:' + res.statusCode);
                   console.log('data: ' + data);
                   if (res.statusCode == '200'){
-                      //parseResults(data, ['records'], options);
+                      if (options.onSuccess()){
+                        data = JSON.parse(data);
+                        options.onSuccess.apply(this, [data.records]);
+                      }
                   }
                   else{
                       if (options.onError){
