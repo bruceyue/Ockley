@@ -244,9 +244,8 @@ app.post('/apex/:id.:format?', function(req, res){
                 console.log(results);
                 res.send(results);
             },
-            onError: function(error, results){
-                console.log('parse error - ' + error + ' got this much: ');
-                console.log(results);
+            onError: function(error){
+                console.log('parse error - ' + error);
                 //TODO - report error
                 res.redirect('back');
             }

@@ -302,13 +302,12 @@ module.exports = function(options){
             headers: headers
         };
 
-        //console.log('Making request: ' + JSON.stringify(reqOpts));
+        console.log('Making request: ' + JSON.stringify(reqOpts));
 
         var req = https.request(reqOpts, function(res) {
               var data = '';
               res.setEncoding('utf8');
               res.on('data', function(chunk) {
-                  //console.log('got response status code:' + sfdcResponse.statusCode);
                   if (chunk){
                     data += chunk;
                   }
