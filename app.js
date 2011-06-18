@@ -327,7 +327,7 @@ app.post('/vf/:id.:format?', function(req, res){
         return;
     }
 
-    var markup = utils.escape(req.body.content);
+    var markup = req.body.content;//utils.escape(req.body.content);
 
     sfdc.update(req.session.sfdc.urls.sobjects, req.session.sfdc.access_token, 'ApexPage',  req.params.id, { Markup:  markup }, {
         onSuccess: function(){
