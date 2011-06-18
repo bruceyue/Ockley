@@ -215,13 +215,13 @@ module.exports = function(options){
 
         var url = utils.parseUrl(requestUrl);
 
-        var data = JSON.stringify(record);
+        var content = JSON.stringify(record);
 
         var headers = {
             'Host': url.host,
             'Authorization': 'OAuth ' + accessToken,
             'Content-Type': 'application/json',
-            'Content-Length': data.length
+            'Content-Length': content.length
         };
 
         var path = "/" + url.path + sObjectTypeName + '/' + sObjectId;
@@ -234,7 +234,8 @@ module.exports = function(options){
         };
 
         console.log('updating: ' + JSON.stringify(reqOpts));
-
+        console.log('with content: ' + content);
+        
         var req = https.request(reqOpts, function(res) {
               var data = '';
               res.setEncoding('utf8');
@@ -264,7 +265,7 @@ module.exports = function(options){
             }
         });
 
-        req.write(data);
+        req.write(content);
         req.end();
     };
 
