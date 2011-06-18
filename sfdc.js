@@ -224,7 +224,7 @@ module.exports = function(options){
             'Content-Length': data.length
         };
 
-        var path = "/" + url.path + '/' + sObjectTypeName + '/' + sObjectId;
+        var path = "/" + url.path + sObjectTypeName + '/' + sObjectId;
         var reqOpts = {
             host: url.host,
             port: 443,
