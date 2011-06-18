@@ -182,7 +182,10 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                     }
                     else{
                         var msg = 'Failed to receive result from request';
-                        var err = JSON.parse(data);
+                        var err = data;
+                        if (typeof data == 'string'){
+                            err = JSON.parse(data);
+                        }
                         if (err && err.length > 0){
                             err = err[0];
                             if (err.message){
