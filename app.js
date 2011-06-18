@@ -88,28 +88,6 @@ app.get('/login', function(req, res) {
 
 app.post('/login', function(req, res) {
 
-    /* no longer support basic auth
-    if (req.body == null || req.body.user == null){
-        res.send('Missing login user name and password');
-        return;
-    }
-
-    var user = req.body.user;
-    sfdc.login(user.name, user.pass, {
-        onSuccess : function(results){
-            if (results && results.length){
-                
-                updateSession(req.session, results[0]);
-            }
-            res.redirect('/editor');
-        },
-        onError : function(error){
-            console.log('login error - ' + error);
-            res.send(error);
-        }
-    });
-    */
-
     if (req.body == null || req.body.server == null){
         res.send('Missing login server selection');
         return;
@@ -120,7 +98,6 @@ app.post('/login', function(req, res) {
     var url = isSandbox ? sfdc.getOAuthSandboxUrl() : sfdc.getOAuthUrl();
     console.log('Redirecting to login url: ' + url);
     res.redirect(url);
-
 });
 
 app.get('/token', function(req, res){
@@ -221,9 +198,8 @@ app.get('/apex.:format?', function(req, res) {
 
             onSuccess: function(results){
                 console.log('query success');
-                console.log('query Results: ');
-                console.log(results);
-
+                //console.log('query Results: ');
+                //console.log(results);
                 res.send(results);
             },
             onError: function(error){
@@ -319,9 +295,6 @@ app.get('/vf.:format?', function(req, res) {
     sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage limit 1000", {
             onSuccess: function(results){
                 console.log('query success');
-                console.log('query Results: ');
-                console.log(results);
-
                 res.send(results);
             },
             onError: function(error){
@@ -356,11 +329,10 @@ app.post('/vf/:id.:format?', function(req, res){
 
     var markup = utils.escape(req.body.content);
 
-    sfdc.update(getSfdcServerUrl(req.session), req.session.sfdc.access_token, 'ApexPage',  req.params.id, [], { Markup:  markup }, {
-        onSuccess: function(results){
+    sfdc.update(req.session.sfdc.urls.sobjects, req.session.sfdc.access_token, 'ApexPage',  req.params.id, { Markup:  markup }, {
+        onSuccess: function(){
             console.log('update success - results: ');
-            console.log(results);
-            res.send(results);
+            res.send('Success', 200);
         },
         onError: function(error, results){
             console.log('update error - ' + error + ' got this much: ');

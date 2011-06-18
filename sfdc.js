@@ -160,11 +160,10 @@ module.exports = function(options){
         getAccessToken(requestToken, callbacks);
     };
 
+    this.query = function(requestUrl, accessToken, query, options){
 
-    this.query = function(serverUrl, accessToken, query, options){
-
-        console.log('query: server url: ' +serverUrl);
-        var url = utils.parseUrl(serverUrl);
+        console.log('query: server url: ' +requestUrl);
+        var url = utils.parseUrl(requestUrl);
 
         var headers = {
             'Host': url.host,
@@ -209,62 +208,32 @@ module.exports = function(options){
             }
         });
 
-        //req.write(soap);
         req.end();
-
     };
 
-    this.update = function(serverUrl, sessionId, sObjectTypeName, sObjectId, fieldsToNull, fieldsValues, options){
+    this.update = function(requestUrl, accessToken, sObjectTypeName, sObjectId, record, options){
 
-        var soap = "";
-        soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com" xmlns:urn1="urn:sobject.partner.soap.sforce.com">';
-        soap += "<soapenv:Header>";
-        soap += "  <urn:SessionHeader>";
-        soap += "     <urn:sessionId>" + sessionId + "</urn:sessionId>";
-        soap += "  </urn:SessionHeader>";
-        soap += "</soapenv:Header>";
-        soap += "<soapenv:Body>";
-        soap += "  <urn:update>";
-        soap += "     <urn:sObjects>";
-        soap += "     <urn1:type>" + sObjectTypeName + "</urn1:type>";
+        var url = utils.parseUrl(requestUrl);
 
-        var len = fieldsToNull.length;
-        for(var i = 0; i < len; ++i){
-            soap += "<urn1:fieldsToNull>" + fieldsToNull[i] + "</urn1:fieldsToNull>";
-        }
-
-        soap += "    <urn1:Id>" + sObjectId + "</urn1:Id>";
-
-        for (var field in fieldsValues){
-            if (fieldsValues.hasOwnProperty(field)){
-               soap += "<urn1:" + field + ">" + fieldsValues[field] + "</urn1:" + field + ">";
-            }
-        }
-
-        soap += "    </urn:sObjects>";
-        soap += " </urn:update>";
-        soap += "</soapenv:Body>";
-        soap += "</soapenv:Envelope>";
-
-        //console.log('soap: ' + soap);
-
-        var url = utils.parseUrl(serverUrl);
+        var data = JSON.stringify(record);
 
         var headers = {
             'Host': url.host,
-            'SOAPAction': 'Update',
-            'Content-Type': 'text/xml',
-            'Content-Length': soap.length
+            'Authorization': 'OAuth ' + accessToken,
+            'Content-Type': 'application/json',
+            'Content-Length': data.length
         };
 
-        var path = "/" + url.path;
+        var path = "/" + url.path + '/' + sObjectTypeName + '/' + sObjectId;
         var reqOpts = {
             host: url.host,
             port: 443,
             path: path,
-            method: 'POST',
+            method: 'PATCH',
             headers: headers
         };
+
+        console.log('updating: ' + JSON.stringify(reqOpts));
 
         var req = https.request(reqOpts, function(res) {
               var data = '';
@@ -276,7 +245,10 @@ module.exports = function(options){
                   console.log('got response status code:' + res.statusCode);
                   console.log('data: ' + data);
                   if (res.statusCode == '200'){
-                      parseResults(data, ['result'], options);
+                      //parseResults(data, ['result'], options);
+                      if (options.onSuccess){
+                          options.onSuccess.apply(this, []);
+                      }
                   }
                   else{
                       if (options.onError){
@@ -292,7 +264,7 @@ module.exports = function(options){
             }
         });
 
-        req.write(soap);
+        req.write(data);
         req.end();
     };
 
