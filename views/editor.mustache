@@ -180,6 +180,31 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                         messageDialog.hide();
                         return;
                     }
+                    else{
+                        var msg = 'Failed to receive result from request';
+                        var err = JSON.parse(data);
+                        if (err && err.length > 0){
+                            err = err[0];
+                            if (err.message){
+                                msg = err.message;
+                            }
+                            /*
+                            if (err.problem){
+                                msg = data.problem.text;
+                            }
+                            if (data.errors && data.errors.message){
+                                msg = data.errors.message.text;
+                            }
+                            if (data.line){
+                                msg += ' line: ' + data.line.text;
+                            }
+                            if (data.column){
+                                msg += ' column: ' + data.column.text;
+                            }
+                            */
+                        }
+                        messageDialog.setMessage(msg).showOk(true);
+                    }
                     /*
                     var msg = 'Failed to receive result from request';
                     if (data && data.length > 0){
@@ -190,23 +215,11 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
                             }
                             else if (data.success.text === 'false'){
-                                //fail
-                                if (data.problem){
-                                    msg = data.problem.text;
-                                }
-                                if (data.errors && data.errors.message){
-                                    msg = data.errors.message.text;
-                                }
-                                if (data.line){
-                                    msg += ' line: ' + data.line.text;
-                                }
-                                if (data.column){
-                                    msg += ' column: ' + data.column.text;
-                                }
+
                             }
                         }
                     }
-                    messageDialog.setMessage(msg).showOk(true);
+
                     */
                 });
             }
