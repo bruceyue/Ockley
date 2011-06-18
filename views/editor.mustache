@@ -188,39 +188,23 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                             if (err.message){
                                 msg = err.message;
                             }
-                            /*
+
                             if (err.problem){
-                                msg = data.problem.text;
+                                msg = err.problem.text;
                             }
-                            if (data.errors && data.errors.message){
-                                msg = data.errors.message.text;
+                            if (err.errors && err.errors.message){
+                                msg = err.errors.message.text;
                             }
-                            if (data.line){
-                                msg += ' line: ' + data.line.text;
+                            if (err.line){
+                                msg += ' line: ' + err.line.text;
                             }
-                            if (data.column){
-                                msg += ' column: ' + data.column.text;
+                            if (err.column){
+                                msg += ' column: ' + err.column.text;
                             }
-                            */
+                            
                         }
                         messageDialog.setMessage(msg).showOk(true);
                     }
-                    /*
-                    var msg = 'Failed to receive result from request';
-                    if (data && data.length > 0){
-                        data = data[0];
-                        if (data.success){
-                            if (data.success.text === 'true'){
-                                //success
-
-                            }
-                            else if (data.success.text === 'false'){
-
-                            }
-                        }
-                    }
-
-                    */
                 });
             }
         }
