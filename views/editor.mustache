@@ -176,6 +176,10 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 $.post(url, { 'content': content }, function(data) {
                     log('Compile/Save result: ');
                     log(data);
+                    if (data == 'Success'){
+                        messageDialog.hide();
+                        return;
+                    }
                     /*
                     var msg = 'Failed to receive result from request';
                     if (data && data.length > 0){
@@ -183,8 +187,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                         if (data.success){
                             if (data.success.text === 'true'){
                                 //success
-                                messageDialog.hide();
-                                return;
+
                             }
                             else if (data.success.text === 'false'){
                                 //fail

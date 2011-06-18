@@ -334,10 +334,9 @@ app.post('/vf/:id.:format?', function(req, res){
             console.log('update success - results: ');
             res.send('Success');
         },
-        onError: function(error, results){
-            console.log('update error - ' + error + ' got this much: ');
-            console.log(results);
-            console.log(error);
+        onError: function(error){
+            console.log('update error - ' + error);
+            res.send(error);
         }
     });
 });
