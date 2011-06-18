@@ -176,6 +176,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 $.post(url, { 'content': content }, function(data) {
                     log('Compile/Save result: ');
                     log(data);
+                    /*
                     var msg = 'Failed to receive result from request';
                     if (data && data.length > 0){
                         data = data[0];
@@ -203,6 +204,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                         }
                     }
                     messageDialog.setMessage(msg).showOk(true);
+                    */
                 });
             }
         }
@@ -236,7 +238,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 $.getJSON(url, function(data) {
                     //log(JSON.stringify(data));
                     if (data && data.records && data.records.length > 0){
-                        var content = data[0][contentKey];
+                        var content = data.records[0][contentKey];
                         if (content){
                             tabs.createNew({
                                 title: link.text(),
