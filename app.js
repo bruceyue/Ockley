@@ -237,7 +237,7 @@ app.post('/apex/:id.:format?', function(req, res){
     var content = utils.escape(req.body.content);
 
 
-    sfdc.compile(req.session.sfdc.apex, req.session.sfdc.access_token, content, {
+    sfdc.compile(req.session.sfdc.urls.apex, req.session.sfdc.access_token, content, {
 
             onSuccess: function(results){
                 console.log('parse success - results: ');
