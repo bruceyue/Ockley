@@ -235,8 +235,8 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 //fetch the document and open it in a new tab
                 $.getJSON(url, function(data) {
                     //log(JSON.stringify(data));
-                    if (data.length > 0){
-                        var content = data[0][contentKey].text;
+                    if (data && data.records && data.records.length > 0){
+                        var content = data[0][contentKey];
                         if (content){
                             tabs.createNew({
                                 title: link.text(),
