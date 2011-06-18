@@ -332,7 +332,7 @@ app.post('/vf/:id.:format?', function(req, res){
     sfdc.update(req.session.sfdc.urls.sobjects, req.session.sfdc.access_token, 'ApexPage',  req.params.id, { Markup:  markup }, {
         onSuccess: function(){
             console.log('update success - results: ');
-            res.send('Success', 200);
+            res.send('Success');
         },
         onError: function(error, results){
             console.log('update error - ' + error + ' got this much: ');

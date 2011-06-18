@@ -245,8 +245,7 @@ module.exports = function(options){
               res.on('end', function(){
                   console.log('got response status code:' + res.statusCode);
                   console.log('data: ' + data);
-                  if (res.statusCode == '200'){
-                      //parseResults(data, ['result'], options);
+                  if (res.statusCode == '200' || res.statusCode == '204'){
                       if (options.onSuccess){
                           options.onSuccess.apply(this, []);
                       }
