@@ -303,7 +303,8 @@ module.exports = function(options){
         };
 
         console.log('Making request: ' + JSON.stringify(reqOpts));
-
+        //console.log('Soap: ' + JSON.stringify(soap));
+        
         var req = https.request(reqOpts, function(res) {
               var data = '';
               res.setEncoding('utf8');
