@@ -3,16 +3,38 @@ Ockley 1.0
 Copyright 2011,  Matthew Page
 licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
+var fs = require('fs');
 var express = require('./node_modules/express');
 var mustachio = require('./node_modules/mustachio');
 var utils = require('./utils.js')();
-var sfdc = require('./sfdc.js')({
-    oAuthPublicKey : process.env.OAuthPublicKey || '',
-    oAuthPrivateKey : process.env.OAuthPrivateKey || '',
-    oAuthCallbackURI: process.env.OAuthCallbackUri || 'https://ockley.herokuapp.com/token'
-});
 
-var app = module.exports = express.createServer();
+var sfdcOptions = {
+    //Note: ockleydev.* are files that contain private and public keys from remote access setup in Salesforce Org
+    //Instructions on setting up remote access: http://wiki.developerforce.com/index.php/Getting_Started_with_the_Force.com_REST_API
+    oAuthPublicKey : process.env.OAuthPublicKey || fs.readFileSync('../ockleydev.public').toString(),
+    oAuthPrivateKey : process.env.OAuthPrivateKey || fs.readFileSync('../ockleydev.private').toString(),
+    oAuthCallbackURI: process.env.OAuthCallbackUri || 'https://localhost:3000/token'
+};
+console.log(sfdcOptions);
+
+var sfdc = require('./sfdc.js')(sfdcOptions);
+console.log(sfdc.getSettings());
+
+var serverOptions = null;
+
+if(typeof(process.env.PORT) == 'undefined') {
+    //you are probably not on Heroku, setup your own SSL
+
+    console.log('using local https server...');
+
+	serverOptions = {
+	    //Use cert generation info here: http://www.silassewell.com/blog/2010/06/03/node-js-https-ssl-server-example/
+  		key: fs.readFileSync('../privatekey.pem').toString(),
+  		cert: fs.readFileSync('../certificate.pem').toString()
+	};
+}
+
+var app = module.exports = express.createServer(serverOptions);
 
 app.configure(function() {
     app.register('.mustache', mustachio);
@@ -58,7 +80,7 @@ function updateSession(session, state){
 
     utils.extend(session.sfdc, state);
 }
-
+/*
 function getSfdcServerUrl(session){
     var serverUrl = session.sfdc.urls.enterprise;
 
@@ -69,7 +91,7 @@ function getSfdcServerUrl(session){
     }
     return serverUrl;
 }
-
+*/
 
 //ROUTES
 

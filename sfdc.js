@@ -20,6 +20,7 @@ module.exports = function(options){
     settings.oAuthUrl = 'https://login.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + settings.oAuthCallbackURI;
     settings.oAuthSandboxUrl = 'https://test.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + settings.oAuthCallbackURI;
 
+
     function parseResults(xmlString, tagNames, options){
 
         var _parser = new sax.parser(false, { lowercasetags: true, trim:true });
@@ -155,6 +156,7 @@ module.exports = function(options){
 
     this.getOAuthRequestToken = function(url, callbacks) {
         var tokenURL = unescape(url);
+        //console.log('tokenUrl=' + tokenURL);
         var requestToken = escape(tokenURL.substring(tokenURL.indexOf("code=") + 5, tokenURL.length));
         console.log('Request Token:::' + requestToken);
         getAccessToken(requestToken, callbacks);
@@ -400,6 +402,9 @@ module.exports = function(options){
       fetchIdentityInfo(identityServerUrl, accessToken, options);
     };
 
+    this.getSettings = function(){
+        return settings;
+    };
 
 
     return this;
