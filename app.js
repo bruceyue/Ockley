@@ -20,6 +20,7 @@ var sfdc = require('./sfdc.js')(sfdcOptions);
 
 var serverOptions = null;
 
+console.log(typeof process.env.PORT);
 if(typeof(process.env.PORT) == 'undefined') {
     //probably not running on Heroku
 
