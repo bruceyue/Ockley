@@ -15,15 +15,13 @@ var sfdcOptions = {
     oAuthPrivateKey : process.env.OAuthPrivateKey || fs.readFileSync('../ockleydev.private').toString(),
     oAuthCallbackURI: process.env.OAuthCallbackUri || 'https://localhost:3000/token'
 };
-console.log(sfdcOptions);
 
 var sfdc = require('./sfdc.js')(sfdcOptions);
-console.log(sfdc.getSettings());
 
 var serverOptions = null;
 
 if(typeof(process.env.PORT) == 'undefined') {
-    //you are probably not on Heroku, setup your own SSL
+    //probably not running on Heroku
 
     console.log('using local https server...');
 
@@ -61,7 +59,9 @@ function isAuthenticated(req){
     return (req.session && req.session.sfdc && req.session.sfdc.access_token);
 }
 
+//merge the passed in object onto the session state
 function updateSession(session, state){
+
     if (!session.hasOwnProperty('sfdc')){
         session.sfdc = {};
     }
@@ -80,22 +80,12 @@ function updateSession(session, state){
 
     utils.extend(session.sfdc, state);
 }
-/*
-function getSfdcServerUrl(session){
-    var serverUrl = session.sfdc.urls.enterprise;
 
-    //TODO - support partners
-    var isPartner = false;
-    if (isPartner){
-        serverUrl = session.sfdc.urls.partner;
-    }
-    return serverUrl;
-}
-*/
-
+///////////////////////////////////////////////////
 //ROUTES
 
 app.get('/', function(req, res) {
+
     res.render("index", {
         title: "Ockley",
         loggedIn: isAuthenticated(req)
@@ -103,6 +93,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/login', function(req, res) {
+
     res.render("login", {
         title: "Login"
     });
@@ -111,13 +102,14 @@ app.get('/login', function(req, res) {
 app.post('/login', function(req, res) {
 
     if (req.body == null || req.body.server == null){
-        res.send('Missing login server selection');
+        res.send('Missing login server selection', 400);
         return;
     }
 
     var selectedServer = req.body.server.url;
     var isSandbox = selectedServer === 'test.salesforce.com';
     var url = isSandbox ? sfdc.getOAuthSandboxUrl() : sfdc.getOAuthUrl();
+
     console.log('Redirecting to login url: ' + url);
     res.redirect(url);
 });
@@ -126,25 +118,26 @@ app.get('/token', function(req, res){
 
     var callbacks = {
         onSuccess: function(response){
-            console.log('oauth response: ' + JSON.stringify(response));
+
             updateSession(req.session, response);
 
             sfdc.getIdentityInfo(response.id, response.access_token, {
                 onSuccess: function(identityInfo){
-                    console.log('got identity info: ' + JSON.stringify(identityInfo));
+
                     updateSession(req.session, identityInfo);
                     res.redirect('/editor');
                 },
                 onError: function(identityErr){
+
                     console.log('error requesting identity - ' + identityErr);
-                    res.send(identityErr);
+                    res.send(identityErr, 500);
                 }
             });
 
         },
         onError: function(e){
             console.log('login error - ' + e);
-            res.send(e);
+            res.send(e, 500);
         }
     };
 
@@ -153,6 +146,7 @@ app.get('/token', function(req, res){
 
 
 app.del('/logout', function(req, res) {
+
     console.log('logging out ');
     if (req.session) {
         req.session.sfdc = null;
@@ -190,15 +184,11 @@ app.get('/apex/:id.:format?', function(req, res){
     sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body from ApexClass where id ='" + req.params.id + "' limit 1", {
             
             onSuccess: function(results){
-                console.log('query success');
-                //console.log('Query Results: ');
-                //console.log(records);
-                res.send(results);
+                res.send(results, 200);
             },
             onError: function(error){
-                console.log('query error');
-                //TODO - report error
-                console.log(error);
+                console.log('query error: ' + error);
+                res.send(error, 500);
             }
     });
 });
@@ -212,64 +202,52 @@ app.get('/apex.:format?', function(req, res) {
     }
 
     if (req.params.format != 'json'){
-      res.send('Format not available', 400);
-      return;
+        res.send('Format not available', 400);
+        return;
     }
 
-    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body from ApexClass limit 1000", {
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name from ApexClass limit 1000", {
 
             onSuccess: function(results){
-                console.log('query success');
-                //console.log('query Results: ');
-                //console.log(results);
-                res.send(results);
+                res.send(results, 200);
             },
             onError: function(error){
-                console.log('query error');
-                //TODO - report error
-                console.log(error);
+                console.log('query error: ' + error);
+                res.send(error, 500);
             }
     });
 });
 
 //save a specific apex page
 app.post('/apex/:id.:format?', function(req, res){
+
     if (!isAuthenticated(req)){
         res.redirect("/login");
         return;
     }
 
     if (req.params.format != 'json'){
-      res.send('Format not available', 400);
-      return;
+        res.send('Format not available', 400);
+        return;
     }
 
-    console.log('Saving doc ' + req.params.id );
-
-    console.log(req.body);
-
-
     if (req.body == null || req.body.content == null){
-        //TODO - report error
-        console.log('Missing content param');
-        res.redirect('back');
+        res.send('Missing content param', 400);
         return;
     }
 
     var content = utils.escape(req.body.content);
 
-
     sfdc.compile(req.session.sfdc.urls.apex, req.session.sfdc.access_token, content, {
 
             onSuccess: function(results){
-                console.log('parse success - results: ');
-                console.log(results);
-                res.send(results);
+                res.send(results, 200);
             },
             onError: function(error){
-                console.log('parse error - ' + error);
-                //TODO - report error
-                res.redirect('back');
+                console.log('compile error - ' + error);
+                //note: don't return error code here.
+                //ui will display returned error message
+                res.send(error);
             }
     });
 });
@@ -291,11 +269,11 @@ app.get('/vf/:id.:format?', function(req, res){
     sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage where id ='" + req.params.id + "' limit 1", {
 
             onSuccess: function(results){
-                res.send(results);
+                res.send(results, 200);
             },
             onError: function(error){
-                //TODO - report error
-                console.log(error);
+                console.log('query error: ' + error);
+                res.send(error, 500);
             }
     });
 });
@@ -313,50 +291,45 @@ app.get('/vf.:format?', function(req, res) {
       return;
     }
 
-    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage limit 1000", {
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name from ApexPage limit 1000", {
             onSuccess: function(results){
-                console.log('query success');
-                res.send(results);
+                res.send(results, 200);
             },
             onError: function(error){
-                //TODO - report error
-                console.log(error);
+                console.log('query error: ' + error);
+                res.send(error, 500);
             }
     });
 });
 
 //save a specific vf page
 app.post('/vf/:id.:format?', function(req, res){
+
     if (!isAuthenticated(req)){
         res.redirect("/login");
         return;
     }
 
     if (req.params.format != 'json'){
-      res.send('Format not available', 400);
-      return;
-    }
-
-    console.log('Saving doc ' + req.params.id );
-
-    console.log(req.body);
-
-    if (req.body == null || req.body.content == null){
-        //TODO - report error
-        console.log('Missing content param');
-        res.redirect('back');
+        res.send('Format not available', 400);
         return;
     }
 
-    var markup = req.body.content;//utils.escape(req.body.content);
+    if (req.body == null || req.body.content == null){
+        res.send('Missing content param', 400);
+        return;
+    }
+
+    var markup = req.body.content;
 
     sfdc.update(req.session.sfdc.urls.sobjects, req.session.sfdc.access_token, 'ApexPage',  req.params.id, { Markup:  markup }, {
         onSuccess: function(){
-            console.log('update success - results: ');
-            res.send('Success');
+            res.send('Success', 200);
         },
         onError: function(error){
             console.log('update error - ' + error);
+            //note: don't return error code here.
+            //ui will display returned error message
             res.send(error);
         }
     });

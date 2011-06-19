@@ -153,6 +153,37 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             }
         }
 
+        function getErrorMsg(err){
+
+            if (typeof err == 'string'){
+                err = JSON.parse(err);
+            }
+
+            if ($.isArray(err) && err.length > 0){
+                err = err[0];
+            }
+
+            var msg = 'Failed to receive result from request';
+
+            if (err.message){
+                msg = err.message;
+            }
+            if (err.problem){
+                msg = err.problem.text;
+            }
+            if (err.errors && err.errors.message){
+                msg = err.errors.message.text;
+            }
+            if (err.line){
+                msg += ' line: ' + err.line.text;
+            }
+            if (err.column){
+                msg += ' column: ' + err.column.text;
+            }
+
+            return msg;
+        }
+
         function onDocumentSave(){
             var tabId = tabs.getSelected();
             var docId = tabs.getData(tabId, 'docId');
@@ -176,38 +207,20 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 $.post(url, { 'content': content }, function(data) {
                     log('Compile/Save result: ');
                     log(data);
-                    if (data == 'Success'){
+                    if (typeof data == 'string' && data == 'Success'){
                         messageDialog.hide();
                         return;
                     }
-                    else{
-                        var msg = 'Failed to receive result from request';
-                        var err = data;
-                        if (typeof data == 'string'){
-                            err = JSON.parse(data);
+                    else if ($.isArray(data) && data.length > 0){
+                        data = data[0];
+                        if (data.hasOwnProperty('success')){
+                            if (data.success.text === 'true'){
+                                messageDialog.hide();
+                                return;
+                            }
                         }
-                        if (err && err.length > 0){
-                            err = err[0];
-                            if (err.message){
-                                msg = err.message;
-                            }
-
-                            if (err.problem){
-                                msg = err.problem.text;
-                            }
-                            if (err.errors && err.errors.message){
-                                msg = err.errors.message.text;
-                            }
-                            if (err.line){
-                                msg += ' line: ' + err.line.text;
-                            }
-                            if (err.column){
-                                msg += ' column: ' + err.column.text;
-                            }
-                            
-                        }
-                        messageDialog.setMessage(msg).showOk(true);
                     }
+                    messageDialog.setMessage(getErrorMsg(data)).showOk(true);
                 });
             }
         }

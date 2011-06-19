@@ -46,45 +46,37 @@ module.exports = function(options){
         };
 
         var pushTag = function(tag){
-            //console.log('push tag: ' + tag.name);
             _tags.push({ name: tag.name });
         };
 
         var popTag = function(){
             if (_tags.length){
                 var t = _tags.pop();
-                //console.log('popped tag: ' + t.name);
                 var len = _tags.length;
                 if (len){
                     _tags[len - 1][t.name] = t;
                 }
                 else{
-                    //console.log('pushing result: ');
-                    //console.log(t);
                     _results.push(t);
                 }
             }
         };
 
         _parser.onopentag = function(tag) {
-            //console.log("Sax - Open Element: " + tag.name +" (Attributes: " + JSON.stringify(tag.attributes) + " )");
             if (_tags.length || isMatch(tag.name)){
                 pushTag(tag);
             }
         };
         _parser.onclosetag = function(tagName) {
-            //console.log("Sax - Close Element: " + tagName);
             popTag();
         };
         _parser.ontext = function(text) {
-            //console.log('Sax - Text: ' + text);
             var len = _tags.length;
             if (len){
                 _tags[len - 1].text = text;
             }
         };
         _parser.onerror = function(err) {
-            //console.log('Sax - Error: ' + JSON.stringify(err));
             var onError = _options.onError;
             if (onError){
                 while(_tags.length){
@@ -95,11 +87,8 @@ module.exports = function(options){
 
         };
         _parser.onend = function() {
-            //console.log('Sax - End');
             var onSuccess = _options.onSuccess;
             if (onSuccess){
-                //console.log('Parsed ' + _results.length + ' elements');
-                //console.log(_results);
                 onSuccess.call(this, _results);
             }
         };
@@ -109,10 +98,8 @@ module.exports = function(options){
     }
 
     function getAccessToken(token, callbacks) {
-        console.log('Getting Access Token for ' + token);
 
         var post_data = 'code=' + token + '&grant_type=authorization_code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + escape(settings.oAuthCallbackURI) + '&client_secret=' + settings.oAuthPrivateKey;
-        console.log(post_data);
 
         var options = {
             host: 'login.salesforce.com',
@@ -129,8 +116,6 @@ module.exports = function(options){
 
         var req = https.request(options,
                 function(res) {
-                    console.log("statusCode: ", res.statusCode);
-                    console.log("headers: ", res.headers);
 
                     var data = '';
                     res.setEncoding('utf8');
@@ -155,16 +140,14 @@ module.exports = function(options){
     }
 
     this.getOAuthRequestToken = function(url, callbacks) {
+
         var tokenURL = unescape(url);
-        //console.log('tokenUrl=' + tokenURL);
         var requestToken = escape(tokenURL.substring(tokenURL.indexOf("code=") + 5, tokenURL.length));
-        console.log('Request Token:::' + requestToken);
         getAccessToken(requestToken, callbacks);
     };
 
     this.query = function(requestUrl, accessToken, query, options){
 
-        console.log('query: server url: ' +requestUrl);
         var url = utils.parseUrl(requestUrl);
 
         var headers = {
@@ -181,8 +164,6 @@ module.exports = function(options){
             headers: headers
         };
 
-        console.log('Querying: ' + JSON.stringify(reqOpts));
-
         var req = https.request(reqOpts, function(res) {
               var data = '';
               res.setEncoding('utf8');
@@ -190,8 +171,6 @@ module.exports = function(options){
                   data += chunk;
               });
               res.on('end', function(){
-                  console.log('got response status code:' + res.statusCode);
-                  //console.log('data: ' + data);
                   if (res.statusCode == '200'){
                       if (options.onSuccess){
                         options.onSuccess.apply(this, [data]);
@@ -235,9 +214,6 @@ module.exports = function(options){
             headers: headers
         };
 
-        console.log('updating: ' + JSON.stringify(reqOpts));
-        console.log('with content: ' + content);
-        
         var req = https.request(reqOpts, function(res) {
               var data = '';
               res.setEncoding('utf8');
@@ -245,8 +221,6 @@ module.exports = function(options){
                   data += chunk;
               });
               res.on('end', function(){
-                  console.log('got response status code:' + res.statusCode);
-                  console.log('data: ' + data);
                   if (res.statusCode == '200' || res.statusCode == '204'){
                       if (options.onSuccess){
                           options.onSuccess.apply(this, []);
@@ -304,9 +278,6 @@ module.exports = function(options){
             headers: headers
         };
 
-        console.log('Making request: ' + JSON.stringify(reqOpts));
-        //console.log('Soap: ' + JSON.stringify(soap));
-        
         var req = https.request(reqOpts, function(res) {
               var data = '';
               res.setEncoding('utf8');
@@ -316,8 +287,6 @@ module.exports = function(options){
                   }
               });
               res.on('end', function(){
-                  //console.log('got response status code:' + res.statusCode);
-                  //console.log('data: ' + data);
                   if (res.statusCode == '200'){
                       parseResults(data, ['result'], options);
                   }
@@ -340,10 +309,12 @@ module.exports = function(options){
     };
 
     this.getOAuthUrl = function(){
+
         return settings.oAuthUrl;
     };
 
     this.getOAuthSandboxUrl = function(){
+
         return settings.oAuthSandboxUrl;
     };
 
@@ -373,7 +344,6 @@ module.exports = function(options){
               });
               res.on('end', function(){
                   if (res.statusCode == '302'){
-                      console.log('got redirect ' +  res.headers.location);
                       fetchIdentityInfo(res.headers.location, accessToken, options);
                   }
                   else if (res.statusCode == '200'){
@@ -390,7 +360,6 @@ module.exports = function(options){
 
         });
         req.on('error', function(error){
-            console.log(error);
             if (options.onError){
                 options.onError.apply(this, [error]);
             }
@@ -399,13 +368,9 @@ module.exports = function(options){
     }
 
     this.getIdentityInfo = function(identityServerUrl, accessToken, options){
-      fetchIdentityInfo(identityServerUrl, accessToken, options);
-    };
 
-    this.getSettings = function(){
-        return settings;
+        fetchIdentityInfo(identityServerUrl, accessToken, options);
     };
-
 
     return this;
 };
