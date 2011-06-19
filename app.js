@@ -18,7 +18,7 @@ var sfdcOptions = {
 
 var sfdc = require('./sfdc.js')(sfdcOptions);
 
-var serverOptions = null;
+var app = null;
 
 if ( process.env.PORT == null ) {
 
@@ -26,14 +26,18 @@ if ( process.env.PORT == null ) {
 
     console.log('using local https server...');
 
-	serverOptions = {
+	var serverOptions = {
 	    //Use cert generation info here: http://www.silassewell.com/blog/2010/06/03/node-js-https-ssl-server-example/
   		key: fs.readFileSync('../privatekey.pem').toString(),
   		cert: fs.readFileSync('../certificate.pem').toString()
 	};
-}
+    app = module.exports = express.createServer(serverOptions);
 
-var app = module.exports = express.createServer(serverOptions);
+}
+else{
+
+    app = module.exports = express.createServer();
+}
 
 app.configure(function() {
     app.register('.mustache', mustachio);
