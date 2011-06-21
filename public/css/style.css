@@ -94,25 +94,43 @@ body{
     font-family: Verdana,Arial,sans-serif;
     font-size: 1.1em;
     width: 90%;
-    margin-left: auto;
-    margin-right: auto;
+    margin:  2em auto 2em auto;
+}
+
+header {
 }
 
 header ul{
-     list-style: none;
-     margin: 1em 0;
-     padding: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-indent: 0;
+    padding-bottom: 1em;
 }
 
 header ul li {
-    margin: 0 1em 0 0;
-    padding: 0;
+    margin: 0;
+    padding-right: 1em;
     display: inline-block;
 }
 
-#main{
-    margin-top: 3em;
+header a {
+    text-decoration: none;
 }
+
+#main{
+    margin: 2em 0 2em 0;
+}
+
+footer{
+    clear: both;
+    font-size: 85%;
+}
+
+footer p{
+    padding-top: 1em;
+}
+
 
 /*-------------------------------------- */
 /* Ockley Styles End                     */
