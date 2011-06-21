@@ -5,7 +5,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 */
 module.exports = {
   stylesheets: function() {
-    return ["//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css",
+    return [/*"//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css",*/
+            "//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css",
+            /*"css/Aristo/jquery-ui-1.8.7.custom.css",*/
             "libs/codemirror/lib/codemirror.css",
             "libs/codemirror/mode/xml/xml.css",
             "libs/codemirror/mode/css/css.css",

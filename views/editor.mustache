@@ -32,17 +32,42 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 	</div>
 </div>
 
-<div id='messageDialog' class='display:none'>
+<div id='messageDialog' style='display:none'>
     <p></p>
 </div>
 
-<div id="findDialog" class='display:none'>
+<div id="findDialog" style='display:none'>
     <ul>
         <li><span>Find:&nbsp;</span><input id='findText' type='text' /></li>
         <li><input id='caseSensitive' type='checkbox'>Case Sensitive</input></li>
         <li><input id='regex' type='checkbox'>Regex</input></li>
     </ul>
 </div>
+
+<div id='themesContainer' style="display:none" >
+     <select id='themes'>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css'>Smoothness</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/cupertino/jquery-ui.css'>Cupertino</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-lightness/jquery-ui.css'>Lightness</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-darkness/jquery-ui.css'>Darkness</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/redmond/jquery-ui.css'>Redmond</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/start/jquery-ui.css'>Start</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/sunny/jquery-ui.css'>Sunny</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/overcast/jquery-ui.css'>Overcast</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/le-frog/jquery-ui.css'>Le Frog</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/flick/jquery-ui.css'>Flick</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/pepper-grinder/jquery-ui.css'>Pepper Grinder</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/eggplant/jquery-ui.css'>Eggplant</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/dark-hive/jquery-ui.css'>Dark Hive</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css'>South Street</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/blitzer/jquery-ui.css'>Blitzer</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/humanity/jquery-ui.css'>Humanity</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/hot-sneaks/jquery-ui.css'>Hot Sneaks</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/trontastic/jquery-ui.css'>Trontastic</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/vader/jquery-ui.css'>Vader</option>
+     </select>
+ </div>
+
 
 <script>
 
@@ -134,6 +159,28 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 findDialog.show(selection);
             }
         });
+
+        //move the themes container to the bottom of the page
+        var themesContainer = $('#themesContainer');
+        $('footer').append(themesContainer.detach());
+        themesContainer.show();
+
+        //handle theme selection
+        var themes = themesContainer.find('#themes');
+        themes.change(function(){
+            var themeLink = $('head').find('link[href*=jquery-ui]');
+            themeLink.attr('href', $(this).val());
+
+            //store the theme name in a cookie
+            $.cookie("ockley_theme", $(this).find('option:selected').first().text());
+        });
+
+        //if there is a cookie with a selected theme, restore that theme
+        var selectedTheme = $.cookie('ockley_theme');
+        if(selectedTheme){
+            var option = themes.find('option:contains(' + selectedTheme + ')');
+            themes.val(option.val()).trigger('change');
+        }
 
         function getDocList(url, type, callback){
             if (url && type){

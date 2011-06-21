@@ -138,7 +138,7 @@ function EditorTabs(elemId) {
                 if (currentLine != cursorLine){
                     editor.setLineClass(currentLine, null);
                     editor.ockley.currentLineNumber = cursorLine;
-                    editor.setLineClass(cursorLine, "currentLine");
+                    editor.setLineClass(cursorLine, "ui-state-highlight");
                 }
 
             }
@@ -151,7 +151,7 @@ function EditorTabs(elemId) {
         if (!editor.ockley.hasOwnProperty('currentLineNumber')){
             editor.ockley.currentLineNumber = 0;
         }
-        editor.setLineClass(0, "currentLine");
+        editor.setLineClass(0, "ui-state-highlight");
 
         //fancy corners
         tabPanel.find('.CodeMirror').addClass('ui-corner-all');
