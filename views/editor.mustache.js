@@ -17,6 +17,7 @@ module.exports = {
   },
   scripts: function(){
     return ["//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js",
+            "libs/ui.tabs.closable/ui.tabs.closable.min.js",
             "libs/codemirror/lib/codemirror.js",
             "libs/codemirror/mode/htmlmixed/htmlmixed.js",
             "libs/codemirror/mode/xml/xml.js",

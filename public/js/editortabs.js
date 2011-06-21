@@ -11,7 +11,21 @@ function EditorTabs(elemId) {
     var _tabSet = $(elemId);
     var _resized = false;
 
-    _tabSet.tabs().find(".ui-tabs-nav").sortable({ axis: "x" });
+    _tabSet.tabs({
+        closable: true,
+        closableClick: function(event, ui) {
+                //prevent closing of the "new" tab
+                return ('#tabs-new' !== $(ui.tab).attr('href'));
+            }
+    }).find(".ui-tabs-nav").sortable({ axis: "x" });
+
+    setTimeout(function(){
+        //remove the close button from the "new" tab
+        var tabIcon = _tabSet.find('a[href=#tabs-new]').next('a');
+        if (tabIcon.has('span.ui-icon')){
+            tabIcon.remove();
+        }
+    }, 250);
 
     _tabSet.bind("tabsselect", { createNew : this.createNew },
         function(event, ui) {
