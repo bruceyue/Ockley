@@ -91,10 +91,12 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             }
         });
 
+        //set the sidebar height equal to the height of the tab set
         $("#sidebar").height($t.outerHeight());
 
         var messageDialog = new MessageDialog('#messageDialog');
 
+        //create the find dialog
         var findDialog = new FindDialog({
             dialogElemSelector: '#findDialog',
             findTextSelector: '#findText',
@@ -103,62 +105,63 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             getEditor: function(){ return tabs.getEditor(); }
         });
 
+        //create the document accordion
         var accordion = new DocAccordion("#accordion", {
             documentClicked: onDocumentClicked
         });
 
+        //get a listing of Apex classes and add to the accordion
         getDocList('/apex.json', 'ApexClass', function(docs){
             accordion.appendDocuments("Apex", docs);
         });
+
+        //get a listing of Apex pages and add to the accordion
         getDocList('/vf.json', 'ApexPage',function(docs){
             accordion.appendDocuments("Visualforce", docs);
         });
 
-        //setup toolbar buttons
-        
-        $( "#save" ).button({
-			text: false,
-			icons: {
-				primary: "silk-icon-save"
-			}
-		}).click(onDocumentSave);
-
-        $( "#undo" ).button({
-			text: false,
-			icons: {
-				primary: "silk-icon-undo"
-			}
-		}).click(function(){
-            var editor = tabs.getEditor();
-            if (editor != null){
-                editor.undo();
+        //configure toolbar buttons
+        var buttons = [
+            {
+                selector: '#save',
+                icon: "silk-icon-save",
+                onClick: onDocumentSave
+            },
+            {
+                selector: '#undo',
+                icon: "silk-icon-undo",
+                onClick: function(){
+                    var editor = tabs.getEditor();
+                    if (editor != null){
+                        editor.undo();
+                    }
+                }
+            },
+            {
+                selector: '#redo',
+                icon: 'silk-icon-redo',
+                onClick: function(){
+                    var editor = tabs.getEditor();
+                    if (editor != null){
+                        editor.redo();
+                    }
+                }
+            },
+            {
+                selector: '#find',
+                icon: 'silk-icon-find',
+                onClick: function(){
+                    var editor = tabs.getEditor();
+                    if (editor != null){
+                        var selection = $.trim(editor.getSelection());
+                        findDialog.show(selection);
+                    }
+                }
             }
-        });
+        ];
 
-		$( "#redo" ).button({
-			text: false,
-			icons: {
-				primary: "silk-icon-redo"
-			}
-		}).click(function(){
-            var editor = tabs.getEditor();
-            if (editor != null){
-                editor.redo();
-            }
-        });
-
-        $( "#find" ).button({
-			text: false,
-			icons: {
-				primary: "silk-icon-find"
-			}
-		}).click(function(){
-            var editor = tabs.getEditor();
-            if (editor != null){
-                var selection = $.trim(editor.getSelection());
-                findDialog.show(selection);
-            }
-        });
+        //now create the toolbar
+        var toolbar = new Toolbar("#toolbar", buttons);
 
         //move the themes container to the bottom of the page
         var themesContainer = $('#themesContainer');
@@ -231,43 +234,68 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             return msg;
         }
 
+        function saveDocument(url, msg, content){
+            messageDialog.show(msg);
+
+            $.post(url, { 'content': content }, function(data) {
+
+                log('Compile/Save result: ');
+                log(data);
+                if (typeof data == 'string' && data == 'Success'){
+                    messageDialog.hide();
+                    return;
+                }
+                else if ($.isArray(data) && data.length > 0){
+                    data = data[0];
+                    if (data.hasOwnProperty('success')){
+                        if (data.success.text === 'true'){
+                            messageDialog.hide();
+                            return;
+                        }
+                    }
+                }
+
+                messageDialog.setMessage(getErrorMsg(data)).showOk(true);
+            });
+        }
+
         function onDocumentSave(){
             var tabId = tabs.getSelected();
             var docId = tabs.getData(tabId, 'docId');
+            var lastModified = tabs.getData(tabId, 'lastModified');
             var headerTitle = tabs.getData(tabId, 'headerTitle');
-            var editor = tabs.getEditor(tabId);
-            var content = editor.getValue();
             var url = null;
+            var postUrl = null;
             var action = "Compiling...";
 
             if (headerTitle === "Apex"){
-                url = '/apex/'+ docId+'.json';
+                url = '/apex/lastmodified/' + docId + '.json';
+                postUrl = '/apex/'+ docId+'.json';
             }
             else if (headerTitle === "Visualforce"){
-                url = '/vf/'+ docId+'.json';
+                url = '/vf/lastmodified/' + docId+'.json';
+                postUrl = '/vf/'+ docId+'.json';
                 action = "Saving...";
             }
 
             if (url != null){
-                messageDialog.show(action);
 
-                $.post(url, { 'content': content }, function(data) {
-                    log('Compile/Save result: ');
-                    log(data);
-                    if (typeof data == 'string' && data == 'Success'){
-                        messageDialog.hide();
-                        return;
+                //get the lastmodified date for the document
+                //if it appears to be newer than the last save, warn the user
+                $.getJSON(url, function(data){
+                    var now = sfDateToJsDate(lastModified);
+                    var then = sfDateToJsDate(data.LastModifiedDate);
+                    var postIt = false;
+                    if (now < then){
+                        postIt = confirm('It looks like the document you are attempting to save/compile is older than what is in the Org. Are you sure you want to continue and overwrite any changes?');
                     }
-                    else if ($.isArray(data) && data.length > 0){
-                        data = data[0];
-                        if (data.hasOwnProperty('success')){
-                            if (data.success.text === 'true'){
-                                messageDialog.hide();
-                                return;
-                            }
-                        }
+                    else{
+                        postIt = true;
                     }
-                    messageDialog.setMessage(getErrorMsg(data)).showOk(true);
+
+                    if (postIt){
+                        saveDocument(postUrl, action, tabs.getEditor(tabId).getValue());
+                    }
                 });
             }
         }
@@ -301,12 +329,14 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 $.getJSON(url, function(data) {
                     //log(JSON.stringify(data));
                     if (data && data.records && data.records.length > 0){
-                        var content = data.records[0][contentKey];
+                        var record = data.records[0];
+                        var lastModified = record.LastModifiedDate;
+                        var content = record[contentKey];
                         if (content){
                             tabs.createNew({
                                 title: link.text(),
                                 text: content,
-                                data: { 'docId': docId, 'headerTitle': headerTitle },
+                                data: { 'docId': docId, 'headerTitle': headerTitle, 'lastModified' : lastModified },
                                 'mode': editMode
                             });
                         }

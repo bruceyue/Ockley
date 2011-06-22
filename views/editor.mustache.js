@@ -27,7 +27,8 @@ module.exports = {
             "js/editortabs.js",
             "js/docaccordion.js",
             "js/messagedialog.js",
-            "js/finddialog.js"];
+            "js/finddialog.js",
+            "js/toolbar.js"];
   }
 };
 

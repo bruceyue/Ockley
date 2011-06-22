@@ -33,6 +33,5 @@ module.exports = function(/*options*/){
         return ret;
     };
 
-
     return this;
 };

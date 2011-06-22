@@ -86,6 +86,40 @@ function updateSession(session, state){
     utils.extend(session.sfdc, state);
 }
 
+function getLastModified(req, res, sObjectTypeName){
+
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+        res.send('Format not available', 400);
+        return;
+    }    
+
+    sfdc.getSObjectLastModifiedDate(req.session.sfdc.urls.query, req.session.sfdc.access_token,  req.params.id, sObjectTypeName, {
+        onSuccess: function(results){
+            results = JSON.parse(results);
+            if (results && results.records){
+                results = results.records;
+                if (results.length > 0){
+                    results = results[0];
+                    if (results.LastModifiedDate){
+                        //results = sfdc.sfDateToJsDate(results.LastModifiedDate);
+                        results = JSON.stringify(results);
+                    }
+                }
+            }
+            res.send(results, 200);
+        },
+        onError: function(error){
+            console.log('lastmodified error - ' + error);
+            res.send(error);
+        }
+    });
+}
+
 ///////////////////////////////////////////////////
 //ROUTES
 
@@ -173,7 +207,7 @@ app.get('/editor', function(req, res) {
     });
 });
 
-//get a specific apex page
+//get a specific apex class
 app.get('/apex/:id.:format?', function(req, res){
 
     if (!isAuthenticated(req)){
@@ -186,7 +220,7 @@ app.get('/apex/:id.:format?', function(req, res){
       return;
     }
 
-    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body from ApexClass where id ='" + req.params.id + "' limit 1", {
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Body, LastModifiedDate from ApexClass where id ='" + req.params.id + "' limit 1", {
             
             onSuccess: function(results){
                 res.send(results, 200);
@@ -224,6 +258,7 @@ app.get('/apex.:format?', function(req, res) {
 });
 
 //save a specific apex page
+//warning: this overwrites without checking if something newer exists! You may want to call lastmodified first
 app.post('/apex/:id.:format?', function(req, res){
 
     if (!isAuthenticated(req)){
@@ -257,6 +292,11 @@ app.post('/apex/:id.:format?', function(req, res){
     });
 });
 
+//get apex class lastmodified datetime stamp
+app.get('/apex/lastmodified/:id.:format?', function(req, res){
+    getLastModified(req, res, 'ApexClass');
+});
+
 
 //get a specific vf page
 app.get('/vf/:id.:format?', function(req, res){
@@ -271,7 +311,7 @@ app.get('/vf/:id.:format?', function(req, res){
       return;
     }
 
-    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup from ApexPage where id ='" + req.params.id + "' limit 1", {
+    sfdc.query(req.session.sfdc.urls.query, req.session.sfdc.access_token, "select Id, Name, Markup, LastModifiedDate from ApexPage where id ='" + req.params.id + "' limit 1", {
 
             onSuccess: function(results){
                 res.send(results, 200);
@@ -308,6 +348,7 @@ app.get('/vf.:format?', function(req, res) {
 });
 
 //save a specific vf page
+//warning: this overwrites without checking if something newer exists! You may want to call lastmodified first
 app.post('/vf/:id.:format?', function(req, res){
 
     if (!isAuthenticated(req)){
@@ -325,6 +366,8 @@ app.post('/vf/:id.:format?', function(req, res){
         return;
     }
 
+    //TODO - need to check to see if the document has been modified since the last time it was fetched
+
     var markup = req.body.content;
 
     sfdc.update(req.session.sfdc.urls.sobjects, req.session.sfdc.access_token, 'ApexPage',  req.params.id, { Markup:  markup }, {
@@ -339,6 +382,12 @@ app.post('/vf/:id.:format?', function(req, res){
         }
     });
 });
+
+//get vf page lastmodified datetime stamp
+app.get('/vf/lastmodified/:id.:format?', function(req, res){
+    getLastModified(req, res, 'ApexPage');
+});
+
 
 app.get('*', function(req, res) {
     console.log('404:' + req.url);

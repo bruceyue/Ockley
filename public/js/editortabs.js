@@ -19,28 +19,14 @@ function EditorTabs(elemId) {
             }
     }).find(".ui-tabs-nav").sortable({ axis: "x" });
 
-    setTimeout(function(){
-        //remove the close button from the "new" tab
-        var tabIcon = _tabSet.find('a[href=#tabs-new]').next('a');
-        if (tabIcon.has('span.ui-icon')){
-            tabIcon.remove();
-        }
-    }, 250);
 
-    _tabSet.bind("tabsselect", { createNew : this.createNew },
-        function(event, ui) {
-            var tab = $(ui.tab);
-            switch (tab.attr('href')) {
-                case '#tabs-new':
-                    event.data.createNew();
-                    return false;
-                    break;
-                default:
-                    refreshEditor(tab);
-                    break;
-            }
-            return true;
-    });
+    function removeCloseButton(tabId){
+        //remove the close button from a tab
+        var tabIcon = _tabSet.find('a[href='+ tabId + ']').next('a');
+        if (tabIcon.has('span.ui-icon')){
+            tabIcon.hide();
+        }
+    }
 
     function getTab(tabId){
         return _tabSet.find('a[href=' + tabId + ']');
@@ -78,9 +64,13 @@ function EditorTabs(elemId) {
         _tabSet.find('.ui-tabs-panel, .editorContainer, .CodeMirror, .CodeMirror-scroll').width(w).height(h);
     }
 
+    function select(tabId){
+        _tabSet.tabs("select", tabId);
+    }
+
     /* public */
     this.setSelected = function(tabId) {
-        _tabSet.tabs("select", tabId);
+        select(tabId);
     };
 
     this.getSelected = function() {
@@ -184,7 +174,27 @@ function EditorTabs(elemId) {
         }
         tab.data('editor', editor);
 
-        this.setSelected(index);
+        select(index);
+
     };
+
+    _tabSet.bind("tabsselect", { createNew : this.createNew },
+        function(event, ui) {
+            var tab = $(ui.tab);
+            switch (tab.attr('href')) {
+                case '#tabs-new':
+                    event.data.createNew();
+                    return false;
+                    break;
+                default:
+                    refreshEditor(tab);
+                    break;
+            }
+            return true;
+    });
+
+    setTimeout(function(){
+        removeCloseButton('#tabs-new');
+    }, 0);
 
 }

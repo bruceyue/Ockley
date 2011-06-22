@@ -372,5 +372,9 @@ module.exports = function(options){
         fetchIdentityInfo(identityServerUrl, accessToken, options);
     };
 
+    this.getSObjectLastModifiedDate = function(requestUrl, accessToken, sObjectId, sObjectTypeName, callbacks){
+        this.query(requestUrl, accessToken, "select LastModifiedDate from " + sObjectTypeName + " where id ='" + sObjectId + "' limit 1", callbacks );
+    };
+
     return this;
 };
