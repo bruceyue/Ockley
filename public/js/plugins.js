@@ -59,6 +59,23 @@ jQuery.cookie = function(name, value, options) {
     }
 };
 
+function jsDateToSfDate(){
+    
+}
+
+//makes an ISO8601 date
+function jsDateToSfDate(d) {
+ function pad(n){return n<10 ? '0'+n : n}
+ return d.getUTCFullYear()+'-'
+      + pad(d.getUTCMonth()+1)+'-'
+      + pad(d.getUTCDate())+'T'
+      + pad(d.getUTCHours())+':'
+      + pad(d.getUTCMinutes())+':'
+      + pad(d.getUTCSeconds())+'Z'
+}
+
+
+//converts from an ISO8601 date
 function sfDateToJsDate(sfDateString) {
 
     log('sfDateToJsDate: got ' + sfDateString);

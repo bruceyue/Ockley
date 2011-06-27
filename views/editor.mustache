@@ -80,10 +80,14 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         var fudge = wh * 0.1;
         $t.height(wh - $t.offset().top - fudge);
 
+        //create the object that manages editor tabs
         var tabs = new EditorTabs( $t );
+
+        //create an initial empty document
         tabs.createNew();
         tabs.refresh(true);
 
+        //we want the tabs container to be resizable
         $t.resizable({
             helper: "ui-resizable-helper",
             stop: function(event, ui) {
@@ -94,6 +98,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         //set the sidebar height equal to the height of the tab set
         $("#sidebar").height($t.outerHeight());
 
+        //messagedialog used when saving/compile docs
         var messageDialog = new MessageDialog('#messageDialog');
 
         //create the find dialog
@@ -105,7 +110,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             getEditor: function(){ return tabs.getEditor(); }
         });
 
-        //create the document accordion
+        //create the document accordion.
         var accordion = new DocAccordion("#accordion", {
             documentClicked: onDocumentClicked
         });
@@ -185,6 +190,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             themes.val(option.val()).trigger('change');
         }
 
+        //fetch a listing of apex or vf documents
         function getDocList(url, type, callback){
             if (url && type){
                 $.getJSON(url, function(data) {
@@ -203,6 +209,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             }
         }
 
+        //try to build a message from the error results
         function getErrorMsg(err){
 
             if (typeof err == 'string'){
@@ -234,7 +241,20 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             return msg;
         }
 
-        function saveDocument(url, msg, content){
+        //save an apex or vf document
+        function saveDocument(docId, docType, content, successCallback){
+
+            var url, msg, success;
+
+            if (docType === "apex"){
+                url = '/apex/'+ docId+'.json';
+                msg = "Compiling...";
+            }
+            else if (docType === "vf"){
+                url = '/vf/'+ docId+'.json';
+                msg = "Saving...";
+            }
+
             messageDialog.show(msg);
 
             $.post(url, { 'content': content }, function(data) {
@@ -242,65 +262,81 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 log('Compile/Save result: ');
                 log(data);
                 if (typeof data == 'string' && data == 'Success'){
-                    messageDialog.hide();
-                    return;
+                    success = true;
                 }
                 else if ($.isArray(data) && data.length > 0){
                     data = data[0];
                     if (data.hasOwnProperty('success')){
                         if (data.success.text === 'true'){
-                            messageDialog.hide();
-                            return;
+                            success = true;
                         }
                     }
                 }
-
-                messageDialog.setMessage(getErrorMsg(data)).showOk(true);
+                if (success){
+                    messageDialog.hide();
+                    if (successCallback != null){
+                        successCallback.apply(this, []);
+                    }
+                }else{
+                    messageDialog.setMessage(getErrorMsg(data)).showOk(true);
+                }
             });
         }
 
-        function onDocumentSave(){
-            var tabId = tabs.getSelected();
-            var docId = tabs.getData(tabId, 'docId');
-            var lastModified = tabs.getData(tabId, 'lastModified');
-            var headerTitle = tabs.getData(tabId, 'headerTitle');
-            var url = null;
-            var postUrl = null;
-            var action = "Compiling...";
+        //check the lastmodified date of the document and see if it is newer than
+        //the lastmodified value we have. This is to ensure that someone hasn't updated a document
+        //since the last time we refreshed. Prevent overwriting changes.
+        function checkLastModified(docId, docType, lastModified, successCallback){
+            var url;
 
-            if (headerTitle === "Apex"){
+            if (docType === "apex"){
                 url = '/apex/lastmodified/' + docId + '.json';
-                postUrl = '/apex/'+ docId+'.json';
             }
-            else if (headerTitle === "Visualforce"){
+            else if (docType === "vf"){
                 url = '/vf/lastmodified/' + docId+'.json';
-                postUrl = '/vf/'+ docId+'.json';
-                action = "Saving...";
             }
 
-            if (url != null){
+            if (url){
 
                 //get the lastmodified date for the document
                 //if it appears to be newer than the last save, warn the user
                 $.getJSON(url, function(data){
                     var now = sfDateToJsDate(lastModified);
                     var then = sfDateToJsDate(data.LastModifiedDate);
-                    var postIt = false;
+                    var overwrite = false;
                     if (now < then){
-                        postIt = confirm('It looks like the document you are attempting to save/compile is older than what is in the Org. Are you sure you want to continue and overwrite any changes?');
+                        overwrite = confirm('It looks like the document you are attempting to save/compile is older than what is in the Org. Are you sure you want to continue and overwrite any changes?');
                     }
                     else{
-                        postIt = true;
+                        overwrite = true;
                     }
 
-                    if (postIt){
-                        tabs.setData(tabId, 'lastModified', now);
-                        saveDocument(postUrl, action, tabs.getEditor(tabId).getValue());
+                    if (overwrite){
+                        if (successCallback != null){
+                            successCallback.apply(this, [then]);
+                        }
                     }
                 });
             }
+
         }
 
+        //called when toolbar save is clicked
+        function onDocumentSave(){
+            var tabId = tabs.getSelected();
+            var docId = tabs.getData(tabId, 'docId');
+            var docType = tabs.getData(tabId, 'docType');
+            var lastModified = tabs.getData(tabId, 'lastModified');
+            
+            checkLastModified(docId, docType, lastModified, function(){
+                saveDocument(docId, docType, tabs.getEditor(tabId).getValue(), function(){
+                    //update the lastmodified date to now
+                    tabs.setData(tabId, 'lastModified', jsDateToSfDate(new Date()));
+                });
+            });
+        }
+
+        //called when a document title is clicked in the accordion.
         function onDocumentClicked(headerTitle, link){
             var docId = link.attr('id');
 
@@ -314,15 +350,18 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             var url = null;
             var contentKey = null;
             var editMode = 'apex';
+            var docType = '';
 
             if (headerTitle === "Apex"){
                 url = '/apex/'+ docId+'.json';
                 contentKey = 'Body';
+                docType = 'apex';
             }
             else if (headerTitle === "Visualforce"){
                 url = '/vf/'+ docId+'.json';
                 contentKey = 'Markup';
                 editMode = 'text/html';
+                docType = 'vf';
             }
 
             if (url && contentKey){
@@ -337,7 +376,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                             tabs.createNew({
                                 title: link.text(),
                                 text: content,
-                                data: { 'docId': docId, 'headerTitle': headerTitle, 'lastModified' : lastModified },
+                                data: { 'docId': docId, 'docType': docType, 'lastModified' : lastModified },
                                 'mode': editMode
                             });
                         }
