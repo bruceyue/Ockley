@@ -294,6 +294,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                     }
 
                     if (postIt){
+                        tabs.setData(tabId, 'lastModified', now);
                         saveDocument(postUrl, action, tabs.getEditor(tabId).getValue());
                     }
                 });

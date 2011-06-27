@@ -90,6 +90,10 @@ function EditorTabs(elemId) {
       return getTab(tabId).data(key);
     };
 
+    this.setData = function(tabId, key, value){
+      getTab(tabId).data(key, value);
+    };
+
     this.getEditor = function(tabId){
         if (tabId == null){
             tabId = this.getSelected();
