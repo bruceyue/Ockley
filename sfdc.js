@@ -9,6 +9,8 @@ module.exports = function(options){
     var https = require('https');
     var sax = require('./node_modules/sax');
     var utils = require('./utils.js')();
+    var jsz = require('./public/libs/jszip.js');
+    var fs = require('fs');
 
     var settings = {
         oAuthPublicKey: '',
@@ -244,6 +246,129 @@ module.exports = function(options){
         req.end();
     };
 
+    this.create = function(requestUrl, accessToken, sObjectTypeName, record, options){
+        var url = utils.parseUrl(requestUrl);
+
+        var content = JSON.stringify(record);
+
+        var headers = {
+            'Host': url.host,
+            'Authorization': 'OAuth ' + accessToken,
+            'Content-Type': 'application/json',
+            'Content-Length': content.length
+        };
+
+        var path = "/" + url.path + sObjectTypeName;
+        var reqOpts = {
+            host: url.host,
+            port: 443,
+            path: path,
+            method: 'POST',
+            headers: headers
+        };
+
+        var req = https.request(reqOpts, function(res) {
+              var data = '';
+              res.setEncoding('utf8');
+              res.on('data', function(chunk) {
+                  data += chunk;
+              });
+              res.on('end', function(){
+                  console.log('Create: got status code: ' + res.statusCode);
+                  if (res.statusCode == '200' || res.statusCode == '204'){
+                      if (options.onSuccess){
+                          options.onSuccess.apply(this, []);
+                      }
+                  }
+                  else{
+                      if (options.onError){
+                        options.onError.apply(this, [data]);
+                      }
+                  }
+              });
+
+        });
+        req.on('error', function(error){
+            if (options.onError){
+                options.onError.apply(this, [error]);
+            }
+        });
+
+        req.write(content);
+        req.end();
+    };
+
+    this.soapCreate = function(serverUrl, sessionId, sObjectTypeName, record, options){
+        var soap = "";
+        soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:urn="urn:enterprise.soap.sforce.com" xmlns:urn1="urn:sobject.enterprise.soap.sforce.com">';
+        soap += "<soapenv:Header>";
+        soap += "  <urn:SessionHeader>";
+        soap += "     <urn:sessionId>" + sessionId + "</urn:sessionId>";
+        soap += "  </urn:SessionHeader>";
+        soap += "</soapenv:Header>";
+        soap += "<soapenv:Body>";
+        soap += "  <urn:create>";
+        soap += "    <urn:sObjects xsi:type='urn1:" + sObjectTypeName + "' >";
+
+                        for(var field in record){
+                            if (record.hasOwnProperty(field)){
+                                 soap += "<urn1:" + field + ">" + record[field] + "</urn1:" + field + ">";
+                            }
+                        }
+
+        soap += "    </urn:sObjects>";
+        soap += "  </urn:create>";
+        soap += "</soapenv:Body>";
+        soap += "</soapenv:Envelope>";
+
+        var url = utils.parseUrl(serverUrl);
+
+        var headers = {
+            'Host': url.host,
+            'SOAPAction': 'Create',
+            'Content-Type': 'text/xml',
+            'Content-Length': soap.length
+        };
+
+        var path = "/" + url.path;
+        var reqOpts = {
+            host: url.host,
+            port: 443,
+            path: path,
+            method: 'POST',
+            headers: headers
+        };
+
+        var req = https.request(reqOpts, function(res) {
+              var data = '';
+              res.setEncoding('utf8');
+              res.on('data', function(chunk) {
+                  if (chunk){
+                    data += chunk;
+                  }
+              });
+              res.on('end', function(){
+                  if (res.statusCode == '200'){
+                      parseResults(data, ['result'], options);
+                  }
+                  else{
+                      if (options.onError){
+                          options.onError.apply(this, [data]);
+                      }
+                  }
+              });
+
+        });
+        req.on('error', function(error){
+            if (options.onError){
+                options.onError.apply(this, [error]);
+            }
+        });
+
+        req.write(soap);
+        req.end();
+    };
+
     this.compile = function(serverUrl, sessionId, code, options){
 
         var soap = "";
@@ -306,6 +431,190 @@ module.exports = function(options){
 
         req.write(soap);
         req.end();
+    };
+
+    function writeTempFile(filePathName, fileContent){
+        fs.writeFile(filePathName, fileContent, 'binary', function (err) {
+            if (err) throw err;
+        });
+    }
+
+    this.getDeployStatus = function(serverUrl, sessionId, id, options) {
+
+        var soap = "";
+        soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:met="http://soap.sforce.com/2006/04/metadata">';
+        soap += "<soapenv:Header>";
+        soap += "  <met:SessionHeader>";
+        soap += "     <met:sessionId>" + sessionId + "</met:sessionId>";
+        soap += "  </met:SessionHeader>";
+        soap += "</soapenv:Header>";
+        soap += "<soapenv:Body>";
+
+        var actionBeginTag = "<met:checkStatus>";
+        var actionEndTag = "</met:checkStatus>";
+
+        //if (options.deployStatus){
+        //    var actionBeginTag = "<met:checkDeployStatus>";
+        //    var actionEndTag = "</met:checkDeployStatus>";
+        //}
+
+        soap += actionBeginTag;
+        soap += "  <met:asyncProcessId>" + id + "</met:asyncProcessId>";
+        soap += actionEndTag;
+        soap += "</soapenv:Body>";
+        soap += "</soapenv:Envelope>";
+
+        var url = utils.parseUrl(serverUrl);
+
+        var headers = {
+            'Host': url.host,
+            'SOAPAction': options.deployStatus ? 'CheckDeployStatus' : 'CheckStatus',
+            'Content-Type': 'text/xml',
+            'Content-Length': soap.length
+        };
+
+        var path = "/" + url.path;
+        var reqOpts = {
+            host: url.host,
+            port: 443,
+            path: path,
+            method: 'POST',
+            headers: headers
+        };
+
+        var req = https.request(reqOpts, function(res) {
+            var data = '';
+            res.setEncoding('utf8');
+            res.on('data', function(chunk) {
+                if (chunk) {
+                    data += chunk;
+                }
+            });
+            res.on('end', function() {
+                if (res.statusCode == '200') {
+                    parseResults(data, ['result'], options);
+                }
+                else {
+                    if (options.onError) {
+                        options.onError.apply(this, [data]);
+                    }
+                }
+            });
+
+        });
+        req.on('error', function(error) {
+            if (options.onError) {
+                options.onError.apply(this, [error]);
+            }
+        });
+
+        req.write(soap);
+        req.end();
+    };
+
+    this.deploy = function(serverUrl, sessionId, files, options) {
+
+        var zip = new jsz.JSZip();
+
+        var file, folder, folders = {}, len = files.length;
+        for (var i = 0; i < len; ++i){
+            file = files[i];
+            if (file.folder != null && file.folder.length > 0){
+                folder = file.folder;
+                if (folders.hasOwnProperty(folder)){
+                    folder = folders[folder];
+                }
+                else{
+                    //add new folder
+                    folder = folders[folder] = zip.folder(folder);
+                }
+                folder.add(file.name, file.content);
+            }
+            else{
+                zip.add(file.name, file.content);
+            }
+        }
+
+        var zipContent = zip.generate();
+        //writeTempFile('./tmp/deploy.zip',zip.generate(true));
+
+        var soap = "";
+        soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:met="http://soap.sforce.com/2006/04/metadata">';
+        soap += "<soapenv:Header>";
+        soap += "  <met:SessionHeader>";
+        soap += "     <met:sessionId>" + sessionId + "</met:sessionId>";
+        soap += "  </met:SessionHeader>";
+        soap += "</soapenv:Header>";
+        soap += "<soapenv:Body>";
+        soap += "<met:deploy>";
+        soap += "  <met:ZipFile>" + zipContent + "</met:ZipFile>";
+
+        soap += "<met:DeployOptions>";
+        soap += "   <met:allowMissingFiles>true</met:allowMissingFiles>";
+        //soap += "   <met:autoUpdatePackage>?</met:autoUpdatePackage>";
+        soap += "   <met:checkOnly>false</met:checkOnly>";
+        soap += "   <met:ignoreWarnings>true</met:ignoreWarnings>";
+        soap += "   <met:performRetrieve>false</met:performRetrieve>";
+        //soap += "   <met:purgeOnDelete>?</met:purgeOnDelete>";
+        soap += "   <met:rollbackOnError>true</met:rollbackOnError>";
+        soap += "   <met:runAllTests>false</met:runAllTests>";
+        soap += "   <met:singlePackage>true</met:singlePackage>";
+        soap += "</met:DeployOptions>";
+        soap += "</met:deploy>";
+        soap += "</soapenv:Body>";
+        soap += "</soapenv:Envelope>";
+
+        var url = utils.parseUrl(serverUrl);
+
+        var headers = {
+            'Host': url.host,
+            'SOAPAction': 'Deploy',
+            'Content-Type': 'text/xml',
+            'Content-Length': soap.length
+        };
+
+        var path = "/" + url.path;
+        var reqOpts = {
+            host: url.host,
+            port: 443,
+            path: path,
+            method: 'POST',
+            headers: headers
+        };
+
+        console.log('Deploy requesting: ' + JSON.stringify(reqOpts));
+        console.log('Deploy soap: ' + soap);
+
+        var req = https.request(reqOpts, function(res) {
+            var data = '';
+            res.setEncoding('utf8');
+            res.on('data', function(chunk) {
+                if (chunk) {
+                    data += chunk;
+                }
+            });
+            res.on('end', function() {
+                if (res.statusCode == '200') {
+                    parseResults(data, ['result'], options);
+                }
+                else {
+                    if (options.onError) {
+                        options.onError.apply(this, [data]);
+                    }
+                }
+            });
+
+        });
+        req.on('error', function(error) {
+            if (options.onError) {
+                options.onError.apply(this, [error]);
+            }
+        });
+
+        req.write(soap);
+        req.end();
+
+
     };
 
     this.getOAuthUrl = function(){

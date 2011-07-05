@@ -5,6 +5,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 -->
 <div>
     <span id="toolbar" class="ui-widget-header ui-corner-all" >
+        <button id="new">New</button>
         <button id="save">Save</button>
         <button id="undo">Undo</button>
         <button id="redo">Redo</button>
@@ -44,6 +45,21 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
     </ul>
 </div>
 
+<div id="newDialog" style='display: none'>
+    <p>What type of document do you want to create?</p>
+    <ul>
+        <li><input id="radio1" type="radio" name="newDoc" value="apex" checked='true' /><label for="radio1">Apex</label></li>
+        <li><input id="radio2" type="radio" name="newDoc" value="vf" /><label for="radio2">Visualforce</label></li>
+        <!--<li><input id="radio3" type="radio" name="newDoc" value="res" /><label for="radio3">Static Resource</label></li>-->
+
+    </ul>
+    <br />
+    <p>What do you want to call it?</p>
+    <ul>
+        <li><span>Name:&nbsp;</span><input id='nameText' type='text' /></li>
+    </ul>
+</div>
+
 <div id='themesContainer' style="display:none" >
      <select id='themes'>
          <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css'>Smoothness</option>
@@ -73,121 +89,181 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
     jQuery(function(){
 
-        var $t = $("#tabs");
+        var tabs = initTabs();
+        var messageDialog = initMessageDialog();
+        var findDialog = initFindDialog();
+        var newDialog = initNewDialog();
 
-        //maximize the tab height
-        var wh = $(window).height();
-        var fudge = wh * 0.1;
-        $t.height(wh - $t.offset().top - fudge);
+        initSidebar();
+        initDocAccordion();
+        initToolbar();
+        initThemes();
 
-        //create the object that manages editor tabs
-        var tabs = new EditorTabs( $t );
 
-        //create an initial empty document
-        tabs.createNew();
-        tabs.refresh(true);
 
-        //we want the tabs container to be resizable
-        $t.resizable({
-            helper: "ui-resizable-helper",
-            stop: function(event, ui) {
-                tabs.refresh(true);
+        function initFindDialog(){
+
+            //create the find dialog
+            return new FindDialog({
+                dialogElemSelector: '#findDialog',
+                findTextSelector: '#findText',
+                foundTextClassName: 'foundText',
+                caseSensitiveSelector: '#caseSensitive',
+                getEditor: function(){ return tabs.getEditor(); }
+            });
+        }
+
+        function initMessageDialog(){
+
+            //messagedialog used when saving/compile docs
+            return new MessageDialog('#messageDialog');
+        }
+
+        function initNewDialog(){
+             var dialogOptions = {
+                autoOpen: false,
+                resizable: false,
+                title: 'New',
+                 buttons: {
+                    "Ok" : function(){
+                        var selected = $(this).find('input').filter(":checked");
+                        var name = $(this).find('#nameText').val();
+                        if (selected.size() > 0){
+                            onDocumentNew(selected.val(), name);
+                        }
+
+                        $(this).dialog("close");
+                    },
+                    "Cancel" : function() { $(this).dialog("close"); }
+                },
+                width: 400
+            };
+            return $("#newDialog").dialog(dialogOptions);
+        }
+
+        function initSidebar(){
+            //set the sidebar height equal to the height of the tab set
+            $("#sidebar").height($("#tabs").outerHeight());
+        }
+
+        function initDocAccordion(){
+
+            //create the document accordion.
+            var accordion = new DocAccordion("#accordion", {
+                documentClicked: onAccordionDocumentClicked
+            });
+
+            //get a listing of Apex classes and add to the accordion
+            getDocList('/apex.json', 'ApexClass', function(docs){
+                accordion.appendDocuments("Apex", docs);
+            });
+
+            //get a listing of Apex pages and add to the accordion
+            getDocList('/vf.json', 'ApexPage',function(docs){
+                accordion.appendDocuments("Visualforce", docs);
+            });
+
+        }
+
+        function initTabs(){
+            var $t = $("#tabs");
+
+            //maximize the tab height
+            var wh = $(window).height();
+            var fudge = wh * 0.1;
+            $t.height(wh - $t.offset().top - fudge);
+
+            //create the object that manages editor tabs
+            var tabs = new EditorTabs( $t );
+
+            //create an initial empty document
+            tabs.createNew();
+            tabs.refresh(true);
+
+            //we want the tabs container to be resizable
+            $t.resizable({
+                helper: "ui-resizable-helper",
+                stop: function(event, ui) {
+                    tabs.refresh(true);
+                }
+            });
+
+            return tabs;
+        }
+
+        function initToolbar(){
+            //configure toolbar buttons
+            var buttons = [
+                {
+                    selector: '#new',
+                    icon: 'silk-icon-new',
+                    onClick: function(){ newDialog.dialog('open'); }
+                },
+                {
+                    selector: '#save',
+                    icon: "silk-icon-save",
+                    onClick: onDocumentSave
+                },
+                {
+                    selector: '#undo',
+                    icon: "silk-icon-undo",
+                    onClick: function(){
+                        var editor = tabs.getEditor();
+                        if (editor != null){
+                            editor.undo();
+                        }
+                    }
+                },
+                {
+                    selector: '#redo',
+                    icon: 'silk-icon-redo',
+                    onClick: function(){
+                        var editor = tabs.getEditor();
+                        if (editor != null){
+                            editor.redo();
+                        }
+                    }
+                },
+                {
+                    selector: '#find',
+                    icon: 'silk-icon-find',
+                    onClick: function(){
+                        var editor = tabs.getEditor();
+                        if (editor != null){
+                            var selection = $.trim(editor.getSelection());
+                            findDialog.show(selection);
+                        }
+                    }
+                }
+            ];
+
+            //now create the toolbar
+            var toolbar = new Toolbar("#toolbar", buttons);
+        }
+
+        function initThemes(){
+
+            //move the themes container to the bottom of the page
+            var themesContainer = $('#themesContainer');
+            $('footer').append(themesContainer.detach());
+            themesContainer.show();
+
+            //handle theme selection
+            var themes = themesContainer.find('#themes');
+            themes.change(function(){
+                var themeLink = $('head').find('link[href*=jquery-ui]');
+                themeLink.attr('href', $(this).val());
+
+                //store the theme name in a cookie
+                $.cookie("ockley_theme", $(this).find('option:selected').first().text());
+            });
+
+            //if there is a cookie with a selected theme, restore that theme
+            var selectedTheme = $.cookie('ockley_theme');
+            if(selectedTheme){
+                var option = themes.find('option:contains(' + selectedTheme + ')');
+                themes.val(option.val()).trigger('change');
             }
-        });
-
-        //set the sidebar height equal to the height of the tab set
-        $("#sidebar").height($t.outerHeight());
-
-        //messagedialog used when saving/compile docs
-        var messageDialog = new MessageDialog('#messageDialog');
-
-        //create the find dialog
-        var findDialog = new FindDialog({
-            dialogElemSelector: '#findDialog',
-            findTextSelector: '#findText',
-            foundTextClassName: 'foundText',
-            caseSensitiveSelector: '#caseSensitive',
-            getEditor: function(){ return tabs.getEditor(); }
-        });
-
-        //create the document accordion.
-        var accordion = new DocAccordion("#accordion", {
-            documentClicked: onDocumentClicked
-        });
-
-        //get a listing of Apex classes and add to the accordion
-        getDocList('/apex.json', 'ApexClass', function(docs){
-            accordion.appendDocuments("Apex", docs);
-        });
-
-        //get a listing of Apex pages and add to the accordion
-        getDocList('/vf.json', 'ApexPage',function(docs){
-            accordion.appendDocuments("Visualforce", docs);
-        });
-
-        //configure toolbar buttons
-        var buttons = [
-            {
-                selector: '#save',
-                icon: "silk-icon-save",
-                onClick: onDocumentSave
-            },
-            {
-                selector: '#undo',
-                icon: "silk-icon-undo",
-                onClick: function(){
-                    var editor = tabs.getEditor();
-                    if (editor != null){
-                        editor.undo();
-                    }
-                }
-            },
-            {
-                selector: '#redo',
-                icon: 'silk-icon-redo',
-                onClick: function(){
-                    var editor = tabs.getEditor();
-                    if (editor != null){
-                        editor.redo();
-                    }
-                }
-            },
-            {
-                selector: '#find',
-                icon: 'silk-icon-find',
-                onClick: function(){
-                    var editor = tabs.getEditor();
-                    if (editor != null){
-                        var selection = $.trim(editor.getSelection());
-                        findDialog.show(selection);
-                    }
-                }
-            }
-        ];
-
-        //now create the toolbar
-        var toolbar = new Toolbar("#toolbar", buttons);
-
-        //move the themes container to the bottom of the page
-        var themesContainer = $('#themesContainer');
-        $('footer').append(themesContainer.detach());
-        themesContainer.show();
-
-        //handle theme selection
-        var themes = themesContainer.find('#themes');
-        themes.change(function(){
-            var themeLink = $('head').find('link[href*=jquery-ui]');
-            themeLink.attr('href', $(this).val());
-
-            //store the theme name in a cookie
-            $.cookie("ockley_theme", $(this).find('option:selected').first().text());
-        });
-
-        //if there is a cookie with a selected theme, restore that theme
-        var selectedTheme = $.cookie('ockley_theme');
-        if(selectedTheme){
-            var option = themes.find('option:contains(' + selectedTheme + ')');
-            themes.val(option.val()).trigger('change');
         }
 
         //fetch a listing of apex or vf documents
@@ -336,8 +412,80 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             });
         }
 
+        function checkDeployStatus(deployId){
+            return function(){
+                var url = '/apex/deploystatus/' + deployId + '.json';
+
+                //get the lastmodified date for the document
+                //if it appears to be newer than the last save, warn the user
+                $.getJSON(url, function(data){
+                    log('deploy status result: ');
+                    log(data);
+                    if ($.isArray(data) && data.length > 0){
+                        data = data[0];
+                        if (data.hasOwnProperty('done')){
+                            if (data.done.text === 'true'){
+                                messageDialog.hide();
+                            }
+                            else{
+                                setTimeout(checkDeployStatus(deployId), 2000);
+                            }
+                        }
+                    }
+                });
+            };
+        }
+
+
+        function onDocumentNew(docType, docName){
+
+            var url, msg;
+
+            log('creating new document of type: ' + docType);
+            if (docType === 'apex'){
+                url = '/apex.json';
+                msg = 'Deploying New Apex Class...';
+            }
+            else if (docType === 'vf'){
+                url = '/vf.json';
+                msg = 'Creating New Visualforce page...';
+            }
+            else if (docType === 'res'){
+                
+            }
+            messageDialog.show(msg);
+
+            $.post(url, { name: docName }, function(data) {
+
+                log('Create result: ');
+                log(data);
+                var success = false, done = false;
+                if (typeof data == 'string' && data == 'Success'){
+                    success = true;
+                }
+                else if ($.isArray(data) && data.length > 0){
+                    data = data[0];
+                    if (data.hasOwnProperty('done')){
+                        success = true;
+                        done = (data.done.text === 'true');
+                    }
+                }
+
+                if (success){
+                    if (false === done){
+                        setTimeout(checkDeployStatus(data.id.text), 2000);
+                    }
+                    else{
+                        messageDialog.hide();
+                    }
+                }
+
+            });
+
+        }
+
         //called when a document title is clicked in the accordion.
-        function onDocumentClicked(headerTitle, link){
+        function onAccordionDocumentClicked(headerTitle, link){
             var docId = link.attr('id');
 
             //if it's already open, just activate the tab

@@ -33,20 +33,28 @@
 }
 
 #messageDialog,
-#findDialog {
+#findDialog,
+#newDialog{
     background-color:white;
     padding: 1em;
 }
 
-#findDialog ul{
+#findDialog ul,
+#newDialog ul{
     list-style: none;
 }
-#findDialog li{
+#findDialog li,
+#newDialog li{
     margin: 0.5em;
 }
 #findText {
     width: 250px;
 }
+
+#newDialog label{
+    padding-left: 4px;
+}
+
 .foundText{
     background-color: yellow;
 }
@@ -79,6 +87,7 @@
     width: 200px;
 }
 
+.silk-icon-new,
 .silk-icon-undo,
 .silk-icon-redo,
 .silk-icon-save,
@@ -89,6 +98,10 @@
     background-repeat: no-repeat;
     height: 16px;
     width: 16px;
+}
+
+.silk-icon-new {
+    background-image: url("/images/silk_icons/add.png") !important;
 }
 
 .silk-icon-undo {

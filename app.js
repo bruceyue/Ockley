@@ -7,6 +7,7 @@ var fs = require('fs');
 var express = require('./node_modules/express');
 var mustachio = require('./node_modules/mustachio');
 var utils = require('./utils.js')();
+var SFDC_API_VERSION = '21.0';
 
 var sfdcOptions = {
     //Note: ockleydev.* are files that contain private and public keys from remote access setup in Salesforce Org
@@ -75,7 +76,7 @@ function updateSession(session, state){
         var urls = state.urls;
 
         for(var key in urls){
-            urls[key] = urls[key].replace('{version}', '21.0');
+            urls[key] = urls[key].replace('{version}', SFDC_API_VERSION);
         }
 
         if (urls.hasOwnProperty('metadata')){
@@ -164,6 +165,9 @@ app.get('/token', function(req, res){
                 onSuccess: function(identityInfo){
 
                     updateSession(req.session, identityInfo);
+
+                    //console.log(req.session.sfdc.urls);
+                    
                     res.redirect('/editor');
                 },
                 onError: function(identityErr){
@@ -292,11 +296,87 @@ app.post('/apex/:id.:format?', function(req, res){
     });
 });
 
+//create a new apex class
+app.post('/apex.:format?', function(req, res){
+
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+        res.send('Format not available', 400);
+        return;
+    }
+
+    if (req.body == null || req.body.name == null){
+        res.send('Missing content param', 400);
+        return;
+    }
+
+    var fileName = req.body.name + '.cls';
+    var fileContent = "public with sharing class " + req.body.name + " {\r\n}";
+    if (req.body.content != null){
+        fileContent = req.body.content;
+    }
+        
+    var files = [{
+        "name": fileName,
+        "content": fileContent,
+        "folder": "classes"
+    },{
+        "name": fileName + "-meta.xml",
+        "content": '<?xml version="1.0" encoding="UTF-8"?><ApexClass xmlns="http://soap.sforce.com/2006/04/metadata"><apiVersion>' + SFDC_API_VERSION + '</apiVersion><status>Active</status></ApexClass>',
+        "folder": "classes"
+    },{
+        "name": "package.xml",
+        "content": '<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata"><types><members>*</members><name>ApexClass</name></types><version>'+ SFDC_API_VERSION + '</version></Package>',
+        "folder":''
+    }];
+
+    sfdc.deploy(req.session.sfdc.urls.metadata, req.session.sfdc.access_token, files, {
+
+            onSuccess: function(results){
+                console.log(results);
+                res.send(results, 200);
+            },
+            onError: function(error){
+                console.log('deploy error - ' + error);
+                //note: don't return error code here.
+                //ui will display returned error message
+                res.send(error);
+            }
+    });
+});
+
+
 //get apex class lastmodified datetime stamp
 app.get('/apex/lastmodified/:id.:format?', function(req, res){
     getLastModified(req, res, 'ApexClass');
 });
 
+app.get('/apex/deploystatus/:id.:format?', function(req, res){
+
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+       if (req.params.format != 'json'){
+        res.send('Format not available', 400);
+        return;
+    }
+
+    sfdc.getDeployStatus(req.session.sfdc.urls.metadata, req.session.sfdc.access_token,  req.params.id, {
+        onSuccess: function(results){
+            res.send(results, 200);
+        },
+        onError: function(error){
+            console.log('deploy status error - ' + error);
+            res.send(error);
+        }
+    });
+
+});
 
 //get a specific vf page
 app.get('/vf/:id.:format?', function(req, res){
@@ -382,6 +462,61 @@ app.post('/vf/:id.:format?', function(req, res){
         }
     });
 });
+
+//create a new Visualforce Page
+app.post('/vf.:format?', function(req, res){
+
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+        res.send('Format not available', 400);
+        return;
+    }
+
+    if (req.body == null || req.body.name == null){
+        res.send('Missing content param', 400);
+        return;
+    }
+
+    var fileName = req.body.name + '.page';
+    var fileContent = "<apex:page >\r\n<h1>Congratulations</h1>\r\nThis is your new Page\r\n</apex:page>";
+    if (req.body.content != null){
+        fileContent = req.body.content;
+    }
+
+    var files = [{
+        "name": fileName,
+        "content": fileContent,
+        "folder": "pages"
+    },{
+        "name": fileName + "-meta.xml",
+        "content": '<?xml version="1.0" encoding="UTF-8"?><ApexPage xmlns="http://soap.sforce.com/2006/04/metadata"><apiVersion>' + SFDC_API_VERSION + '</apiVersion><status>Active</status></ApexPage>',
+        "folder": "pages"
+    },{
+        "name": "package.xml",
+        "content": '<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata"><types><members>*</members><name>ApexPage</name></types><version>' + SFDC_API_VERSION + '</version></Package>',
+        "folder":''
+    }];
+
+    sfdc.deploy(req.session.sfdc.urls.metadata, req.session.sfdc.access_token, files, {
+
+            onSuccess: function(results){
+                console.log(results);
+                res.send(results, 200);
+            },
+            onError: function(error){
+                console.log('deploy error - ' + error);
+                //note: don't return error code here.
+                //ui will display returned error message
+                res.send(error);
+            }
+    });
+
+});
+
 
 //get vf page lastmodified datetime stamp
 app.get('/vf/lastmodified/:id.:format?', function(req, res){
