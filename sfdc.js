@@ -297,7 +297,7 @@ module.exports = function(options){
         req.write(content);
         req.end();
     };
-
+/*
     this.soapCreate = function(serverUrl, sessionId, sObjectTypeName, record, options){
         var soap = "";
         soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:urn="urn:enterprise.soap.sforce.com" xmlns:urn1="urn:sobject.enterprise.soap.sforce.com">';
@@ -368,7 +368,7 @@ module.exports = function(options){
         req.write(soap);
         req.end();
     };
-
+*/
     this.compile = function(serverUrl, sessionId, code, options){
 
         var soap = "";
@@ -439,7 +439,7 @@ module.exports = function(options){
         });
     }
 
-    this.getDeployStatus = function(serverUrl, sessionId, id, options) {
+    this.getDeployStatus = function(serverUrl, sessionId, id, deployResult, options) {
 
         var soap = "";
         soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:met="http://soap.sforce.com/2006/04/metadata">';
@@ -453,10 +453,12 @@ module.exports = function(options){
         var actionBeginTag = "<met:checkStatus>";
         var actionEndTag = "</met:checkStatus>";
 
-        //if (options.deployStatus){
-        //    var actionBeginTag = "<met:checkDeployStatus>";
-        //    var actionEndTag = "</met:checkDeployStatus>";
-        //}
+
+        if (deployResult){
+            actionBeginTag = "<met:checkDeployStatus>";
+            actionEndTag = "</met:checkDeployStatus>";
+        }
+
 
         soap += actionBeginTag;
         soap += "  <met:asyncProcessId>" + id + "</met:asyncProcessId>";
@@ -595,6 +597,7 @@ module.exports = function(options){
             });
             res.on('end', function() {
                 if (res.statusCode == '200') {
+                    console.log('Deploy got result: ' + data);
                     parseResults(data, ['result'], options);
                 }
                 else {

@@ -355,7 +355,7 @@ app.get('/apex/lastmodified/:id.:format?', function(req, res){
     getLastModified(req, res, 'ApexClass');
 });
 
-app.get('/apex/deploystatus/:id.:format?', function(req, res){
+app.get('/deploystatus/:id.:format?', function(req, res){
 
     if (!isAuthenticated(req)){
         res.redirect("/login");
@@ -366,12 +366,35 @@ app.get('/apex/deploystatus/:id.:format?', function(req, res){
         return;
     }
 
-    sfdc.getDeployStatus(req.session.sfdc.urls.metadata, req.session.sfdc.access_token,  req.params.id, {
+    sfdc.getDeployStatus(req.session.sfdc.urls.metadata, req.session.sfdc.access_token,  req.params.id, false, {
         onSuccess: function(results){
             res.send(results, 200);
         },
         onError: function(error){
             console.log('deploy status error - ' + error);
+            res.send(error);
+        }
+    });
+
+});
+
+app.get('/deployresult/:id.:format?', function(req, res){
+
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+       if (req.params.format != 'json'){
+        res.send('Format not available', 400);
+        return;
+    }
+
+    sfdc.getDeployStatus(req.session.sfdc.urls.metadata, req.session.sfdc.access_token,  req.params.id, true, {
+        onSuccess: function(results){
+            res.send(results, 200);
+        },
+        onError: function(error){
+            console.log('deploy result error - ' + error);
             res.send(error);
         }
     });
@@ -493,7 +516,7 @@ app.post('/vf.:format?', function(req, res){
         "folder": "pages"
     },{
         "name": fileName + "-meta.xml",
-        "content": '<?xml version="1.0" encoding="UTF-8"?><ApexPage xmlns="http://soap.sforce.com/2006/04/metadata"><apiVersion>' + SFDC_API_VERSION + '</apiVersion><status>Active</status></ApexPage>',
+        "content": '<?xml version="1.0" encoding="UTF-8"?><ApexPage xmlns="http://soap.sforce.com/2006/04/metadata"><apiVersion>' + SFDC_API_VERSION + '</apiVersion><label>' +  req.body.name + '</label></ApexPage>',
         "folder": "pages"
     },{
         "name": "package.xml",

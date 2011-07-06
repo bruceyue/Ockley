@@ -317,6 +317,34 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             return msg;
         }
 
+        function getResult(data){
+            var ret = {
+                "success" : false,
+                "data": data
+            };
+
+            if (typeof data == 'string' && data == 'Success'){
+                ret.success = true;
+            }
+            else if ($.isArray(data) && data.length > 0){
+                ret.success = true;
+                ret.data = data = data[0];
+                if (data.hasOwnProperty('success')){
+                    ret.success =  (data.success.text === 'true');
+                }
+                if (data.hasOwnProperty('done')){
+                    ret.done = (data.done.text == 'true');
+                }
+                if (data.hasOwnProperty('numbercomponenterrors')){
+                    if (parseInt(data.numbercomponenterrors, 10) > 0){
+                        ret.success = false;
+                    }
+                }
+            }
+
+            return ret;
+        }
+
         //save an apex or vf document
         function saveDocument(docId, docType, content, successCallback){
 
@@ -337,18 +365,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
                 log('Compile/Save result: ');
                 log(data);
-                if (typeof data == 'string' && data == 'Success'){
-                    success = true;
-                }
-                else if ($.isArray(data) && data.length > 0){
-                    data = data[0];
-                    if (data.hasOwnProperty('success')){
-                        if (data.success.text === 'true'){
-                            success = true;
-                        }
-                    }
-                }
-                if (success){
+
+                var result = getResult(data);
+                if (result.success){
                     messageDialog.hide();
                     if (successCallback != null){
                         successCallback.apply(this, []);
@@ -414,28 +433,42 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         function checkDeployStatus(deployId){
             return function(){
-                var url = '/apex/deploystatus/' + deployId + '.json';
+                var url = '/deploystatus/' + deployId + '.json';
 
-                //get the lastmodified date for the document
-                //if it appears to be newer than the last save, warn the user
                 $.getJSON(url, function(data){
-                    log('deploy status result: ');
+                    log('deploy status: ');
                     log(data);
-                    if ($.isArray(data) && data.length > 0){
-                        data = data[0];
-                        if (data.hasOwnProperty('done')){
-                            if (data.done.text === 'true'){
-                                messageDialog.hide();
-                            }
-                            else{
-                                setTimeout(checkDeployStatus(deployId), 2000);
-                            }
+
+                    var result = getResult(data);
+                    if (result.success){
+                        if (!result.done){
+                            setTimeout(checkDeployStatus(deployId), 2000);
+                            return;
                         }
                     }
+                    setTimeout(checkDeployResult(deployId), 500);
                 });
             };
         }
 
+        function checkDeployResult(deployId){
+            return function(){
+                var url = '/deployresult/' + deployId + '.json';
+
+                $.getJSON(url, function(data){
+                    log('deploy result: ');
+                    log(data);
+
+                    var result = getResult(data);
+                    if (result.success){
+                        messageDialog.hide();
+                    }
+                    else{
+                        messageDialog.setMessage("Failed to create new document!").showOk(true);
+                    }
+                });
+            };
+        }
 
         function onDocumentNew(docType, docName){
 
@@ -451,7 +484,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 msg = 'Creating New Visualforce page...';
             }
             else if (docType === 'res'){
-                
+                //TODO - add support for creating static resources
             }
             messageDialog.show(msg);
 
@@ -459,26 +492,13 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
                 log('Create result: ');
                 log(data);
-                var success = false, done = false;
-                if (typeof data == 'string' && data == 'Success'){
-                    success = true;
-                }
-                else if ($.isArray(data) && data.length > 0){
-                    data = data[0];
-                    if (data.hasOwnProperty('done')){
-                        success = true;
-                        done = (data.done.text === 'true');
-                    }
-                }
 
-                if (success){
-                    if (false === done){
-                        setTimeout(checkDeployStatus(data.id.text), 2000);
-                    }
-                    else{
-                        messageDialog.hide();
-                    }
+                var result = getResult(data);
+                if (result.success && result.done){
+                    messageDialog.hide();
+                    return;
                 }
+                setTimeout(checkDeployStatus(result.data.id.text), 2000);
 
             });
 
