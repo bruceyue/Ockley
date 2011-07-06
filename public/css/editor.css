@@ -1,90 +1,19 @@
 
+/**** Toolbar and Toolbar Icons ****/
+
 #toolbar{
-    height: 100%;
-    width: 95%;
-    float:left;
-    padding: 4px;
-    margin-left: 1px;
-    margin-bottom: 2px;
-}
-
-#sidebar {
-    width: 15%;
-    min-width: 10%;
-    height: 100%;
-    float:left;
-    margin-right: 2px;
-    clear:left;
-}
-
-#tabs{
-    width: 80%;
-    min-width: 40%;
-    height: 100%;
+    height:43px; /* toolbar height is fixed */
+    width: 100%;
     float:left;
 }
 
-#tabs ul {
-    margin: 0;
+#toolbar .ui-button {
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
-#tabs div.ui-tabs-panel{
-    padding: 0 !important;
-}
-
-#messageDialog,
-#findDialog,
-#newDialog{
-    background-color:white;
-    padding: 1em;
-}
-
-#findDialog ul,
-#newDialog ul{
-    list-style: none;
-}
-#findDialog li,
-#newDialog li{
-    margin: 0.5em;
-}
-#findText {
-    width: 250px;
-}
-
-#newDialog label{
-    padding-left: 4px;
-}
-
-.foundText{
-    background-color: yellow;
-}
-.currentLine{
-    background-color: #dcdcdc !important;
-}
-
-#apexContent, #vfContent{
-    padding-left: 0.5em;
-    font-size: 0.75em;
-    overflow-x: hidden;
-}
-
-#apexContent ul, #vfContent ul{
-     list-style: none;
-}
-
-#apexContent li, #vfContent li{
-     margin-bottom: 0.5em;
-}
-
-.ui-resizable-helper { border: 1px dotted gray; }
-
-.CodeMirror{
-    border: 1px solid #eee;
-}
-
-#themesContainer{
-    float: left;
-    width: 200px;
+#new { /*leftmost toolbar button */
+    margin-left: 4px;
 }
 
 .silk-icon-new,
@@ -116,4 +45,113 @@
 .silk-icon-find {
     background-image: url("/images/silk_icons/find.png") !important;
 }
+
+/**** Sidebar ****/
+
+
+#sidebar {
+    width: 15%;
+    /*min-width: 10%;*/
+    height: 90%;
+    float:left;
+}
+
+/**** Tabs ****/
+
+#tabs{
+    width: 84%;
+    /*min-width: 40%;*/
+    height: 90%;
+    float:left;
+}
+
+#tabs ul {
+    margin: 0;
+}
+
+#tabs div.ui-tabs-panel{
+    padding: 0 !important;
+}
+
+/**** Dialogs ****/
+
+#messageDialog,
+#findDialog,
+#newDialog{
+    background-color:white;
+    padding: 1em;
+}
+
+#findDialog ul,
+#newDialog ul{
+    list-style: none;
+}
+#findDialog li,
+#newDialog li{
+    margin: 0.5em;
+}
+#findText {
+    width: 250px;
+}
+
+#newDialog label{
+    padding-left: 4px;
+}
+
+.foundText{
+    background-color: yellow;
+}
+.currentLine{
+    background-color: #dcdcdc !important;
+}
+
+/**** Accordion Content ****/
+
+#apexContent, #vfContent{
+    padding-left: 0.5em;
+    font-size: 0.75em;
+    overflow-x: hidden;
+}
+
+#apexContent ul, #vfContent ul{
+     list-style: none;
+}
+
+#apexContent li, #vfContent li{
+     margin-bottom: 0.5em;
+}
+
+
+/**** CodeMirror ****/
+
+.ui-tabs-panel {
+    height: 92%;
+}
+
+.editorContainer{
+    height: 100%;
+}
+
+.CodeMirror{
+    border: 1px solid #eee;
+    height: 100%;
+}
+
+.CodeMirror-scroll {
+  height: 100%;
+}
+
+
+/**** Themes ****/
+
+#themesContainer{
+    width: 100%;
+    clear:both;
+}
+
+/*** Other ***/
+
+/*
+.ui-resizable-helper { border: 1px dotted gray; }
+*/
 

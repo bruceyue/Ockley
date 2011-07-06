@@ -3,14 +3,12 @@ Ockley 1.0
 Copyright 2011,  Matthew Page
 licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 -->
-<div>
-    <span id="toolbar" class="ui-widget-header ui-corner-all" >
-        <button id="new">New</button>
-        <button id="save">Save</button>
-        <button id="undo">Undo</button>
-        <button id="redo">Redo</button>
-        <button id="find">Find</button>
-    </span>
+<div id="toolbar" class="ui-widget-header ui-corner-all" >
+    <button id="new">New</button>
+    <button id="save">Save</button>
+    <button id="undo">Undo</button>
+    <button id="redo">Redo</button>
+    <button id="find">Find</button>
 </div>
 <div id="sidebar" class="ui-widget ui-widget-content ui-corner-all">
     <div id="accordion">
@@ -32,6 +30,31 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 	<div id="tabs-new">
 	</div>
 </div>
+
+<div id='themesContainer' >
+     <select id='themes'>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css'>Smoothness</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/cupertino/jquery-ui.css'>Cupertino</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-lightness/jquery-ui.css'>Lightness</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-darkness/jquery-ui.css'>Darkness</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/redmond/jquery-ui.css'>Redmond</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/start/jquery-ui.css'>Start</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/sunny/jquery-ui.css'>Sunny</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/overcast/jquery-ui.css'>Overcast</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/le-frog/jquery-ui.css'>Le Frog</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/flick/jquery-ui.css'>Flick</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/pepper-grinder/jquery-ui.css'>Pepper Grinder</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/eggplant/jquery-ui.css'>Eggplant</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/dark-hive/jquery-ui.css'>Dark Hive</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css'>South Street</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/blitzer/jquery-ui.css'>Blitzer</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/humanity/jquery-ui.css'>Humanity</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/hot-sneaks/jquery-ui.css'>Hot Sneaks</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/trontastic/jquery-ui.css'>Trontastic</option>
+         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/vader/jquery-ui.css'>Vader</option>
+     </select>
+</div>
+
 
 <div id='messageDialog' style='display:none'>
     <p></p>
@@ -59,31 +82,6 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         <li><span>Name:&nbsp;</span><input id='nameText' type='text' /></li>
     </ul>
 </div>
-
-<div id='themesContainer' style="display:none" >
-     <select id='themes'>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css'>Smoothness</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/cupertino/jquery-ui.css'>Cupertino</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-lightness/jquery-ui.css'>Lightness</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-darkness/jquery-ui.css'>Darkness</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/redmond/jquery-ui.css'>Redmond</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/start/jquery-ui.css'>Start</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/sunny/jquery-ui.css'>Sunny</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/overcast/jquery-ui.css'>Overcast</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/le-frog/jquery-ui.css'>Le Frog</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/flick/jquery-ui.css'>Flick</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/pepper-grinder/jquery-ui.css'>Pepper Grinder</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/eggplant/jquery-ui.css'>Eggplant</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/dark-hive/jquery-ui.css'>Dark Hive</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css'>South Street</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/blitzer/jquery-ui.css'>Blitzer</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/humanity/jquery-ui.css'>Humanity</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/hot-sneaks/jquery-ui.css'>Hot Sneaks</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/trontastic/jquery-ui.css'>Trontastic</option>
-         <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/vader/jquery-ui.css'>Vader</option>
-     </select>
- </div>
-
 
 <script>
 
@@ -143,7 +141,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         function initSidebar(){
             //set the sidebar height equal to the height of the tab set
-            $("#sidebar").height($("#tabs").outerHeight());
+            //$("#sidebar").height($("#tabs").outerHeight());
         }
 
         function initDocAccordion(){
@@ -168,10 +166,12 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         function initTabs(){
             var $t = $("#tabs");
 
+            /*
             //maximize the tab height
             var wh = $(window).height();
             var fudge = wh * 0.1;
             $t.height(wh - $t.offset().top - fudge);
+            */
 
             //create the object that manages editor tabs
             var tabs = new EditorTabs( $t );
@@ -180,6 +180,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             tabs.createNew();
             tabs.refresh(true);
 
+            /*
             //we want the tabs container to be resizable
             $t.resizable({
                 helper: "ui-resizable-helper",
@@ -187,7 +188,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                     tabs.refresh(true);
                 }
             });
-
+            */
             return tabs;
         }
 
@@ -243,10 +244,12 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         function initThemes(){
 
+            /*
             //move the themes container to the bottom of the page
             var themesContainer = $('#themesContainer');
             $('footer').append(themesContainer.detach());
             themesContainer.show();
+            */
 
             //handle theme selection
             var themes = themesContainer.find('#themes');

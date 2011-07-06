@@ -55,6 +55,7 @@ function EditorTabs(elemId) {
     }
 
     function resizeAll(){
+        /*
         _resized = true;
         var w = _tabSet.innerWidth() - 6;
         var h = _tabSet.innerHeight() - 6;
@@ -62,6 +63,7 @@ function EditorTabs(elemId) {
         h -= tabsNav.outerHeight();
 
         _tabSet.find('.ui-tabs-panel, .editorContainer, .CodeMirror, .CodeMirror-scroll').width(w).height(h);
+        */
     }
 
     function select(tabId){

@@ -87,17 +87,25 @@ a:hover { color: #036; }
 /* Ockley Styles Begin                   */
 /*-------------------------------------- */
 
-body{
+
+body, html{
+    height: 100%;
 }
 
 #container{
+    height: 100%;
+    width: 90%;
+    float:left;
+
     font-family: Verdana,Arial,sans-serif;
     font-size: 1.1em;
-    width: 90%;
-    margin:  2em auto 2em auto;
+
+    margin-left: 5%;
+    margin-right: 5%;
 }
 
 header {
+    width: 100%;
 }
 
 header ul{
@@ -118,19 +126,23 @@ header a {
     text-decoration: none;
 }
 
-#main{
-    margin: 2em 0 2em 0;
+#main {
+    height: 90%;
+    width: 100%;
+    float:left;
 }
 
+
 footer{
-    clear: both;
+    width: 100%;
+    float: left;
+
     font-size: 85%;
 }
 
 footer p{
     padding-top: 1em;
 }
-
 
 /*-------------------------------------- */
 /* Ockley Styles End                     */
