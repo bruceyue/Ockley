@@ -584,8 +584,8 @@ module.exports = function(options){
             headers: headers
         };
 
-        console.log('Deploy requesting: ' + JSON.stringify(reqOpts));
-        console.log('Deploy soap: ' + soap);
+        //console.log('Deploy requesting: ' + JSON.stringify(reqOpts));
+        //console.log('Deploy soap: ' + soap);
 
         var req = https.request(reqOpts, function(res) {
             var data = '';
