@@ -9,30 +9,8 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
     <button id="undo">Undo</button>
     <button id="redo">Redo</button>
     <button id="find">Find</button>
-</div>
-<div id="sidebar" class="ui-widget ui-widget-content ui-corner-all">
-    <div id="accordion">
-	    <h3 id="apexHeader"><a href="#">Apex</a></h3>
-        <div id="apexContent">
-            <p>loading...</p>
-        </div>
-        <h3 id="vfHeader"><a href="#">Visualforce</a></h3>
-        <div id="vfContent">
-            <p>loading...</p>
-        </div>
-    </div>
-</div>
-        
-<div id="tabs">
-    <ul>
-		<li><a href="#tabs-new">+</a></li>
-	</ul>
-	<div id="tabs-new">
-	</div>
-</div>
 
-<div id='themesContainer' >
-     <select id='themes'>
+    <select id='themes'>
          <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css'>Smoothness</option>
          <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/cupertino/jquery-ui.css'>Cupertino</option>
          <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-lightness/jquery-ui.css'>Lightness</option>
@@ -53,9 +31,30 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
          <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/trontastic/jquery-ui.css'>Trontastic</option>
          <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/vader/jquery-ui.css'>Vader</option>
      </select>
+
 </div>
+<div class="editorColumns">
+    <div id="sidebar" class="ui-widget ui-widget-content ui-corner-all">
+        <div id="accordion">
+            <h3 id="apexHeader"><a href="#">Apex</a></h3>
+            <div id="apexContent">
+                <p>loading...</p>
+            </div>
+            <h3 id="vfHeader"><a href="#">Visualforce</a></h3>
+            <div id="vfContent">
+                <p>loading...</p>
+            </div>
+        </div>
+    </div>
 
-
+    <div id="tabs">
+        <ul>
+            <li><a href="#tabs-new">+</a></li>
+        </ul>
+        <div id="tabs-new">
+        </div>
+    </div>
+</div>
 <div id='messageDialog' style='display:none'>
     <p></p>
 </div>
@@ -166,13 +165,6 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         function initTabs(){
             var $t = $("#tabs");
 
-            /*
-            //maximize the tab height
-            var wh = $(window).height();
-            var fudge = wh * 0.1;
-            $t.height(wh - $t.offset().top - fudge);
-            */
-
             //create the object that manages editor tabs
             var tabs = new EditorTabs( $t );
 
@@ -180,15 +172,6 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             tabs.createNew();
             tabs.refresh(true);
 
-            /*
-            //we want the tabs container to be resizable
-            $t.resizable({
-                helper: "ui-resizable-helper",
-                stop: function(event, ui) {
-                    tabs.refresh(true);
-                }
-            });
-            */
             return tabs;
         }
 
@@ -244,15 +227,8 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         function initThemes(){
 
-            /*
-            //move the themes container to the bottom of the page
-            var themesContainer = $('#themesContainer');
-            $('footer').append(themesContainer.detach());
-            themesContainer.show();
-            */
-
             //handle theme selection
-            var themes = themesContainer.find('#themes');
+            var themes = $('#themes');
             themes.change(function(){
                 var themeLink = $('head').find('link[href*=jquery-ui]');
                 themeLink.attr('href', $(this).val());

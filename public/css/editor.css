@@ -4,6 +4,7 @@
 #toolbar{
     height:43px; /* toolbar height is fixed */
     width: 100%;
+    min-width: 600px;
     float:left;
 }
 
@@ -46,23 +47,39 @@
     background-image: url("/images/silk_icons/find.png") !important;
 }
 
-/**** Sidebar ****/
+#themes {
+    float: right;
+    margin-top: 12px;
+    margin-right: 4px;
+}
 
+/**** Wrapper for both sidebar and tabs ****/
+
+.editorColumns {
+    width: 100%;
+    min-width: 600px;
+    height: 100%;
+    float:left;
+}
+
+/**** Sidebar ****/
 
 #sidebar {
     width: 15%;
-    /*min-width: 10%;*/
-    height: 90%;
+    height: 91%;
     float:left;
+    margin:  0;
+    overflow: hidden;
 }
 
 /**** Tabs ****/
 
 #tabs{
-    width: 84%;
-    /*min-width: 40%;*/
+    width: 83%;
     height: 90%;
-    float:left;
+    float:right;
+    margin: 0;
+    overflow: hidden;
 }
 
 #tabs ul {
@@ -126,10 +143,12 @@
 
 .ui-tabs-panel {
     height: 92%;
+    overflow: hidden;
 }
 
 .editorContainer{
     height: 100%;
+    width: 100%;
 }
 
 .CodeMirror{
@@ -138,20 +157,6 @@
 }
 
 .CodeMirror-scroll {
-  height: 100%;
+    height: 100%;
 }
-
-
-/**** Themes ****/
-
-#themesContainer{
-    width: 100%;
-    clear:both;
-}
-
-/*** Other ***/
-
-/*
-.ui-resizable-helper { border: 1px dotted gray; }
-*/
 
