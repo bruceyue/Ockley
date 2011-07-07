@@ -227,8 +227,14 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         function initThemes(){
 
-            //handle theme selection
             var themes = $('#themes');
+
+            themes.selectmenu({
+                style:'dropdown',
+                width:150
+            });
+
+            //handle theme selection
             themes.change(function(){
                 var themeLink = $('head').find('link[href*=jquery-ui]');
                 themeLink.attr('href', $(this).val());
