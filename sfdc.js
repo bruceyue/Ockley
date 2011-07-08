@@ -20,7 +20,7 @@ module.exports = function(options){
     utils.extend(settings, options);
 
     settings.oAuthUrl = 'https://login.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + settings.oAuthCallbackURI;
-    settings.oAuthSandboxUrl = 'https://test.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + settings.oAuthCallbackURI;
+    settings.oAuthSandboxUrl = 'https://test.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicSbKey + '&redirect_uri=' + settings.oAuthCallbackURI + '/sandbox';
 
 
     function parseResults(xmlString, tagNames, options){
@@ -99,16 +99,20 @@ module.exports = function(options){
         _parser.close();
     }
 
-    function getAccessToken(token, callbacks) {
+    function getAccessToken(token, isSandbox, callbacks) {
 
-        var post_data = 'code=' + token + '&grant_type=authorization_code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + escape(settings.oAuthCallbackURI) + '&client_secret=' + settings.oAuthPrivateKey;
+        var publicKey = isSandbox ? settings.oAuthPublicSbKey : settings.oAuthPublicKey;
+        var privateKey = isSandbox ? settings.oAuthPrivateSbKey : settings.oAuthPrivateKey;
+        var callbackUri = isSandbox ? settings.oAuthCallbackURI + "/sandbox" : settings.oAuthCallbackURI;
+
+        var post_data = 'code=' + token + '&grant_type=authorization_code&client_id=' + publicKey + '&redirect_uri=' + escape(callbackUri) + '&client_secret=' + privateKey;
 
         var options = {
-            host: 'login.salesforce.com',
+            host: isSandbox ? 'test.salesforce.com' : 'login.salesforce.com',
             path: '/services/oauth2/token',
             method: 'POST',
             headers: {
-                'host': 'login.salesforce.com',
+                'host': isSandbox ? 'test.salesforce.com' : 'login.salesforce.com',
                 'Content-Length': post_data.length,
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept':'application/jsonrequest',
@@ -141,11 +145,11 @@ module.exports = function(options){
         req.end();
     }
 
-    this.getOAuthRequestToken = function(url, callbacks) {
+    this.getOAuthRequestToken = function(url, isSandbox, callbacks) {
 
         var tokenURL = unescape(url);
         var requestToken = escape(tokenURL.substring(tokenURL.indexOf("code=") + 5, tokenURL.length));
-        getAccessToken(requestToken, callbacks);
+        getAccessToken(requestToken, isSandbox, callbacks);
     };
 
     this.query = function(requestUrl, accessToken, query, options){
@@ -297,78 +301,7 @@ module.exports = function(options){
         req.write(content);
         req.end();
     };
-/*
-    this.soapCreate = function(serverUrl, sessionId, sObjectTypeName, record, options){
-        var soap = "";
-        soap += '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:urn="urn:enterprise.soap.sforce.com" xmlns:urn1="urn:sobject.enterprise.soap.sforce.com">';
-        soap += "<soapenv:Header>";
-        soap += "  <urn:SessionHeader>";
-        soap += "     <urn:sessionId>" + sessionId + "</urn:sessionId>";
-        soap += "  </urn:SessionHeader>";
-        soap += "</soapenv:Header>";
-        soap += "<soapenv:Body>";
-        soap += "  <urn:create>";
-        soap += "    <urn:sObjects xsi:type='urn1:" + sObjectTypeName + "' >";
 
-                        for(var field in record){
-                            if (record.hasOwnProperty(field)){
-                                 soap += "<urn1:" + field + ">" + record[field] + "</urn1:" + field + ">";
-                            }
-                        }
-
-        soap += "    </urn:sObjects>";
-        soap += "  </urn:create>";
-        soap += "</soapenv:Body>";
-        soap += "</soapenv:Envelope>";
-
-        var url = utils.parseUrl(serverUrl);
-
-        var headers = {
-            'Host': url.host,
-            'SOAPAction': 'Create',
-            'Content-Type': 'text/xml',
-            'Content-Length': soap.length
-        };
-
-        var path = "/" + url.path;
-        var reqOpts = {
-            host: url.host,
-            port: 443,
-            path: path,
-            method: 'POST',
-            headers: headers
-        };
-
-        var req = https.request(reqOpts, function(res) {
-              var data = '';
-              res.setEncoding('utf8');
-              res.on('data', function(chunk) {
-                  if (chunk){
-                    data += chunk;
-                  }
-              });
-              res.on('end', function(){
-                  if (res.statusCode == '200'){
-                      parseResults(data, ['result'], options);
-                  }
-                  else{
-                      if (options.onError){
-                          options.onError.apply(this, [data]);
-                      }
-                  }
-              });
-
-        });
-        req.on('error', function(error){
-            if (options.onError){
-                options.onError.apply(this, [error]);
-            }
-        });
-
-        req.write(soap);
-        req.end();
-    };
-*/
     this.compile = function(serverUrl, sessionId, code, options){
 
         var soap = "";

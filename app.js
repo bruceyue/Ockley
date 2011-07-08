@@ -12,8 +12,16 @@ var SFDC_API_VERSION = '21.0';
 var sfdcOptions = {
     //Note: ockleydev.* are files that contain private and public keys from remote access setup in Salesforce Org
     //Instructions on setting up remote access: http://wiki.developerforce.com/index.php/Getting_Started_with_the_Force.com_REST_API
+
+    //production
     oAuthPublicKey : process.env.OAuthPublicKey || fs.readFileSync('../ockleydev.public').toString(),
     oAuthPrivateKey : process.env.OAuthPrivateKey || fs.readFileSync('../ockleydev.private').toString(),
+
+    //sandbox
+    oAuthPublicSbKey : process.env.OAuthPublicSbKey || fs.readFileSync('../ockleydevsb.public').toString(),
+    oAuthPrivateSbKey : process.env.OAuthPrivateSbKey || fs.readFileSync('../ockleydevsb.private').toString(),
+
+    
     oAuthCallbackURI: process.env.OAuthCallbackUri || 'https://localhost:3000/token'
 };
 
@@ -154,11 +162,12 @@ app.post('/login', function(req, res) {
     res.redirect(url);
 });
 
-app.get('/token', function(req, res){
+app.get('/token/:sandbox?', function(req, res){
 
     var callbacks = {
         onSuccess: function(response){
 
+            console.log(response);
             updateSession(req.session, response);
 
             sfdc.getIdentityInfo(response.id, response.access_token, {
@@ -184,7 +193,12 @@ app.get('/token', function(req, res){
         }
     };
 
-    sfdc.getOAuthRequestToken( req.url, callbacks );
+    var isSandbox = false;
+    if (req.params && req.params.sandbox){
+        isSandbox = true;
+    }
+    console.log('is sandbox == ' + isSandbox);
+    sfdc.getOAuthRequestToken( req.url, isSandbox, callbacks );
 });
 
 
