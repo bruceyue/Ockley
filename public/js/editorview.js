@@ -33,7 +33,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
     Ockley.EditorView = Backbone.View.extend({
 
         tabs: null,
-        tab: null,
+        tabId: null,
         tabPanel: null,
         editor: null,
 
@@ -46,7 +46,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         initialize: function(){
-            _.bindAll(this, "render");
+            _.bindAll(this, "render", "undo", "redo", "isSelectedView");
             this.model.bind('change', this.render);
             if (this.options.hasOwnProperty("tabs")){
                 this.tabs = this.options.tabs;
@@ -58,15 +58,23 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         },
 
+        isSelectedView: function() {
+            return (this.tabs.getSelected() == this.tabId );
+        },
+
         undo: function() {
-          if (this.editor != null){
-              this.editor.undo();
+          if (this.isSelectedView()){
+              if (this.editor != null){
+                  this.editor.undo();
+              }
           }
         },
 
         redo: function() {
-          if (this.editor != null){
-              this.editor.redo();
+          if (this.isSelectedView()){
+              if (this.editor != null){
+                  this.editor.redo();
+              }
           }
         },
 
@@ -75,7 +83,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             if (this.editor == null){
                 var title = this.model.get("name");
                 var ret = this.tabs.createNew({ 'title' : title });
-                this.tab = ret.tab;
+                this.tabId = ret.tabId;
                 this.tabPanel = ret.tabPanel;
 
                 var content = $("<div class='editorContainer'><textarea class='editor' ></textarea></div>");

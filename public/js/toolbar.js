@@ -41,15 +41,23 @@ Manages a jQuery UI collection of buttons.
 
             if (this.toolBar == null){
                 if (this.options.buttons != null){
+                    var eventsMgr = this.options.eventsMgr;
                     $.each(this.options.buttons, function(index, btn){
 
-                        if (btn.hasOwnProperty('selector') && btn.hasOwnProperty('icon') && btn.hasOwnProperty('onClick')){
+                        if (btn.hasOwnProperty('selector') &&
+                            btn.hasOwnProperty('icon')){
                             $( btn.selector ).button({
                                     text: false,
                                     icons: {
                                         primary: btn.icon
                                     }
-                            }).click(btn.onClick);
+                            }).click(function(){
+                                if (btn.hasOwnProperty('name')){
+                                    if (eventsMgr != null){
+                                        eventsMgr.trigger(btn.name);
+                                    }
+                                }
+                            });
                         }
                     });
                 }

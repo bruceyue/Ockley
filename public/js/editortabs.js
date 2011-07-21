@@ -66,11 +66,11 @@ function EditorTabs(elemId) {
         select(index);
 
         //Note: tabs are links which have hrefs pointing to the tabpanels
-        var tab = getTab(id);
+        //var tab = getTab(id);
 
         var tabPanel = _tabSet.find(id);
 
-        return { "tab" : tab, "tabPanel" : tabPanel };
+        return { "tabId" : id, "tabPanel" : tabPanel };
 
     };
 
