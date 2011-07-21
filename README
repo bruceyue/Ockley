@@ -6,23 +6,49 @@ What currently works (not a lot)
 * It will retrieve your Apex code and Visualforce pages
 * basic apex/vf syntax highlighting
 * You can edit and save Apex and Visualforce.
+* You can create New Apex Classes and Visualforce pages.
+* It will warn you if you attempt to overwrite something that is newer than what you are editing
+* It is jQuery theme-enabled
 * You can deploy it to Heroku!
 
 Setup
 
-The instructions here will get you started: http://dailyjs.com/2010/11/08/node-tutorial-2/
+The instructions here will get you started in Node: http://dailyjs.com/2010/11/08/node-tutorial-2/
 
 * Install Node.js - http://nodejs.org/
 * Install npm - https://github.com/isaacs/npm
 * Install a bunch of modules.
     cd Ockley
     npm install express mustache mustachio sax
-* Run the build script
+
+* Run the build script [ Work in progress ]
     cd Ockley/build
     ant build
+
 * Run Ockley
     cd Ockley
     node app.js
+
+
+Code Notes
+
+The app is built using express.js and the template engine is mustache.
+
+The js files in the root are the core of the node app.
+app.js - is the app (of course)
+sfdc.js - routines for interacting with salesforce via REST or SOAP.
+utils.js - is pretty self-explanatory
+
+In views, layout.mustache is the "master template" and the other templates are injected into it.
+Mustachio is used to set the template params for things like stylesheets and scripts.
+The mustachio files are named similar to the template but have a js suffix.
+
+In public, we have standard web stuff.
+Any javascript that I wrote is under public/js.
+Javascript libraries that I didn't write, live under public/libs.
+
+
+Acknowledgements
 
 Special thanks to Mark James for the awesome icons:
 http://www.famfamfam.com/lab/icons/silk/

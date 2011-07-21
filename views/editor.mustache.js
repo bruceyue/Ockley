@@ -14,7 +14,10 @@ module.exports = {
             "css/apex.css"];
   },
   scripts: function(){
-    return ["//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js",
+    return ["libs/underscore/underscore-min.js",
+            "libs/backbone/backbone.js",
+            "//ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js",
+            "//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js",
             "libs/ui.tabs.closable/ui.tabs.closable.min.js",
             "libs/jquery.ui.selectmenu.js",
             "libs/codemirror/lib/codemirror.js",
@@ -23,11 +26,14 @@ module.exports = {
             "libs/codemirror/mode/css/css.js",
             "libs/codemirror/mode/javascript/javascript.js",
             "js/apex.js",
-            "js/editortabs.js",
-            "js/docaccordion.js",
             "js/messagedialog.js",
             "js/finddialog.js",
-            "js/toolbar.js"];
+            "js/toolbar.js",
+            "js/doc.js",
+            "js/doclist.js",
+            "js/doclistitem.js",
+            "js/editortabs.js",
+            "js/editorview.js"];
   }
 };
 
