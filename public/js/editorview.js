@@ -6,29 +6,12 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
 (function(){
 
-    // Save a reference to the global object.
-    var root = this;
-
-    // The top-level namespace. All public Ockley classes and modules will
-    // be attached to this. Exported for both CommonJS and the browser.
-    var Ockley;
-    if (typeof exports !== 'undefined') {
-        Ockley = exports;
-    } else {
-        if (root.Ockley == null){
-            root.Ockley = {};
-        }
-        Ockley = root.Ockley;
-    }
+    var Ockley = namespace("Ockley");
 
     // Make sure we have both backbone and jQuery
-    if (root.Backbone === 'undefined' ||  root.jQuery === 'undefined'){
+    if (this.Backbone === 'undefined' ||  this.jQuery === 'undefined'){
         throw new Error('Backbone and jQuery are required!');
     }
-
-    var Editor = {
-
-    };
 
     Ockley.EditorView = Backbone.View.extend({
 
@@ -36,6 +19,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         tabId: null,
         tabPanel: null,
         editor: null,
+        foundTextClassName: 'foundText',
 
         defaults: {
             mode: 'apex'
@@ -54,12 +38,47 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             if (this.options.hasOwnProperty("eventsMgr")){
                 this.options.eventsMgr.bind("undo", this.undo);
                 this.options.eventsMgr.bind("redo", this.redo);
+                this.options.eventsMgr.bind("findNext", this.findNext);
+                this.options.eventsMgr.bind("findPrevious", this.findPrevious);
+                this.options.eventsMgr.bind("findClose", this.findClose);
             }
 
         },
 
         isSelectedView: function() {
             return (this.tabs.getSelected() == this.tabId );
+        },
+
+        find: function(findState, next){
+            if (findState.changed || findState.cursor == null){
+                findState.cursor = this.editor.getSearchCursor(findState.query, null, !findState.caseSensitive);
+                findState.changed = false;
+            }
+            var ret = false;
+            if (next){
+                ret = findState.cursor.findNext();
+            }
+            else{
+                ret = findState.cursor.findPrevious();
+            }
+            if (ret){
+                this.editor.markText(findState.cursor.from(), findState.cursor.to(), this.foundTextClassName);
+                this.editor.setCursor(findState.cursor.from());
+            }
+        },
+
+        findNext: function(findState){
+            this.find(findState, true);
+        },
+
+        findPrevious: function(findState){
+            this.find(findState, false);
+        },  
+
+        findClose: function( findState ){
+            //when the dialog is closed, remove the foundText class for anything that was found
+            $(this.editor.getWrapperElement()).find('.' + this.foundTextClassName).removeClass(this.foundTextClassName);
+            findState.cursor = null;
         },
 
         undo: function() {

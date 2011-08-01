@@ -8,23 +8,10 @@ Manages a jQuery UI collection of buttons.
 
 (function(){
 
-    // Save a reference to the global object.
-    var root = this;
-
-    // The top-level namespace. All public Ockley classes and modules will
-    // be attached to this. Exported for both CommonJS and the browser.
-    var Ockley;
-    if (typeof exports !== 'undefined') {
-        Ockley = exports;
-    } else {
-        if (root.Ockley == null){
-            root.Ockley = {};
-        }
-        Ockley = root.Ockley;
-    }
+    var Ockley = namespace("Ockley");
 
     // Make sure we have both backbone and jQuery
-    if (root.Backbone === 'undefined' ||  root.jQuery === 'undefined'){
+    if (this.Backbone === 'undefined' ||  this.jQuery === 'undefined'){
         throw new Error('Backbone and jQuery are required!');
     }
 

@@ -2,6 +2,8 @@
  Ockley 1.0
  Copyright 2011,  Matthew Page
  licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+
+ This handles syntax highlighting of apex files in CodeMirror
  */
 CodeMirror.defineMode("apex", function(config, parserConfig) {
     var indentUnit = config.indentUnit;
