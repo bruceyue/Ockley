@@ -31,6 +31,7 @@ Manages a jQuery UI tabs set.
         */
 
         var _tabSet = $(settings.tabsSelector);
+        var _tabsAutoNumber = 0;
 
         _tabSet.tabs({
             closable: true,
@@ -84,15 +85,11 @@ Manages a jQuery UI tabs set.
         this.createNew = function(options) {
 
             var totalTabs = getTabCount();
-            //var index = Math.max(totalTabs - 1, 0);
-            var id = settings.tabsSelector + totalTabs;
+            var id = '#editorTab' + _tabsAutoNumber++;
             var title = options ? options.title: "Untitled";
-            _tabSet.tabs("add", id, title, []);
+            _tabSet.tabs("add", id, title);
 
             select(totalTabs);
-
-            //Note: tabs are links which have hrefs pointing to the tabpanels
-            //var tab = getTab(id);
 
             var tabPanel = _tabSet.find(id);
 
