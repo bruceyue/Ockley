@@ -32,6 +32,7 @@
                 "Next" : findNext
             },
             close: onCloseDialog,
+            open: onOpenDialog,
             width: 400
         };
 
@@ -81,6 +82,15 @@
 
         function findNext(){
             find(false);
+        }
+
+        function onOpenDialog(event, ui){
+            if (settings.eventsMgr != null){
+                settings.eventsMgr.trigger('findOpen', _findState);
+                if (_findState.query != getQueryText()){
+                    setQueryText(_findState.query);
+                }
+            }
         }
 
         function onCloseDialog(event, ui){

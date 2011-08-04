@@ -28,6 +28,7 @@ module.exports = {
             "js/apex.js",
             "js/messagedialog.js",
             "js/finddialog.js",
+            "js/newdialog.js",
             "js/toolbar.js",
             "js/doc.js",
             "js/doclist.js",

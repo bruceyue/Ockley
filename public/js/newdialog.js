@@ -41,6 +41,12 @@
             width: 400
         };
         var _dlg = $(settings.dialogElemSelector).dialog(options);
+
+
+        this.show = function(){
+            _dlg.dialog('open');
+            return this;
+        };
     };
 
 }).call(this);

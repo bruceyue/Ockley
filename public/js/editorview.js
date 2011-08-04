@@ -30,7 +30,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         initialize: function(){
-            _.bindAll(this, "render", "undo", "redo", "isSelectedView");
+            _.bindAll(this, "render", "undo", "redo", "isSelectedView", "find", "findNext", "findPrevious", "findOpen", "findClose");
             this.model.bind('change', this.render);
             if (this.options.hasOwnProperty("tabs")){
                 this.tabs = this.options.tabs;
@@ -40,6 +40,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 this.options.eventsMgr.bind("redo", this.redo);
                 this.options.eventsMgr.bind("findNext", this.findNext);
                 this.options.eventsMgr.bind("findPrevious", this.findPrevious);
+                this.options.eventsMgr.bind("findOpen", this.findOpen);
                 this.options.eventsMgr.bind("findClose", this.findClose);
             }
 
@@ -68,17 +69,30 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         findNext: function(findState){
-            this.find(findState, true);
+            if (this.isSelectedView()){
+                this.find(findState, true);
+            }
         },
 
         findPrevious: function(findState){
-            this.find(findState, false);
+            if (this.isSelectedView()){
+                this.find(findState, false);
+            }
         },  
 
+        findOpen: function( findState ){
+            if (this.isSelectedView()){
+                //when the dialog is opened, place the currently selected text (if any) in the query box
+                findState.query = this.editor.getSelection() || "";
+            }
+        },
+
         findClose: function( findState ){
-            //when the dialog is closed, remove the foundText class for anything that was found
-            $(this.editor.getWrapperElement()).find('.' + this.foundTextClassName).removeClass(this.foundTextClassName);
-            findState.cursor = null;
+            if (this.isSelectedView()){
+                //when the dialog is closed, remove the foundText class for anything that was found
+                $(this.editor.getWrapperElement()).find('.' + this.foundTextClassName).removeClass(this.foundTextClassName);
+                findState.cursor = null;
+            }
         },
 
         undo: function() {
