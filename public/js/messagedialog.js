@@ -13,16 +13,47 @@
         throw new Error('Backbone and jQuery are required!');
     }
 
+    Ockley.MessageDialog = function(options){
 
-    Ockley.MessageDialog = function(elemId){
+        var settings = $.extend({
+            dialogElemSelector: '',
+            message: '',
+            "eventsMgr": null
+        }, options);
 
-        var options = {
+        var dialogOptions = {
             autoOpen: false,
             resizable: false,
-            closeText: ''
+            closeText: '',
+            close: onCloseDialog,
+            open: onOpenDialog,
         };
-        var _dlg = $(elemId).dialog(options);
+
+        var _dlg = $(settings.dialogElemSelector).dialog(dialogOptions);
+
+        //no titlebar
         _dlg.prev(".ui-dialog-titlebar").hide();
+
+        if (settings.message != null){
+            setMessage(settings.message);
+        }
+
+        function setMessage(msg){
+            _dlg.find('p').text(msg);
+        }
+        
+        function onOpenDialog(event, ui){
+            if (settings.eventsMgr != null){
+                settings.eventsMgr.trigger('msgOpen');
+            }
+        }
+
+        function onCloseDialog(event, ui){
+            if (settings.eventsMgr != null){
+                settings.eventsMgr.trigger('msgClose');
+            }
+        }
+
 
         this.show = function(msg, showOk){
             this.setMessage(msg);
@@ -37,7 +68,7 @@
         };
 
         this.setMessage = function(msg){
-            _dlg.find('p').text(msg);
+            setMessage(msg);
             return this;
         };
 

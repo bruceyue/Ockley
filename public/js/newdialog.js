@@ -20,11 +20,11 @@
             "eventsMgr": null
         }, options);
 
-        var options = {
+        var dialogOptions = {
             autoOpen: false,
             resizable: false,
             title: 'New',
-             buttons: {
+            buttons: {
                 "Ok" : function(){
                     var selected = $(this).find('input').filter(":checked");
                     var name = $(this).find('#nameText').val();
@@ -38,9 +38,23 @@
                 },
                 "Cancel" : function() { $(this).dialog("close"); }
             },
+            close: onCloseDialog,
+            open: onOpenDialog,
             width: 400
         };
-        var _dlg = $(settings.dialogElemSelector).dialog(options);
+        var _dlg = $(settings.dialogElemSelector).dialog(dialogOptions);
+
+        function onOpenDialog(event, ui){
+            if (settings.eventsMgr != null){
+                settings.eventsMgr.trigger('newOpen');
+            }
+        }
+
+        function onCloseDialog(event, ui){
+            if (settings.eventsMgr != null){
+                settings.eventsMgr.trigger('newClose');
+            }
+        }
 
 
         this.show = function(){

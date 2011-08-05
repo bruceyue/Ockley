@@ -174,4 +174,39 @@ window.namespace = function(name) {
         return result;
     };
 
+    // Creates a fancy select that handles theme selection
+    // Requires a select that is prepopulated with theme urls
+    //
+    //Example:
+    //<select id='themes'>
+    //  <option value='//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css'>Smoothness</option>
+    //  ...
+    //</select>
+    //
+    Ockley.jQueryUiThemesSelector = function(selector){
+            var themes = $(selector);
+
+            //create a fancy select menu
+            themes.selectmenu({
+                style:'dropdown',
+                width:150
+            });
+
+            //handle theme selection
+            themes.change(function(){
+                var themeLink = $('head').find('link[href*=jquery-ui]');
+                themeLink.attr('href', $(this).val());
+
+                //store the theme name in a cookie
+                $.cookie("ockley_theme", $(this).find('option:selected').first().text());
+            });
+
+            //if there is a cookie with a selected theme, restore that theme
+            var selectedTheme = $.cookie('ockley_theme');
+            if(selectedTheme){
+                var option = themes.find('option:contains(' + selectedTheme + ')');
+                themes.val(option.val()).trigger('change');
+            }
+    };
+
 }).call(this);

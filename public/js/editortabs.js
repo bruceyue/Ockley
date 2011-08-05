@@ -24,21 +24,12 @@ Manages a jQuery UI tabs set.
             throw Error('tabsSelector setting is required!');
         }
 
-
-        /*
-        if (!settings.hasOwnProperty('newTabSelector')){
-            throw Error('newTabSelector setting is required!');
-        }
-        */
-
         var _tabSet = $(settings.tabsSelector);
         var _tabsAutoNumber = 0;
 
         _tabSet.tabs({
             closable: true,
             closableClick: function(event, ui) {
-                    //prevent closing of the "new" tab
-                    //return (settings.newTabSelector !== $(ui.tab).attr('href'));
                     if (settings.hasOwnProperty('eventsMgr')){
                         settings.eventsMgr.trigger('tabClose', $(ui.tab));
                     }
@@ -109,26 +100,9 @@ Manages a jQuery UI tabs set.
 
         _tabSet.bind("tabsselect", { createNew : this.createNew },
             function(event, ui) {
-                var tab = $(ui.tab);
-                switch (tab.attr('href')) {
-                    /*
-                    case settings.newTabSelector:
-                        event.data.createNew();
-                        return false;
-                        break;
-                    */
-                    default:
-                        //TODO - refresh tabs?
-                        //refreshEditor(tab);
-                        break;
-                }
+                //var tab = $(ui.tab);
                 return true;
         });
-
-        setTimeout(function(){
-            removeCloseButton('#tabs-new');
-        }, 0);
-
     }
 
 }).call(this);
