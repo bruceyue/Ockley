@@ -24,6 +24,7 @@ Manages a jQuery UI tabs set.
             throw Error('tabsSelector setting is required!');
         }
 
+
         /*
         if (!settings.hasOwnProperty('newTabSelector')){
             throw Error('newTabSelector setting is required!');
@@ -38,6 +39,9 @@ Manages a jQuery UI tabs set.
             closableClick: function(event, ui) {
                     //prevent closing of the "new" tab
                     //return (settings.newTabSelector !== $(ui.tab).attr('href'));
+                    if (settings.hasOwnProperty('eventsMgr')){
+                        settings.eventsMgr.trigger('tabClose', $(ui.tab));
+                    }
 
                     return true;
                 }
@@ -60,10 +64,6 @@ Manages a jQuery UI tabs set.
             return _tabSet.find('ul.ui-tabs-nav li a');
         }
 
-        function getTabCount() {
-            return _tabSet.tabs("length");
-        }
-
         function getSelectedTab(){
             return _tabSet.find('ul.ui-tabs-nav li.ui-tabs-selected a');
         }
@@ -74,6 +74,11 @@ Manages a jQuery UI tabs set.
         }
 
         /* public */
+        this.getTabCount = function() {
+            return _tabSet.tabs("length");
+        };
+
+
         this.setSelected = function(tabId) {
             select(tabId);
         };
@@ -84,7 +89,7 @@ Manages a jQuery UI tabs set.
 
         this.createNew = function(options) {
 
-            var totalTabs = getTabCount();
+            var totalTabs = this.getTabCount();
             var id = '#editorTab' + _tabsAutoNumber++;
             var title = options ? options.title: "Untitled";
             _tabSet.tabs("add", id, title);
@@ -92,8 +97,13 @@ Manages a jQuery UI tabs set.
             select(totalTabs);
 
             var tabPanel = _tabSet.find(id);
+            var ret = { "tabId" : id, "tabPanel" : tabPanel };
 
-            return { "tabId" : id, "tabPanel" : tabPanel };
+            if (settings.hasOwnProperty('eventsMgr')){
+                settings.eventsMgr.trigger('tabOpen', ret);
+            }
+
+            return ret;
 
         };
 
