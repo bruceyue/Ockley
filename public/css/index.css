@@ -3,7 +3,7 @@
 	margin-top: 0.5em;
 }
 #main h2 {
-    margin-top:  10px;
+    margin-top:  1em;
     font-weight: bold;
 }
 #main p {
@@ -12,7 +12,8 @@
 }
 
 #main img{
-    margin-left: 10px;
+    margin-left: 1%;
+    max-width: 100%;
 }
 
 .sidebar {
@@ -49,5 +50,4 @@ COLUMNS
 .one_half, .one_third, .two_third, .three_fourth, .one_fourth, .one_fifth, .two_fifth, .three_fifth, .four_fifth, .one_sixth, .five_sixth{position:relative; margin-right:2%; float:left; margin-bottom:2.25em}
 .last{margin-right:0 !important; clear:right}
 .clearboth{clear:both; display:block; font-size:0; height:0; line-height:0; width:100%}
-.border { border: solid 1px red; }
 
