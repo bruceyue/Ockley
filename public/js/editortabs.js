@@ -97,12 +97,6 @@ Manages a jQuery UI tabs set.
             return ret;
 
         };
-
-        _tabSet.bind("tabsselect", { createNew : this.createNew },
-            function(event, ui) {
-                //var tab = $(ui.tab);
-                return true;
-        });
     }
 
 }).call(this);

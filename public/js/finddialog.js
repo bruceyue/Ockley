@@ -43,6 +43,10 @@
             isCaseSensitive: false,
             changed: false
         };
+        
+        if (settings.eventsMgr != null){
+            settings.eventsMgr.bind("find", showDialog);
+        }
 
         function getQueryText(){
             return _dlg.find(settings.findTextSelector).val();
@@ -99,10 +103,16 @@
             }
         }
 
-        this.show = function(text){
-            setQueryText(text);
+        function showDialog(text){
+            if (text != null){
+                setQueryText(text);
+            }
             _dlg.dialog('open');
             return this;
+        }
+
+        this.show = function(text){
+            showDialog(text);
         };
 
         this.hide = function(){

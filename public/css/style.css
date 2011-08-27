@@ -106,6 +106,8 @@ body, html{
 
 header {
     width: 100%;
+	margin-top: 1em;
+    border-bottom: 1px solid #e6e4e1;
 }
 
 header ul{
@@ -142,7 +144,7 @@ footer{
 }
 
 footer p{
-    padding-top: 1em;
+    /*padding-top: 1em;*/
 }
 
 /*-------------------------------------- */

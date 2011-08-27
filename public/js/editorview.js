@@ -30,7 +30,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         initialize: function(){
-            _.bindAll(this, "render", "undo", "redo", "isSelectedView", "find", "findNext", "findPrevious", "findOpen", "findClose");
+            _.bindAll(this, "render", "undo", "redo", "save", "isSelectedView", "find", "findNext", "findPrevious", "findOpen", "findClose");
             this.model.bind('change', this.render);
             if (this.options.hasOwnProperty("tabs")){
                 this.tabs = this.options.tabs;
@@ -42,6 +42,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 this.options.eventsMgr.bind("findPrevious", this.findPrevious);
                 this.options.eventsMgr.bind("findOpen", this.findOpen);
                 this.options.eventsMgr.bind("findClose", this.findClose);
+                this.options.eventsMgr.bind("save", this.save );
             }
 
         },
@@ -110,6 +111,15 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
               }
           }
         },
+
+        save: function() {
+          if (this.isSelectedView()){
+              if (this.editor != null){
+              
+              }
+          }
+        },
+
 
         render: function(){
             log('EditorView render');

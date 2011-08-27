@@ -1,5 +1,10 @@
+#main {
+	color: #607890;
+	margin-top: 0.5em;
+}
 #main h2 {
     margin-top:  10px;
+    font-weight: bold;
 }
 #main p {
     margin-top: 1em;
@@ -9,3 +14,40 @@
 #main img{
     margin-left: 10px;
 }
+
+.sidebar {
+	font-size: small;
+}
+
+.sidebar ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-indent: 0;
+    padding-bottom: 1em;
+}
+
+.sidebar li {
+	margin-top: 1.5em;
+}
+
+/*====================================
+COLUMNS
+=====================================*/
+.columns{width:100%; float:left; margin-bottom:1.25em}
+.one_half{width:48%}
+.one_third{width:31.91%}
+.two_third{width:65.33%}
+.one_fourth{width:23.40%}
+.three_fourth{width:74%}
+.one_fifth{width:16.8%}
+.one_sixth{width:13.33%}
+.two_fifth{width:37.6%}
+.three_fifth{width:58.4%}
+.four_fifth{width:67.2%}
+.five_sixth{width:82.67%}
+.one_half, .one_third, .two_third, .three_fourth, .one_fourth, .one_fifth, .two_fifth, .three_fifth, .four_fifth, .one_sixth, .five_sixth{position:relative; margin-right:2%; float:left; margin-bottom:2.25em}
+.last{margin-right:0 !important; clear:right}
+.clearboth{clear:both; display:block; font-size:0; height:0; line-height:0; width:100%}
+.border { border: solid 1px red; }
+
