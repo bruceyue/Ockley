@@ -130,7 +130,7 @@ function getLastModified(req, res, sObjectTypeName){
 }
 
 ///////////////////////////////////////////////////
-//ROUTES
+//BEGIN ROUTES
 
 app.get('/', function(req, res) {
 
@@ -301,12 +301,12 @@ app.put('/apex/:id.:format?', function(req, res){
 
             onSuccess: function(results){
                 res.send(results, 200);
+                return;
             },
             onError: function(error){
                 console.log('compile error - ' + error);
-                //note: don't return error code here.
-                //ui will display returned error message
-                res.send(error);
+                res.send(error, 400);
+                return;
             }
     });
 });
@@ -410,7 +410,7 @@ app.get('/deployresult/:id.:format?', function(req, res){
         },
         onError: function(error){
             console.log('deploy result error - ' + error);
-            res.send(error);
+            res.send(error, 500);
         }
     });
 
@@ -488,13 +488,13 @@ app.put('/vf/:id.:format?', function(req, res){
 
     sfdc.update(req.session.sfdc.urls.sobjects, req.session.sfdc.access_token, 'ApexPage',  req.params.id, { Markup:  markup }, {
         onSuccess: function(){
-            res.send('Success', 200);
+            res.send({}, 200);
+            return;
         },
         onError: function(error){
             console.log('update error - ' + error);
-            //note: don't return error code here.
-            //ui will display returned error message
-            res.send(error);
+            res.send(error, 500);
+            return;
         }
     });
 });
@@ -564,6 +564,12 @@ app.get('*', function(req, res) {
     console.log('404:' + req.url);
     res.send("Nope", 404);
 });
+
+
+//END ROUTES
+///////////////////////////////////////////////////
+
+
 
 // Only listen on $ node app.js
 if (!module.parent) {

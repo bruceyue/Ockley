@@ -211,11 +211,16 @@ window.namespace = function(name) {
     
 	//try to build a message from the error results returned by salesforce
 	Ockley.getSfErrorMsg = function(err){
-	
+
+		//auto convert return value of getSfResult into something we can deal with
+	    if (typeof err == 'object' && err.hasOwnProperty('data') && err.hasOwnProperty('success')){
+	    	err = err.data;	
+	    }
+
 	    if (typeof err == 'string'){
 	        err = JSON.parse(err);
 	    }
-	
+		
 	    if ($.isArray(err) && err.length > 0){
 	        err = err[0];
 	    }
@@ -269,6 +274,16 @@ window.namespace = function(name) {
 	        if (data.hasOwnProperty('errorCode')){
 	        	ret.success = false;
 	        }
+	    }
+	    else if (typeof data == 'object') {
+	    	if (data.hasOwnProperty('status')){
+	    		if (parseInt(data.status, 10) != 200){
+	    			ret.success = false;
+	    		}
+	    	}
+	    	if (data.hasOwnProperty('responseText')){
+	    		ret.data = JSON.parse(data.responseText);
+	    	}
 	    }
 	
 	    return ret;

@@ -22,6 +22,21 @@ module.exports = function(options){
     settings.oAuthUrl = 'https://login.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicKey + '&redirect_uri=' + settings.oAuthCallbackURI;
     settings.oAuthSandboxUrl = 'https://test.salesforce.com/services/oauth2/authorize?display=touch&response_type=code&client_id=' + settings.oAuthPublicSbKey + '&redirect_uri=' + settings.oAuthCallbackURI + '/sandbox';
 
+	function callback(name, callbacks, arg){
+		
+		if (callbacks && typeof callbacks == 'object' && callbacks.hasOwnProperty(name)){
+		    callbacks[name].apply(this, arg);
+        }
+	}
+	
+	function callbackSuccess(callbacks, arg){
+		callback('onSuccess', callbacks, arg);
+	}
+
+	function callbackError(callbacks, arg){
+		callback('onError', callbacks, arg);
+	}
+
 
     function parseResults(xmlString, tagNames, options){
 
@@ -79,20 +94,13 @@ module.exports = function(options){
             }
         };
         _parser.onerror = function(err) {
-            var onError = _options.onError;
-            if (onError){
-                while(_tags.length){
-                    popTag();
-                }
-                onError.call(this, err, _results);
+            while(_tags.length){
+                popTag();
             }
-
+            callbackError(_options, _results);
         };
         _parser.onend = function() {
-            var onSuccess = _options.onSuccess;
-            if (onSuccess){
-                onSuccess.call(this, _results);
-            }
+            callbackSuccess(_options, _results);
         };
 
         _parser.write(xmlString);
@@ -130,15 +138,11 @@ module.exports = function(options){
                     });
 
                     res.on('end', function(d) {
-                        if (callbacks && callbacks.hasOwnProperty('onSuccess')){
-                            callbacks.onSuccess.apply(this, [JSON.parse(data)]);
-                        }
+                    	callbackSuccess(callbacks, [JSON.parse(data)]);
                     });
 
                 }).on('error', function(e) {
-                    if (callbacks && callbacks.hasOwnProperty('onError')){
-                            callbacks.onError.apply(this, [e]);
-                    }
+	               	callbackError(callbacks, [e]);
                 });
 
         req.write(post_data);
@@ -178,21 +182,15 @@ module.exports = function(options){
               });
               res.on('end', function(){
                   if (res.statusCode == '200'){
-                      if (options.onSuccess){
-                        options.onSuccess.apply(this, [data]);
-                      }
+              		callbackSuccess(options, [data]);
                   }
                   else{
-                      if (options.onError){
-                        options.onError.apply(this, [data]);
-                      }
+                  	callbackError(options, [data]);
                   }
               });
         });
         req.on('error', function(error){
-            if (options.onError){
-                options.onError.apply(this, [error]);
-            }
+            callbackError(options, [error]);
         });
 
         req.end();
@@ -228,22 +226,16 @@ module.exports = function(options){
               });
               res.on('end', function(){
                   if (res.statusCode == '200' || res.statusCode == '204'){
-                      if (options.onSuccess){
-                          options.onSuccess.apply(this, []);
-                      }
+                  		callbackSuccess(options, []);
                   }
                   else{
-                      if (options.onError){
-                        options.onError.apply(this, [data]);
-                      }
+                  		callbackError(options, [data]);
                   }
               });
 
         });
         req.on('error', function(error){
-            if (options.onError){
-                options.onError.apply(this, [error]);
-            }
+            callbackError(options, [error]);
         });
 
         req.write(content);
@@ -280,22 +272,16 @@ module.exports = function(options){
               res.on('end', function(){
                   console.log('Create: got status code: ' + res.statusCode);
                   if (res.statusCode == '200' || res.statusCode == '204'){
-                      if (options.onSuccess){
-                          options.onSuccess.apply(this, []);
-                      }
+                      callbackSuccess(options, []);
                   }
                   else{
-                      if (options.onError){
-                        options.onError.apply(this, [data]);
-                      }
+                  	  callbackError(options, [data]);
                   }
               });
 
         });
         req.on('error', function(error){
-            if (options.onError){
-                options.onError.apply(this, [error]);
-            }
+            callbackError(options, [error]);
         });
 
         req.write(content);
@@ -346,20 +332,41 @@ module.exports = function(options){
               });
               res.on('end', function(){
                   if (res.statusCode == '200'){
-                      parseResults(data, ['result'], options);
+                  
+                      parseResults(data, ['result'], {
+
+                      	"onSuccess" : function(results){
+                      	
+                      		console.log(results);
+                      		if (typeof results == 'array' && results.length > 0){
+                      			results = results[0];
+                      		}
+                      		
+                      		if (typeof results == 'object' && results.hasOwnProperty('success')){
+                      			if (results.success.text == 'false'){
+                      				callbackError(options, [results]);
+                      				return;
+                      			}
+                      		}
+                      		
+	                      	callbackSuccess(options, [results]);
+                      	
+                      	},
+                      	"onError" : function(error){
+							
+							callbackError(options, [data]);
+                      	}
+                      	
+                      });
                   }
                   else{
-                      if (options.onError){
-                          options.onError.apply(this, [data]);
-                      }
+                  		callbackError(options, [data]);
                   }
               });
 
         });
         req.on('error', function(error){
-            if (options.onError){
-                options.onError.apply(this, [error]);
-            }
+            callbackError(options, [error]);
         });
 
         req.write(soap);
@@ -430,17 +437,13 @@ module.exports = function(options){
                     parseResults(data, ['result'], options);
                 }
                 else {
-                    if (options.onError) {
-                        options.onError.apply(this, [data]);
-                    }
+                    callbackError(options, [data]);
                 }
             });
 
         });
         req.on('error', function(error) {
-            if (options.onError) {
-                options.onError.apply(this, [error]);
-            }
+	        callbackError(options, [error]);
         });
 
         req.write(soap);
@@ -534,17 +537,13 @@ module.exports = function(options){
                     parseResults(data, ['result'], options);
                 }
                 else {
-                    if (options.onError) {
-                        options.onError.apply(this, [data]);
-                    }
+                    callbackError(options, [data]);
                 }
             });
 
         });
         req.on('error', function(error) {
-            if (options.onError) {
-                options.onError.apply(this, [error]);
-            }
+            callbackError(options, [error]);
         });
 
         req.write(soap);
@@ -592,22 +591,16 @@ module.exports = function(options){
                       fetchIdentityInfo(res.headers.location, accessToken, options);
                   }
                   else if (res.statusCode == '200'){
-                      if (options.onSuccess){
-                          options.onSuccess.apply(this, [JSON.parse(data)]);
-                      }
+                      callbackSuccess(options, [JSON.parse(data)]);
                   }
                   else{
-                      if (options.onError){
-                        options.onError.apply(this, [data]);
-                      }
+                      callbackError(options, [data]);
                   }
               });
 
         });
         req.on('error', function(error){
-            if (options.onError){
-                options.onError.apply(this, [error]);
-            }
+            callbackError(options, [error]);
         });
         req.end();
     }

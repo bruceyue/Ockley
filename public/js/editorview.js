@@ -133,18 +133,12 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
               		{   
               			success: function(model, response){
               				if (eventsMgr != null){
-	              				var ret = Ockley.getSfResult(response);
-    	          				if (ret.success){
-        	      					eventsMgr.trigger('saved');
-            	  				}
-              					else {
-	              					eventsMgr.trigger('saveError', ret.data || ret);
-              					}
+    	      					eventsMgr.trigger('saved');
               				}
               			}, 
               			error: function(model, response){
               				if (eventsMgr != null){
-              					eventsMgr.trigger('saveError', response);
+              					eventsMgr.trigger('saveError', 	Ockley.getSfResult(response));
               				}
               			}
               		}
