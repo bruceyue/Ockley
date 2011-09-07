@@ -208,5 +208,71 @@ window.namespace = function(name) {
                 themes.val(option.val()).trigger('change');
             }
     };
+    
+	//try to build a message from the error results returned by salesforce
+	Ockley.getSfErrorMsg = function(err){
+	
+	    if (typeof err == 'string'){
+	        err = JSON.parse(err);
+	    }
+	
+	    if ($.isArray(err) && err.length > 0){
+	        err = err[0];
+	    }
+	
+	    var msg = 'Failed to receive result from request';
+	
+	    if (err.message){
+	        msg = err.message;
+	    }
+	    if (err.problem){
+	        msg = err.problem.text;
+	    }
+	    if (err.errors && err.errors.message){
+	        msg = err.errors.message.text;
+	    }
+	    if (err.line){
+	        msg += ' line: ' + err.line.text;
+	    }
+	    if (err.column){
+	        msg += ' column: ' + err.column.text;
+	    }
+	
+	    return msg;
+	};
+	
+	//try to get the results from data returned by salesforce
+	//may be success or error
+	Ockley.getSfResult = function(data){
+	    var ret = {
+	        "success" : false,
+	        "data": data
+	    };
+	
+	    if (typeof data == 'string' && data == 'Success'){
+	        ret.success = true;
+	    }
+	    else if ($.isArray(data) && data.length > 0){
+	        ret.success = true;
+	        ret.data = data = data[0];
+	        if (data.hasOwnProperty('success')){
+	            ret.success =  (data.success.text === 'true');
+	        }
+	        if (data.hasOwnProperty('done')){
+	            ret.done = (data.done.text == 'true');
+	        }
+	        if (data.hasOwnProperty('numbercomponenterrors')){
+	            if (parseInt(data.numbercomponenterrors, 10) > 0){
+	                ret.success = false;
+	            }
+	        }
+	        if (data.hasOwnProperty('errorCode')){
+	        	ret.success = false;
+	        }
+	    }
+	
+	    return ret;
+	};
+    
 
 }).call(this);

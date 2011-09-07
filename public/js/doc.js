@@ -35,9 +35,13 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         parse: function(response) {
-            var ret = response,
-                records = response.records,
-                len = records.length;
+            var ret = response, records, len;
+            records = response.records;
+            if (records == null){
+            	return null;
+            }
+            
+            len = records.length;
 
             if (records != null && len > 0){
                 ret = this.parseOne(records[0]);

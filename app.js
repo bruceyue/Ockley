@@ -278,7 +278,7 @@ app.get('/apex.:format?', function(req, res) {
 
 //save a specific apex page
 //warning: this overwrites without checking if something newer exists! You may want to call lastmodified first
-app.post('/apex/:id.:format?', function(req, res){
+app.put('/apex/:id.:format?', function(req, res){
 
     if (!isAuthenticated(req)){
         res.redirect("/login");
@@ -467,7 +467,7 @@ app.get('/vf.:format?', function(req, res) {
 
 //save a specific vf page
 //warning: this overwrites without checking if something newer exists! You may want to call lastmodified first
-app.post('/vf/:id.:format?', function(req, res){
+app.put('/vf/:id.:format?', function(req, res){
 
     if (!isAuthenticated(req)){
         res.redirect("/login");
@@ -483,8 +483,6 @@ app.post('/vf/:id.:format?', function(req, res){
         res.send('Missing content param', 400);
         return;
     }
-
-    //TODO - need to check to see if the document has been modified since the last time it was fetched
 
     var markup = req.body.content;
 

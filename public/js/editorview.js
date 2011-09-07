@@ -115,7 +115,40 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         save: function() {
           if (this.isSelectedView()){
               if (this.editor != null){
-              
+              	
+              	var eventsMgr = null;
+              	
+              	if (this.options.hasOwnProperty("eventsMgr")){
+              		eventsMgr = this.options.eventsMgr;
+              	}
+              	
+              	if (eventsMgr != null){
+					eventsMgr.trigger('saving');
+  				}
+              	
+              	this.model.save(
+              		{   
+              			'content' : this.editor.getValue() 
+              		}, 
+              		{   
+              			success: function(model, response){
+              				if (eventsMgr != null){
+	              				var ret = Ockley.getSfResult(response);
+    	          				if (ret.success){
+        	      					eventsMgr.trigger('saved');
+            	  				}
+              					else {
+	              					eventsMgr.trigger('saveError', ret.data || ret);
+              					}
+              				}
+              			}, 
+              			error: function(model, response){
+              				if (eventsMgr != null){
+              					eventsMgr.trigger('saveError', response);
+              				}
+              			}
+              		}
+              	);
               }
           }
         },
