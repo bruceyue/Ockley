@@ -60,6 +60,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         url: function() {
+            if (this.isNew){
+                return '/apex.json';    
+            }
             return "/apex/" + this.get('id') + '.json';
         }
 
@@ -74,6 +77,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         url: function() {
+            if (this.isNew){
+                return '/vf.json';    
+            }
             return "/vf/" + this.get('id') + '.json';
         }
     }, Ockley.Doc) );

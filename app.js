@@ -331,7 +331,7 @@ app.post('/apex.:format?', function(req, res){
 
     var fileName = req.body.name + '.cls';
     var fileContent = "public with sharing class " + req.body.name + " {\r\n}";
-    if (req.body.content != null){
+    if (req.body.content != null && req.body.content.length > 0){
         fileContent = req.body.content;
     }
         
@@ -349,6 +349,9 @@ app.post('/apex.:format?', function(req, res){
         "folder":''
     }];
 
+    console.log('deploying apex classes: ');
+    console.log(files);
+
     sfdc.deploy(req.session.sfdc.urls.metadata, req.session.sfdc.access_token, files, {
 
             onSuccess: function(results){
@@ -357,9 +360,7 @@ app.post('/apex.:format?', function(req, res){
             },
             onError: function(error){
                 console.log('deploy error - ' + error);
-                //note: don't return error code here.
-                //ui will display returned error message
-                res.send(error);
+                res.send(error, 500);
             }
     });
 });
@@ -387,7 +388,7 @@ app.get('/deploystatus/:id.:format?', function(req, res){
         },
         onError: function(error){
             console.log('deploy status error - ' + error);
-            res.send(error);
+            res.send(error, 500);
         }
     });
 
@@ -519,7 +520,7 @@ app.post('/vf.:format?', function(req, res){
 
     var fileName = req.body.name + '.page';
     var fileContent = "<apex:page >\r\n<h1>Congratulations</h1>\r\nThis is your new Page\r\n</apex:page>";
-    if (req.body.content != null){
+    if (req.body.content != null && req.body.content.length > 0){
         fileContent = req.body.content;
     }
 
@@ -536,6 +537,9 @@ app.post('/vf.:format?', function(req, res){
         "content": '<?xml version="1.0" encoding="UTF-8"?><Package xmlns="http://soap.sforce.com/2006/04/metadata"><types><members>*</members><name>ApexPage</name></types><version>' + SFDC_API_VERSION + '</version></Package>',
         "folder":''
     }];
+
+    console.log('deploying vf pages: ');
+    console.log(files);
 
     sfdc.deploy(req.session.sfdc.urls.metadata, req.session.sfdc.access_token, files, {
 

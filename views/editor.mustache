@@ -143,41 +143,66 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         });
 
 
+        var apexDocListContainer = $("#apexDocList");
+        var vfDocListContainer = $("#vfDocList");
+ 
+        function addDoc(doc, docType, container){
+            var view = null;
+            var mode = '';
+            if (docType == 'apex'){
+              view = new Ockley.ApexDocListItem({ model: doc });
+              editMode = 'apex';
+            }
+            else if (docType == 'vf') {
+              view = new Ockley.VisualforceDocListItem({ model: doc});
+              editMode = 'text/html';
+            }
+            container.append(view.render().el);
+
+            view = new Ockley.EditorView({
+                model: doc,
+                mode: editMode,
+                'tabs': tabs,
+                'eventsMgr': eventsMgr
+            });
+        }
+
+        function addDocs(docs, docType, container){
+           docs.each(function(doc){ addDoc(doc, docType, container) } );
+        }
+
+
         //create a list of apexdocs
         var apexDocs = new Ockley.ApexDocList();
         apexDocs.bind("reset", function(docs) {
-            var view, container = $("#apexDocList");
-            docs.each(function(doc) {
-
-                view = new Ockley.ApexDocListItem({ model: doc });
-                container.append(view.render().el);
-
-                view = new Ockley.EditorView({
-                    model: doc,
-                    mode: 'apex',
-                    'tabs': tabs,
-                    'eventsMgr': eventsMgr
-                });
-            });
+            log('apexDocs - reset');
+            addDocs(docs, 'apex', apexDocListContainer);
         }).fetch();
 
+        apexDocs.bind("add", function(doc){
+            log('apexDocs - add');
+            addDoc(doc, 'apex', apexDocListContainer);
+            messageDialog.hide();
+        });
+
+/*
+        apexDocs.bind("create", function(docs){
+            log('apexDocs - create');
+        });
+*/
 
         //create a list of visualforce docs
         var vfDocs = new Ockley.VisualforceDocList();
         vfDocs.bind("reset", function(docs) {
-            var view, container = $("#vfDocList");
-            docs.each(function(doc) {
-                view = new Ockley.VisualforceDocListItem({ model: doc});
-                container.append(view.render().el);
-
-                view = new Ockley.EditorView({
-                    model: doc,
-                    mode: 'text/html',
-                    'tabs': tabs,
-                    'eventsMgr': eventsMgr
-                });
-            });
+            log('vfDocs - reset');
+            addDocs(docs, 'vf', vfDocListContainer);
         }).fetch();
+
+        vfDocs.bind("add", function(doc){
+            log('vfDocs - add');
+            addDoc(doc, 'vf', vfDocListContainer);
+            messageDialog.hide();
+        });
 
 
 
@@ -214,8 +239,36 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             'eventsMgr': eventsMgr
         });
 
+
+        //when the newDocument event is fired by the "New Document" dialog
+        //we create a new document object by calling the create method on the docList.
+        //this will issue a post to the server informing it to create a new doc in the sf org.
+        eventsMgr.bind("newDocument", function(docType, docName){
+            var docList = apexDocs;
+            var msg = 'Deploying New Apex Class...';
+            if (docType === 'vf'){
+                docList = vfDocs;    
+                msg = 'Creating New Visualforce page...';
+            }
+            
+            if (docList.create({ name: docName },{ 
+                success: function(nextModel, resp, xhr){
+                    var result = Ockley.getSfResult(resp);
+                    if (result.success && result.done){
+                        messageDialog.hide();
+                        return;
+                    }
+                    setTimeout(checkDeployStatus(result.data.id.text), 2000);
+                }
+            })){
+                messageDialog.show(msg);
+            }
+            else{
+                messageDialog.show('Create error!');
+            }
+        });
+
         //hookup handlers for some of the generated events
-        eventsMgr.bind("newDocument", onDocumentNew);
         eventsMgr.bind("saving", function(){ messageDialog.show('Saving…'); });
         eventsMgr.bind("saved", function(){ messageDialog.hide(); });
         eventsMgr.bind("saveError", function(result){ messageDialog.setMessage(Ockley.getSfErrorMsg(result)).showOk(true); });
@@ -261,9 +314,12 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             }
 
         }
-*/
+  */
         function checkDeployStatus(deployId){
             return function(){
+
+                log('checkDeployStatus for ' + deployId);
+
                 var url = '/deploystatus/' + deployId + '.json';
 
                 $.getJSON(url, function(data){
@@ -284,6 +340,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         function checkDeployResult(deployId){
             return function(){
+
+                log('checkDeployResult for ' + deployId);
+
                 var url = '/deployresult/' + deployId + '.json';
 
                 $.getJSON(url, function(data){
@@ -300,42 +359,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
                 });
             };
         }
-
-        function onDocumentNew(docType, docName){
-
-            var url, msg;
-
-            log('creating new document of type: ' + docType);
-            if (docType === 'apex'){
-                url = '/apex.json';
-                msg = 'Deploying New Apex Class...';
-            }
-            else if (docType === 'vf'){
-                url = '/vf.json';
-                msg = 'Creating New Visualforce page...';
-            }
-            else if (docType === 'res'){
-                //TODO - add support for creating static resources
-            }
-            messageDialog.show(msg);
-
-            $.post(url, { name: docName }, function(data) {
-
-                log('Create result: ');
-                log(data);
-
-
-                var result = Ockley.getSfResult(data);
-                if (result.success && result.done){
-                    messageDialog.hide();
-                    return;
-                }
-                setTimeout(checkDeployStatus(result.data.id.text), 2000);
-
-            });
-
-        }
-
+        
         function suggestDocOpen(show){
             if (show){
                 $('#suggestDocOpen').show().effect('shake',{ 'times': 2 });
