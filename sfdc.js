@@ -7,7 +7,7 @@
 module.exports = function(options){
 
     var https = require('https');
-    var sax = require('./node_modules/sax-js');
+    var sax = require('./node_modules/sax');
     var utils = require('./utils.js')();
     var jsz = require('./public/libs/jszip.js');
     var fs = require('fs');
