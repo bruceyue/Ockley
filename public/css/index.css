@@ -32,6 +32,11 @@
 	margin-top: 1.5em;
 }
 
+.smallDate {
+  font-size: smaller;
+  font-style: italic;
+}
+
 /*====================================
 COLUMNS
 =====================================*/
