@@ -245,48 +245,51 @@ window.namespace = function(name) {
 	
 	    return msg;
 	};
-	
-	//try to get the results from data returned by salesforce
-	//may be success or error
-	Ockley.getSfResult = function(data){
-	    var ret = {
-	        "success" : false,
-	        "data": data
-	    };
-	
-	    if (typeof data == 'string' && data == 'Success'){
-	        ret.success = true;
-	    }
-	    else if ($.isArray(data) && data.length > 0){
-	        ret.success = true;
-	        ret.data = data = data[0];
-	        if (data.hasOwnProperty('success')){
-	            ret.success =  (data.success.text === 'true');
-	        }
-	        if (data.hasOwnProperty('done')){
-	            ret.done = (data.done.text == 'true');
-	        }
-	        if (data.hasOwnProperty('numbercomponenterrors')){
-	            if (parseInt(data.numbercomponenterrors, 10) > 0){
-	                ret.success = false;
-	            }
-	        }
-	        if (data.hasOwnProperty('errorCode')){
-	        	ret.success = false;
-	        }
-	    }
-	    else if (typeof data == 'object') {
-	    	if (data.hasOwnProperty('status')){
+
+  function getSfResult(data){
+      var ret = {};
+      ret.success = true;
+      ret.data = data;
+
+      if (data.hasOwnProperty('success')){
+          ret.success =  (data.success.text === 'true');
+      }
+      if (data.hasOwnProperty('done')){
+          ret.done = (data.done.text == 'true');
+      }
+      if (data.hasOwnProperty('numbercomponenterrors')){
+          if (parseInt(data.numbercomponenterrors, 10) > 0){
+              ret.success = false;
+          }
+      }
+      if (data.hasOwnProperty('errorCode')){
+          ret.success = false;
+      }
+      if (data.hasOwnProperty('status')){
 	    		if (parseInt(data.status, 10) != 200){
 	    			ret.success = false;
 	    		}
-	    	}
-	    	if (data.hasOwnProperty('responseText')){
+	  	}
+	  	if (data.hasOwnProperty('responseText')){
 	    		ret.data = JSON.parse(data.responseText);
-	    	}
-	    }
+    	}
+      return ret;
+  }
+
+	//try to get the results from data returned by salesforce
+	//may be success or error
+	Ockley.getSfResult = function(data){
 	
-	    return ret;
+	    if (typeof data == 'string' && data == 'Success'){
+	        return { "success" : true, "data" : data }
+      }
+	    else if ($.isArray(data) && data.length > 0){
+          return getSfResult(data[0]);
+  	  }
+	    else if (typeof data == 'object') {
+          return getSfResult(data);
+	    }
+	    return { "success": false, "data" : data }; 
 	};
     
 

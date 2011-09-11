@@ -30,7 +30,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
              $.tmpl( "DocumentLinkTemplate", {
                  'name' : this.model.get('name'),
                  'id'   : this.model.get('id')
-             } ).appendTo( this.el );
+             } ).appendTo( $(this.el).empty() );
              return this;
          },
          open: function() {

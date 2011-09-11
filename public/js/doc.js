@@ -36,17 +36,21 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
 
         parse: function(response) {
             var ret = response, records, len;
-            records = response.records;
-            if (records == null){
-            	return null;
-            }
             
-            len = records.length;
+            if (response.hasOwnProperty('records')){
+                records = response.records;
+                 len = records.length;
 
-            if (records != null && len > 0){
-                ret = this.parseOne(records[0]);
+                if (records != null && len > 0){
+                    ret = this.parseOne(records[0]);
+                }
             }
-
+            else {
+                if (response.hasOwnProperty('name') && response.hasOwnProperty('id')){
+                    ret = this.parseOne(response);
+                }
+            }
+           
             return ret;
         }
     };
@@ -60,10 +64,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         url: function() {
-            if (this.isNew){
-                return '/apex.json';    
-            }
-            return "/apex/" + this.get('id') + '.json';
+            return "/apex/" +  this.get('id') + '.json';
         }
 
     }, Ockley.Doc) );
@@ -77,10 +78,7 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
         },
 
         url: function() {
-            if (this.isNew){
-                return '/vf.json';    
-            }
-            return "/vf/" + this.get('id') + '.json';
+            return "/vf/" +  this.get('id') + '.json';
         }
     }, Ockley.Doc) );
 

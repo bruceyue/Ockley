@@ -7,7 +7,7 @@
 module.exports = function(options){
 
     var https = require('https');
-    var sax = require('./node_modules/sax');
+    var sax = require('./node_modules/sax-js');
     var utils = require('./utils.js')();
     var jsz = require('./public/libs/jszip.js');
     var fs = require('fs');
@@ -62,44 +62,66 @@ module.exports = function(options){
             return (inArray(tag, _tagNames) > -1);
         };
 
+        var getTagParent = function(){
+            return (_tags.length > 0) ? _tags[_tags.length -1] : null;
+        };
+
         var pushTag = function(tag){
-            _tags.push({ name: tag.name });
+            var parent = getTagParent();
+            if (parent != null){
+                if (parent.children != null){
+                    var existing = inArray(tag.name, parent.children);
+                    if (existing > -1){
+                      //console.log('Duplicate sibling tag detected: ' + tag.name);
+                      return;
+                    }
+                    parent.children.push(tag.name);
+                }
+            }
+            _tags.push({ name: tag.name, children: [], parent: (parent ? parent.name : '') });
         };
 
         var popTag = function(){
-            if (_tags.length){
+            if (_tags.length > 0){
                 var t = _tags.pop();
                 var len = _tags.length;
-                if (len){
+                if (len > 0){
+                    //console.log('Adding ' + t.name + ' to ' + _tags[len-1].name);
                     _tags[len - 1][t.name] = t;
                 }
                 else{
+                    //console.log('Result tag: ' + JSON.stringify(t));
                     _results.push(t);
                 }
             }
         };
 
         _parser.onopentag = function(tag) {
-            if (_tags.length || isMatch(tag.name)){
+           //console.log('OpenTag: ' + tag.name);
+            if (_tags.length > 0 || isMatch(tag.name)){
                 pushTag(tag);
             }
         };
         _parser.onclosetag = function(tagName) {
+            //console.log('CloseTag: ' + tagName);
             popTag();
         };
         _parser.ontext = function(text) {
+            //console.log('Text: ' + text);
             var len = _tags.length;
-            if (len){
+            if (len > 0){
                 _tags[len - 1].text = text;
             }
         };
         _parser.onerror = function(err) {
-            while(_tags.length){
+            while(_tags.length > 0){
                 popTag();
             }
             callbackError(_options, _results);
         };
         _parser.onend = function() {
+            //console.log('End of parse input. Remaining tags: ' + _tags.length);
+            console.log(JSON.stringify(_results));
             callbackSuccess(_options, _results);
         };
 
@@ -270,7 +292,7 @@ module.exports = function(options){
                   data += chunk;
               });
               res.on('end', function(){
-                  console.log('Create: got status code: ' + res.statusCode);
+                  //console.log('Create: got status code: ' + res.statusCode);
                   if (res.statusCode == '200' || res.statusCode == '204'){
                       callbackSuccess(options, []);
                   }
@@ -337,7 +359,7 @@ module.exports = function(options){
 
                       	"onSuccess" : function(results){
                       	
-                      		console.log(results);
+                      		//console.log(results);
                       		if (typeof results == 'array' && results.length > 0){
                       			results = results[0];
                       		}
@@ -533,7 +555,7 @@ module.exports = function(options){
             });
             res.on('end', function() {
                 if (res.statusCode == '200') {
-                    console.log('Deploy got result: ' + data);
+                    //console.log('Deploy got result: ' + data);
                     parseResults(data, ['result'], options);
                 }
                 else {
