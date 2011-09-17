@@ -23,6 +23,7 @@ module.exports = {
             "libs/codemirror2/mode/xml/xml.js",
             "libs/codemirror2/mode/css/css.js",
             "libs/codemirror2/mode/javascript/javascript.js",
+            "libs/miniTip/jquery.miniTip.min.js",
             "js/apex.js",
             "js/messagedialog.js",
             "js/finddialog.js",

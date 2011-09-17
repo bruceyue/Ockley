@@ -636,5 +636,75 @@ module.exports = function(options){
         this.query(requestUrl, accessToken, "select LastModifiedDate from " + sObjectTypeName + " where id ='" + sObjectId + "' limit 1", callbacks );
     };
 
+    //converts from an ISO8601 date
+    this.dateToJsDate = function(sfDateString) {
+
+        if(!this.isoRegExp){
+            var regex = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
+            this.isoRegExp = new RegExp(regex);
+        }
+
+        var result = null;
+        var match = this.isoRegExp.exec(sfDateString);
+        if (match != null){
+
+            //from MDC exec docs:
+            //The returned array has the matched text as the first item,
+            //and then one item for each capturing parenthesis that matched containing the text that was captured.
+
+            //we only want the captured text so we don't need the first item
+            match.shift();
+
+            var year = 1970, month = 0, day = 1, hour = 0, minute = 0, second = 0, millisecond = 0, offset = 0;
+
+            if (match[0] != null){
+                year = match[0];
+                if (year < 100){
+                    year = 1970;
+                }
+            }
+
+            if (match[2] != null){
+                //months are 0 based
+                month = match[2] - 1;
+            }
+
+            if (match[4] != null){
+                day = match[4];
+            }
+
+
+            if (match[6] != null){
+                hour = match[6];
+            }
+
+            if (match[7] != null){
+                minute = match[7];
+            }
+
+            if (match[9] != null){
+                second = match[9];
+            }
+
+            if(match[11] != null){
+                millisecond = (match[11] * 1000);
+            }
+
+            //https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Date
+            result = new Date(year, month, day, hour, minute, second, millisecond);
+
+            if (match[13] != null) {
+                offset = (Number(match[15]) * 60) + Number(match[16]);
+                offset *= ((match[14] == '-') ? 1 : -1);
+            }
+            offset -= result.getTimezoneOffset();
+            result.setTime((result.getTime() + (offset * 60000)));
+
+        }
+        return result;
+    };
+
+
+
     return this;
 };

@@ -158,6 +158,70 @@
     height: 100%;
 }
 
+/***** MiniTip *****/
+
+#miniTip {
+   	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+    z-index: 99999;
+}
+
+/* main content style */
+#miniTip_c { padding: 4px 4px }
+
+
+/* arrow holder, no need to edit */
+#miniTip_a {
+	width: 0;
+	height: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0.5;
+    filter: alpha(opacity=20);       /* IE8 and lower */
+    zoom: 1;       /* set "zoom", "width" or "height" to trigger "hasLayout" in IE 7 and lower */ 
+}
+
+/* arrow pointing down, change border-top color to change color of the arrow */
+#miniTip .n {
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid #00000; 
+	border-bottom: 0;
+}
+
+/* arrow pointing up, change border-bottom color to change color of the arrow */
+#miniTip .s {
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-bottom: 8px solid #00000; 
+	border-top: 0;
+}
+
+/* arrow pointing left, change border-right color to change color of the arrow */
+#miniTip .e {
+	border-bottom: 6px solid transparent;
+	border-top: 6px solid transparent;
+	border-right: 6px solid #000000; 
+	border-left: 0;
+}
+
+/* arrow pointing right, change border-left color to change color of the arrow */
+#miniTip .w {
+	border-bottom: 8px solid transparent;
+	border-top: 8px solid transparent;
+	border-left: 8px solid #000000; 
+	border-right: 0;
+}
+
+
+
 /*****jquery.ui.selectmenu*****/
 .ui-selectmenu { display: block; display: inline-block; position: relative; height: 2.2em; vertical-align: middle; text-decoration: none; overflow: hidden; zoom: 1; margin-bottom: 4px; }
 .ui-selectmenu-icon { position:absolute; right:6px; margin-top:-8px; top: 50%; }

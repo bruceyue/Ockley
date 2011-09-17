@@ -201,8 +201,9 @@ licensed under the MIT license: http://www.opensource.org/licenses/mit-license.p
             else{
                 this.editor.refresh();
             }
+            return this;
         }
-    });
+    });//end extend
 
 
 }).call(this);

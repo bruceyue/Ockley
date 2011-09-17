@@ -95,19 +95,9 @@ function updateSession(session, state){
     utils.extend(session.sfdc, state);
 }
 
-function getLastModified(req, res, sObjectTypeName){
+function getLastModified(req, res, sObjectTypeName, options){
 
-    if (!isAuthenticated(req)){
-        res.redirect("/login");
-        return;
-    }
-
-    if (req.params.format != 'json'){
-        res.send('Format not available', 400);
-        return;
-    }    
-
-    sfdc.getSObjectLastModifiedDate(req.session.sfdc.urls.query, req.session.sfdc.access_token,  req.params.id, sObjectTypeName, {
+     sfdc.getSObjectLastModifiedDate(req.session.sfdc.urls.query, req.session.sfdc.access_token,  req.params.id, sObjectTypeName, {
         onSuccess: function(results){
             results = JSON.parse(results);
             if (results && results.records){
@@ -120,13 +110,13 @@ function getLastModified(req, res, sObjectTypeName){
                     }
                 }
             }
-            res.send(results, 200);
+            //res.send(results, 200);
+            if (options.onSuccess){
+              options.onSuccess(results);
+            }
         },
-        onError: function(error){
-            console.log('lastmodified error - ' + error);
-            res.send(error);
-        }
-    });
+        onError: options.onError
+     });
 }
 
 ///////////////////////////////////////////////////
@@ -296,8 +286,8 @@ app.put('/apex/:id.:format?', function(req, res){
     }
 
     var content = utils.escape(req.body.content);
-
-    sfdc.compile(req.session.sfdc.urls.apex, req.session.sfdc.access_token, content, {
+    
+    var callback = {
 
             onSuccess: function(results){
                 res.send(results, 200);
@@ -308,7 +298,32 @@ app.put('/apex/:id.:format?', function(req, res){
                 res.send(error, 400);
                 return;
             }
-    });
+    };
+
+    var lastModified = null;
+
+    if (req.lastModified != null){
+
+        lastModified = req.lastModified;
+
+        getLastModified(req, res, 'ApexClass', {
+            onSuccess: function(results){
+                   /* 
+                    var now sfdc.dateToJsDate(lastModified);
+                    var then = sfdc.dateToJsDate(results.LastModifiedDate);
+                    if (now < then){
+                        res.send(results, 409);
+                        return;
+                    }
+                    */
+                    sfdc.compile(req.session.sfdc.urls.apex, req.session.sfdc.access_token, content, callback );
+            },
+            onError: callback.onError
+        });
+    }
+    else {
+        sfdc.compile(req.session.sfdc.urls.apex, req.session.sfdc.access_token, content, callback );
+    }
 });
 
 //create a new apex class
@@ -368,7 +383,25 @@ app.post('/apex.:format?', function(req, res){
 
 //get apex class lastmodified datetime stamp
 app.get('/apex/lastmodified/:id.:format?', function(req, res){
-    getLastModified(req, res, 'ApexClass');
+    
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+        res.send('Format not available', 400);
+        return;
+    }    
+  
+    getLastModified(req, res, 'ApexClass',  {
+        onSuccess: function(results){
+            res.send(results, 200);
+        },
+        onError: function(error){
+            res.send(error, 500);
+        }
+    });
 });
 
 app.get('/deploystatus/:id.:format?', function(req, res){
@@ -487,6 +520,9 @@ app.put('/vf/:id.:format?', function(req, res){
 
     var markup = req.body.content;
 
+    //TODO - check last modified
+
+
     sfdc.update(req.session.sfdc.urls.sobjects, req.session.sfdc.access_token, 'ApexPage',  req.params.id, { Markup:  markup }, {
         onSuccess: function(){
             res.send({}, 200);
@@ -560,7 +596,25 @@ app.post('/vf.:format?', function(req, res){
 
 //get vf page lastmodified datetime stamp
 app.get('/vf/lastmodified/:id.:format?', function(req, res){
-    getLastModified(req, res, 'ApexPage');
+ 
+    if (!isAuthenticated(req)){
+        res.redirect("/login");
+        return;
+    }
+
+    if (req.params.format != 'json'){
+        res.send('Format not available', 400);
+        return;
+    }    
+  
+    getLastModified(req, res, 'ApexPage', {
+        onSuccess: function(results){
+            res.send(results, 200);
+        },
+        onError: function(error){
+            res.send(error, 500);
+        }
+    });
 });
 
 
